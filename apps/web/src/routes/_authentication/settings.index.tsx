@@ -1,0 +1,139 @@
+import { useState } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+
+import { Button } from '@src/components/atoms/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@src/components/atoms/card';
+import { Input } from '@src/components/atoms/input';
+import { Label } from '@src/components/atoms/label';
+import { Skeleton } from '@src/components/atoms/skeleton';
+import { useUpdateUser } from '@src/hooks/mutations/useUpdateUser';
+import { useProfile } from '@src/hooks/useProfile';
+
+export const Route = createFileRoute('/_authentication/settings/')({
+  component: SettingsPage,
+});
+
+function SettingsPage() {
+  const { data: profile, isLoading, isError, error } = useProfile();
+
+  const updateUser = useUpdateUser(profile?.id ?? '');
+
+  const [firstName, setFirstName] = useState<string | null>(null);
+  const [lastName, setLastName] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+
+  const currentFirstName = firstName ?? profile?.firstName ?? '';
+  const currentLastName = lastName ?? profile?.lastName ?? '';
+  const currentEmail = email ?? profile?.email ?? '';
+
+  const hasChanges =
+    profile != null &&
+    (currentFirstName !== profile.firstName ||
+      currentLastName !== profile.lastName ||
+      currentEmail !== profile.email);
+
+  const handleSave = () => {
+    if (!profile) return;
+
+    const data: Record<string, string> = {};
+    if (currentFirstName !== profile.firstName) data.firstName = currentFirstName;
+    if (currentLastName !== profile.lastName) data.lastName = currentLastName;
+    if (currentEmail !== profile.email) data.email = currentEmail;
+
+    updateUser.mutate(data, {
+      onSuccess: () => {
+        setFirstName(null);
+        setLastName(null);
+        setEmail(null);
+      },
+    });
+  };
+
+  if (isError) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+          <p className="text-muted-foreground">Manage your account settings.</p>
+        </div>
+        <Card className="border-destructive/50 bg-destructive/10">
+          <CardContent className="py-6 text-center">
+            <p className="text-sm text-destructive">
+              Failed to load profile: {error?.message || 'An unexpected error occurred.'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+        <p className="text-muted-foreground">Manage your account settings.</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>Update your personal information.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+          ) : (
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSave();
+              }}
+            >
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  value={currentFirstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={currentLastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={currentEmail}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button type="submit" disabled={!hasChanges || updateUser.isPending}>
+                  {updateUser.isPending ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
