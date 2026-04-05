@@ -12,14 +12,20 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.0",
+    "playwright": "^1.59.1",
     "prettier": "^3.5.3",
     "turbo": "^2.5.4"
   },
   "lint-staged": {
-    "apps/**/*.{ts,tsx}": ["prettier --write"],
-    "packages/**/*.ts": ["prettier --write"]
+    "apps/**/*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "packages/**/*.ts": [
+      "prettier --write"
+    ]
   },
   "packageManager": "pnpm@10.12.1",
   "engines": {

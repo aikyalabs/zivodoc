@@ -37,3 +37,4 @@ docker-compose.override.yaml
 
 # Generated
 apps/web/src/routeTree.gen.ts
+inspo/*
