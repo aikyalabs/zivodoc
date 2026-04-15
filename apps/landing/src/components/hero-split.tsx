@@ -158,7 +158,7 @@ export function HeroSplit() {
 
             {/* CTAs */}
             <motion.div
-              className="mt-8 flex flex-wrap items-center gap-3"
+              className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
               initial="hidden"
               animate="visible"
               custom={3}

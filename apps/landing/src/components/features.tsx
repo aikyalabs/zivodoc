@@ -67,7 +67,7 @@ const features = [
 export function Features() {
   return (
     <section id="features" className="bg-surface">
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-16 sm:py-36 lg:py-44">
         <div className="flex items-end justify-between mb-16 lg:mb-20">
           <div>
             <FadeIn>

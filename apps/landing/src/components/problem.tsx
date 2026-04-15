@@ -5,7 +5,7 @@ export function Problem() {
     <section id="problem" className="bg-surface">
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14">
         {/* Narrative heading */}
-        <div className="pt-28 sm:pt-36 lg:pt-44 pb-20 sm:pb-24">
+        <div className="pt-16 sm:pt-36 lg:pt-44 pb-12 sm:pb-24">
           <FadeIn>
             <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-8">
               The Problem

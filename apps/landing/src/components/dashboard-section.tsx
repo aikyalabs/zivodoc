@@ -16,7 +16,7 @@ export function DashboardSection() {
   return (
     <section className="bg-surface-alt border-t border-line">
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-20 sm:py-36 lg:py-44">
-        <div className="flex items-end justify-between mb-16 lg:mb-20">
+        <div className="flex items-end justify-between mb-10 sm:mb-16 lg:mb-20">
           <div>
             <FadeIn>
               <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-5">
