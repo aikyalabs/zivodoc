@@ -41,7 +41,7 @@ export function Footer() {
       className="bg-surface-card overflow-hidden border-t border-line"
       style={{ paddingTop: '50px' }}
     >
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14">
         <div className="flex flex-col lg:flex-row gap-16">
           {/* Left side */}
           <div className="lg:w-[45%] shrink-0">

@@ -155,7 +155,7 @@ export default function FeaturesContent() {
     <main>
       {/* Hero */}
       <section className="bg-surface">
-        <div className="max-w-[1440px] mx-auto px-8 lg:px-14 pt-32 sm:pt-40 lg:pt-48 pb-20 sm:pb-28">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 pt-32 sm:pt-40 lg:pt-48 pb-20 sm:pb-28">
           <FadeIn>
             <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-6">
               Features
@@ -186,7 +186,7 @@ export default function FeaturesContent() {
             key={feature.title}
             className={`${isAlt ? 'bg-surface-alt' : 'bg-surface'} border-t border-line`}
           >
-            <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-24 sm:py-32">
+            <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-24 sm:py-32">
               <div
                 className={`grid lg:grid-cols-2 gap-12 lg:gap-20 items-start ${isReverse ? 'lg:[&>*:first-child]:order-2' : ''}`}
               >

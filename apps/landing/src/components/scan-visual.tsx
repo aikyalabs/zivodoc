@@ -62,7 +62,7 @@ function FixCard({ card, index }: { card: (typeof fixCards)[number]; index: numb
 export function ScanVisual() {
   return (
     <section className="bg-surface border-t border-line overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14 pt-28 sm:pt-36 lg:pt-44">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 pt-28 sm:pt-36 lg:pt-44">
         <div className="text-center mb-16 sm:mb-20">
           <FadeIn>
             <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-5">
@@ -84,7 +84,7 @@ export function ScanVisual() {
       </div>
 
       {/* Full-width card layout using CSS grid */}
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14 pb-28 sm:pb-36 lg:pb-44">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 pb-28 sm:pb-36 lg:pb-44">
         {/* Grid background behind cards */}
         <div className="relative">
           <div

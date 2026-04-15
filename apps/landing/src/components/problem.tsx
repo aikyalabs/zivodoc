@@ -3,7 +3,7 @@ import { FadeIn, FadeInStagger, FadeInStaggerItem } from './fade-in';
 export function Problem() {
   return (
     <section id="problem" className="bg-surface">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14">
         {/* Narrative heading */}
         <div className="pt-28 sm:pt-36 lg:pt-44 pb-20 sm:pb-24">
           <FadeIn>

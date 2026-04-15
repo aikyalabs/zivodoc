@@ -5,7 +5,7 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
 export function CTA() {
   return (
     <section className="bg-surface border-t border-line">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
         <FadeIn>
           <div className="flex items-center gap-4 mb-10">
             <span className="h-px w-16 bg-ink-muted" />

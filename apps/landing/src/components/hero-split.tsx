@@ -103,8 +103,8 @@ export function HeroSplit() {
         }}
       />
 
-      <div className="relative max-w-[1440px] mx-auto px-8 lg:px-14 pt-20 sm:pt-24 lg:pt-32 pb-24 sm:pb-32 lg:pb-40">
-        <div className="grid lg:grid-cols-[1fr_1.3fr] gap-12 lg:gap-16 items-center">
+      <div className="relative max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 pt-16 sm:pt-24 lg:pt-32 pb-20 sm:pb-32 lg:pb-40">
+        <div className="grid lg:grid-cols-[1fr_1.3fr] gap-10 lg:gap-16 items-center">
           {/* ── Left column — text ── */}
           <div>
             {/* Badge */}
@@ -125,7 +125,7 @@ export function HeroSplit() {
 
             {/* Headline — tighter line breaks */}
             <motion.h1
-              className="text-[44px] sm:text-[56px] lg:text-[64px] font-semibold leading-[0.96] tracking-[-0.04em]"
+              className="text-[36px] sm:text-[56px] lg:text-[64px] font-semibold leading-[0.96] tracking-[-0.04em]"
               initial="hidden"
               animate="visible"
               custom={1}
@@ -235,9 +235,9 @@ export function HeroSplit() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.25 }}
-                className="px-6 py-5 sm:px-7 sm:py-6"
+                className="px-4 py-4 sm:px-7 sm:py-6 overflow-x-auto"
               >
-                <pre className="font-mono text-[12.5px] sm:text-[13.5px] leading-[1.85] text-ink-secondary whitespace-pre">
+                <pre className="font-mono text-[11px] sm:text-[13.5px] leading-[1.85] text-ink-secondary whitespace-pre">
                   {tabPreviews[activeTab].map((line, i) => (
                     <div key={i}>
                       <span

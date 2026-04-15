@@ -40,7 +40,7 @@ export default function AboutContent() {
     <main>
       {/* Hero */}
       <section className="bg-surface">
-        <div className="max-w-[1440px] mx-auto px-8 lg:px-14 pt-32 sm:pt-40 lg:pt-48 pb-24 sm:pb-32">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 pt-32 sm:pt-40 lg:pt-48 pb-24 sm:pb-32">
           <FadeIn>
             <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-8">
               About
@@ -57,7 +57,7 @@ export default function AboutContent() {
 
       {/* Narrative section */}
       <section className="bg-surface-alt border-t border-line">
-        <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-24 sm:py-32">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-24 sm:py-32">
           <div className="max-w-[720px]">
             <FadeIn>
               <p className="text-[22px] sm:text-[28px] leading-[1.4] tracking-[-0.015em] mb-10 text-ink">
@@ -88,7 +88,7 @@ export default function AboutContent() {
 
       {/* Stats */}
       <section className="bg-surface-card border-y border-line">
-        <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-20 sm:py-24">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-20 sm:py-24">
           <FadeInStagger className="grid grid-cols-2 lg:grid-cols-4">
             {stats.map((stat, i) => (
               <FadeInStaggerItem
@@ -107,7 +107,7 @@ export default function AboutContent() {
 
       {/* Principles */}
       <section className="bg-surface">
-        <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-28 sm:py-36">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-28 sm:py-36">
           <FadeIn>
             <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-6">
               Principles

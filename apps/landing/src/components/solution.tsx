@@ -27,7 +27,7 @@ export function Solution() {
 
   return (
     <section id="solution" className="bg-surface-alt">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
         <FadeIn>
           <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-8">
             How It Works

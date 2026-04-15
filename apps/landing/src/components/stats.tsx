@@ -10,7 +10,7 @@ const stats = [
 export function Stats() {
   return (
     <section className="bg-surface-card relative overflow-hidden border-y border-line">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-24 sm:py-32">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-24 sm:py-32">
         <div className="mb-16 sm:mb-20 max-w-[640px]">
           <FadeIn>
             <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-6">

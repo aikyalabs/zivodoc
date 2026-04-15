@@ -27,7 +27,7 @@ export default function PricingContent() {
     <main>
       {/* Hero */}
       <section className="bg-surface">
-        <div className="max-w-[1440px] mx-auto px-8 lg:px-14 pt-32 sm:pt-40 lg:pt-48 pb-20 sm:pb-28">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 pt-32 sm:pt-40 lg:pt-48 pb-20 sm:pb-28">
           <FadeIn>
             <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-6">
               Pricing
@@ -49,7 +49,7 @@ export default function PricingContent() {
 
       {/* Coming soon card */}
       <section className="bg-surface-alt border-t border-line">
-        <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-20 sm:py-28">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-20 sm:py-28">
           <FadeIn>
             <div className="max-w-[640px] mx-auto text-center">
               <div className="bg-surface-card border border-line p-12 lg:p-16">
@@ -83,7 +83,7 @@ export default function PricingContent() {
                 </a>
               </div>
 
-              <div className="mt-12 grid grid-cols-3 gap-8">
+              <div className="mt-12 grid grid-cols-3 gap-4 sm:gap-8">
                 <div>
                   <p className="text-[32px] font-bold tracking-[-0.03em] mb-2">$0</p>
                   <p className="text-[13px] text-ink-secondary">Free tier, always</p>
@@ -104,7 +104,7 @@ export default function PricingContent() {
 
       {/* FAQ */}
       <section className="bg-surface border-t border-line">
-        <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-28 sm:py-36">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-28 sm:py-36">
           <FadeIn>
             <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-6">
               Frequently Asked

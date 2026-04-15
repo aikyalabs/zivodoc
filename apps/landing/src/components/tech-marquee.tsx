@@ -32,7 +32,7 @@ const categories = [
 export function TechMarquee() {
   return (
     <section className="bg-surface-alt border-y border-line">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
         <div className="grid lg:grid-cols-[1fr_2fr] gap-16 lg:gap-24">
           {/* Left — heading */}
           <div>

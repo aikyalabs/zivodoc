@@ -90,7 +90,7 @@ function TestimonialCard({
 export function Testimonials() {
   return (
     <section id="testimonials" className="bg-surface-alt">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
         <FadeIn className="text-center mb-20 sm:mb-24">
           <h2 className="text-[36px] sm:text-[48px] lg:text-[58px] font-semibold leading-[1.04] tracking-[-0.04em]">
             Trusted by developer tool teams

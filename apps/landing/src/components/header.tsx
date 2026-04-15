@@ -16,7 +16,7 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-line">
       <nav className="h-[54px] w-full flex items-center">
         {/* Logo */}
-        <div className="pl-8 lg:pl-14 pr-10 shrink-0">
+        <div className="pl-5 sm:pl-8 lg:pl-14 pr-10 shrink-0">
           <a
             href="/"
             className="text-[16px] font-bold tracking-[-0.03em] text-ink hover:text-ink-secondary transition-colors"
@@ -77,7 +77,7 @@ export function Header() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-line bg-surface px-8 py-8 flex flex-col gap-5">
+        <div className="md:hidden border-t border-line bg-surface px-5 sm:px-8 py-6 sm:py-8 flex flex-col gap-5">
           {navLinks.map((link) => (
             <a
               key={link.href}
