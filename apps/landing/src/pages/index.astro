@@ -1,0 +1,30 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Header } from '../components/header';
+import { Hero } from '../components/hero';
+import { LogoMarquee } from '../components/logo-marquee';
+import { Problem } from '../components/problem';
+import { Solution } from '../components/solution';
+import { Stats } from '../components/stats';
+import { Features } from '../components/features';
+import { TechMarquee } from '../components/tech-marquee';
+import { Testimonials } from '../components/testimonials';
+import { CTA } from '../components/cta';
+import { Footer } from '../components/footer';
+---
+
+<Layout title="SaaS Template — Ship in Days, Not Months">
+  <Header client:load />
+  <main>
+    <Hero client:load />
+    <LogoMarquee />
+    <Problem client:visible />
+    <Solution client:visible />
+    <Stats client:visible />
+    <Features client:visible />
+    <TechMarquee client:visible />
+    <Testimonials client:visible />
+    <CTA client:visible />
+  </main>
+  <Footer />
+</Layout>

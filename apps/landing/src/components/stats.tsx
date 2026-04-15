@@ -1,4 +1,4 @@
-import { FadeIn, FadeInStagger, FadeInStaggerItem } from '@src/components/fade-in';
+import { FadeIn, FadeInStagger, FadeInStaggerItem } from './fade-in';
 
 const stats = [
   { value: '6 weeks', label: 'of boilerplate eliminated' },
@@ -30,7 +30,7 @@ export function Stats() {
               key={i}
               className="lg:px-10 lg:first:pl-0 lg:last:pr-0 lg:border-l lg:first:border-l-0 border-ink/10 flex flex-col gap-3"
             >
-              <span className="font-pixel text-[48px] sm:text-[64px] lg:text-[72px] font-bold tracking-[-0.04em] leading-[0.9] text-ink">
+              <span className="text-[40px] sm:text-[52px] lg:text-[60px] font-bold tracking-[-0.04em] leading-[0.9] text-ink whitespace-nowrap">
                 {stat.value}
               </span>
               <span className="text-[13px] text-ink/70 leading-relaxed">{stat.label}</span>

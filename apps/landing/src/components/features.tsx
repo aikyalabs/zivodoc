@@ -1,5 +1,5 @@
 import { Shield, Building2, Code2, Database, ScrollText, Zap } from 'lucide-react';
-import { FadeIn, FadeInStagger, FadeInStaggerItem } from '@src/components/fade-in';
+import { FadeIn, FadeInStagger, FadeInStaggerItem } from './fade-in';
 
 const features = [
   {
@@ -7,53 +7,52 @@ const features = [
     title: 'Auth & RBAC',
     medium: 'Security',
     description:
-      'Session-based auth with bcrypt hashing. Three-tier role model with admins, org owners, and members. Granular JSONB permissions per role for fine-grained access control.',
+      'Session-based authentication with bcrypt hashing and crypto-secure tokens. Three-tier role model — platform admins, organization owners, and members. Granular JSONB permissions per role for fine-grained access control, without schema migrations.',
+    bullets: ['Bcrypt 12 rounds', 'Session tokens', 'Caller pattern', 'JSONB permissions'],
     span: 'md:col-span-2 md:row-span-2',
-    size: 'large',
+    size: 'large' as const,
   },
   {
     icon: Building2,
     title: 'Multi-Tenancy',
     medium: 'Architecture',
     description:
-      'Org-scoped data isolation out of the box. Every query filtered by tenant automatically.',
+      'Org-scoped isolation out of the box. Every query filtered by tenant automatically.',
     span: 'md:col-span-1 md:row-span-1',
-    size: 'small',
+    size: 'small' as const,
   },
   {
     icon: Code2,
-    title: 'Full-Stack Type Safety',
+    title: 'Type Safety',
     medium: 'Developer Experience',
-    description:
-      'Zod schemas defined once. Validated on the API, inferred on the frontend. Zero drift.',
+    description: 'Zod schemas defined once. Validated on the API, inferred on the frontend.',
     span: 'md:col-span-1 md:row-span-1',
-    size: 'small',
+    size: 'small' as const,
   },
   {
     icon: Database,
     title: 'Production Database',
     medium: 'Infrastructure',
     description:
-      'PostgreSQL 17 + TypeORM with migrations, seed data, soft deletes, ULID primary keys, connection pooling.',
+      'PostgreSQL 17 + TypeORM with migrations, seed data, soft deletes, and ULID primary keys with entity prefixes.',
     span: 'md:col-span-2 md:row-span-1',
-    size: 'medium',
+    size: 'medium' as const,
   },
   {
     icon: ScrollText,
     title: 'Audit Logging',
     medium: 'Compliance',
-    description:
-      'Every mutation logged automatically. Actor tracking, IPs, durations, sanitized metadata. SOC 2 ready.',
+    description: 'Every mutation logged automatically. Actor, IP, duration, sanitized metadata.',
     span: 'md:col-span-1 md:row-span-1',
-    size: 'small',
+    size: 'small' as const,
   },
   {
     icon: Zap,
     title: 'Modern Stack',
     medium: 'Tech',
-    description: 'NestJS 11, React 19, TanStack Router & Query, Tailwind CSS 4, Turborepo.',
+    description: 'NestJS 11, React 19, TanStack Router & Query, Tailwind CSS 4, Turborepo v2.',
     span: 'md:col-span-1 md:row-span-1',
-    size: 'small',
+    size: 'small' as const,
   },
 ];
 
@@ -81,14 +80,15 @@ export function Features() {
           </FadeIn>
         </div>
 
-        {/* Asymmetric bento grid */}
-        <FadeInStagger className="grid grid-cols-1 md:grid-cols-4 auto-rows-[240px] md:auto-rows-[220px] gap-4 lg:gap-5">
+        {/* Asymmetric bento grid — natural heights, no clipping */}
+        <FadeInStagger className="grid grid-cols-1 md:grid-cols-4 gap-4 lg:gap-5 md:grid-rows-[minmax(260px,auto)_minmax(260px,auto)_minmax(260px,auto)]">
           {features.map((feature, index) => {
             const Icon = feature.icon;
+            const isLarge = feature.size === 'large';
             return (
               <FadeInStaggerItem
                 key={feature.title}
-                className={`group relative bg-surface-dark-card border border-line-dark p-8 lg:p-10 overflow-hidden transition-colors duration-500 hover:border-[#444] ${feature.span}`}
+                className={`group relative bg-surface-dark-card border border-line-dark p-8 lg:p-10 transition-colors duration-500 hover:border-[#444] flex flex-col ${feature.span}`}
               >
                 {/* Index marker */}
                 <span className="absolute top-5 right-5 font-label text-[10px] text-ink-light-muted/40 tracking-wider">
@@ -96,7 +96,7 @@ export function Features() {
                 </span>
 
                 {/* Icon */}
-                <div className="flex size-10 items-center justify-center bg-[#252525] mb-6">
+                <div className="flex size-10 items-center justify-center bg-[#252525] mb-6 shrink-0">
                   <Icon className="size-[18px] text-ink-light-muted" strokeWidth={1.5} />
                 </div>
 
@@ -107,22 +107,40 @@ export function Features() {
 
                 {/* Title */}
                 <h3
-                  className={`font-semibold leading-[1.15] tracking-[-0.02em] text-ink-light mb-4 ${feature.size === 'large' ? 'text-[28px]' : 'text-[18px]'}`}
+                  className={`font-semibold leading-[1.15] tracking-[-0.02em] text-ink-light mb-4 ${
+                    isLarge ? 'text-[28px] sm:text-[32px]' : 'text-[18px]'
+                  }`}
                 >
                   {feature.title}
                 </h3>
 
                 {/* Description */}
                 <p
-                  className={`text-[14px] leading-[1.65] text-ink-light-muted ${feature.size === 'large' ? 'max-w-[380px]' : ''}`}
+                  className={`text-[14px] leading-[1.7] text-ink-light-muted ${
+                    isLarge ? 'max-w-[420px]' : ''
+                  }`}
                 >
                   {feature.description}
                 </p>
 
+                {/* Bullets — only for large featured card */}
+                {isLarge && feature.bullets && (
+                  <div className="mt-auto pt-8 flex flex-wrap gap-2">
+                    {feature.bullets.map((bullet) => (
+                      <span
+                        key={bullet}
+                        className="font-label text-[10px] uppercase tracking-[0.04em] text-ink-light-muted px-2.5 py-1 border border-line-dark"
+                      >
+                        {bullet}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
                 {/* Corner accent line — shows on hover */}
-                <div className="absolute top-0 right-0 size-12 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute top-0 right-0 w-full h-[1px] bg-ink-light-muted/30" />
-                  <div className="absolute top-0 right-0 w-[1px] h-full bg-ink-light-muted/30" />
+                <div className="absolute top-0 right-0 size-12 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                  <div className="absolute top-0 right-0 w-full h-[1px] bg-accent" />
+                  <div className="absolute top-0 right-0 w-[1px] h-full bg-accent" />
                 </div>
               </FadeInStaggerItem>
             );

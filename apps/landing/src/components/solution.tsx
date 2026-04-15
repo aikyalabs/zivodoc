@@ -1,4 +1,4 @@
-import { FadeIn, FadeInStagger, FadeInStaggerItem } from '@src/components/fade-in';
+import { FadeIn, FadeInStagger, FadeInStaggerItem } from './fade-in';
 
 export function Solution() {
   const steps = [

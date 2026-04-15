@@ -1,11 +1,38 @@
 const columns = [
   {
     title: 'Products',
-    links: ['Auth & Sessions', 'RBAC Engine', 'Multi-Tenancy', 'Audit Logging', 'API Framework'],
+    links: [
+      { label: 'Auth & Sessions', href: '/features' },
+      { label: 'RBAC Engine', href: '/features' },
+      { label: 'Multi-Tenancy', href: '/features' },
+      { label: 'Audit Logging', href: '/features' },
+      { label: 'API Framework', href: '/features' },
+    ],
   },
-  { title: 'Learn More', links: ['Customers', 'Pricing', 'Blog', 'About Us', 'Docs'] },
-  { title: 'Socials', links: ['Twitter', 'LinkedIn', 'Discord'] },
-  { title: 'Legal', links: ['Cookies policy', 'Terms of Service', 'Privacy Policy'] },
+  {
+    title: 'Learn More',
+    links: [
+      { label: 'Pricing', href: '/pricing' },
+      { label: 'About Us', href: '/about' },
+      { label: 'Features', href: '/features' },
+    ],
+  },
+  {
+    title: 'Socials',
+    links: [
+      { label: 'Twitter', href: 'https://twitter.com' },
+      { label: 'LinkedIn', href: 'https://linkedin.com' },
+      { label: 'Discord', href: 'https://discord.com' },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { label: 'Cookies Policy', href: '/cookies' },
+      { label: 'Terms of Service', href: '/terms' },
+      { label: 'Privacy Policy', href: '/privacy' },
+    ],
+  },
 ];
 
 export function Footer() {
@@ -49,12 +76,12 @@ export function Footer() {
                 </h3>
                 <ul className="mt-5 space-y-2.5">
                   {col.links.map((link) => (
-                    <li key={link}>
+                    <li key={link.label}>
                       <a
-                        href="#"
+                        href={link.href}
                         className="text-[14px] leading-[14px] text-[#1A1A1A] hover:text-ink-secondary transition-colors"
                       >
-                        {link}
+                        {link.label}
                       </a>
                     </li>
                   ))}

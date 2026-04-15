@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Header } from '../components/header';
+import FeaturesContent from '../components/features-content';
+import { Footer } from '../components/footer';
+---
+
+<Layout title="Features — SaaS Template" description="Every feature you need to build and ship a production SaaS.">
+  <Header client:load />
+  <FeaturesContent client:load />
+  <Footer />
+</Layout>

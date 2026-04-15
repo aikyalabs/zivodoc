@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Header } from '../components/header';
+import AboutContent from '../components/about-content';
+import { Footer } from '../components/footer';
+---
+
+<Layout title="About — SaaS Template" description="Why we built this template and what we believe about SaaS engineering.">
+  <Header client:load />
+  <AboutContent client:load />
+  <Footer />
+</Layout>

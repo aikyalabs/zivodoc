@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Header } from '../components/header';
+import PricingContent from '../components/pricing-content';
+import { Footer } from '../components/footer';
+---
+
+<Layout title="Pricing — SaaS Template" description="Simple, transparent pricing. Start free, scale when you need to.">
+  <Header client:load />
+  <PricingContent client:load />
+  <Footer />
+</Layout>

@@ -1,6 +1,4 @@
-'use client';
-
-import { FadeIn } from '@src/components/fade-in';
+import { FadeIn } from './fade-in';
 
 const row1 = [
   'NestJS',

@@ -1,10 +1,7 @@
-'use client';
-
 import { useState } from 'react';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:5173';
+const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
 
 type TabKey = 'auth' | 'rbac' | 'tenancy' | 'types' | 'audit';
 
@@ -166,12 +163,12 @@ export function Hero() {
             custom={3}
             variants={fadeUp}
           >
-            <Link
+            <a
               href={`${APP_URL}/login`}
               className="font-label inline-flex items-center gap-2.5 h-[52px] px-6 bg-surface-button text-white text-[14px] tracking-[-0.02em] hover:bg-[#333] transition-colors"
             >
               GET STARTED
-              <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                 <path
                   d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9"
                   stroke="currentColor"
@@ -180,7 +177,7 @@ export function Hero() {
                   strokeLinejoin="round"
                 />
               </svg>
-            </Link>
+            </a>
             <a
               href="https://github.com"
               target="_blank"

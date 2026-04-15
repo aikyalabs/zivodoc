@@ -1,14 +1,6 @@
-import type { Metadata } from 'next';
 import { Shield, Building2, Code2, Database, ScrollText, Zap } from 'lucide-react';
-import { Header } from '@src/components/header';
-import { Footer } from '@src/components/footer';
-import { CTA } from '@src/components/cta';
-import { FadeIn } from '@src/components/fade-in';
-
-export const metadata: Metadata = {
-  title: 'Features — SaaS Template',
-  description: 'Every feature you need to build and ship a production SaaS.',
-};
+import { FadeIn } from './fade-in';
+import { CTA } from './cta';
 
 const features = [
   {
@@ -142,118 +134,114 @@ export class AuditInterceptor implements NestInterceptor {
   },
 ];
 
-export default function FeaturesPage() {
+export default function FeaturesContent() {
   return (
-    <>
-      <Header />
-      <main>
-        {/* Hero */}
-        <section className="bg-surface-alt">
-          <div className="max-w-[1440px] mx-auto px-8 lg:px-14 pt-32 sm:pt-40 lg:pt-48 pb-20 sm:pb-28">
-            <FadeIn>
-              <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-6">
-                Features
-              </p>
-            </FadeIn>
-            <FadeIn delay={0.1}>
-              <h1 className="text-[44px] sm:text-[60px] lg:text-[76px] font-semibold leading-[1.02] tracking-[-0.04em] max-w-[900px]">
-                Every moving part you need.{' '}
-                <span className="text-ink-muted">Nothing you don&apos;t.</span>
-              </h1>
-            </FadeIn>
-            <FadeIn delay={0.2}>
-              <p className="mt-8 text-[17px] sm:text-[19px] leading-[1.55] text-ink-secondary max-w-[560px]">
-                Six core building blocks, all wired up and battle-tested. Auth, tenancy, types,
-                database, audit, and a modern stack.
-              </p>
-            </FadeIn>
-          </div>
-        </section>
+    <main>
+      {/* Hero */}
+      <section className="bg-surface-alt">
+        <div className="max-w-[1440px] mx-auto px-8 lg:px-14 pt-32 sm:pt-40 lg:pt-48 pb-20 sm:pb-28">
+          <FadeIn>
+            <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-6">
+              Features
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <h1 className="text-[44px] sm:text-[60px] lg:text-[76px] font-semibold leading-[1.02] tracking-[-0.04em] max-w-[900px]">
+              Every moving part you need.{' '}
+              <span className="text-ink-muted">Nothing you don&apos;t.</span>
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <p className="mt-8 text-[17px] sm:text-[19px] leading-[1.55] text-ink-secondary max-w-[560px]">
+              Six core building blocks, all wired up and battle-tested. Auth, tenancy, types,
+              database, audit, and a modern stack.
+            </p>
+          </FadeIn>
+        </div>
+      </section>
 
-        {/* Feature sections — alternating layouts */}
-        {features.map((feature, i) => {
-          const Icon = feature.icon;
-          const isDark = i % 2 === 1;
-          const isReverse = i % 2 === 1;
-          return (
-            <section
-              key={feature.title}
-              className={`${isDark ? 'bg-surface-dark' : 'bg-surface'} border-t ${isDark ? 'border-line-dark' : 'border-line'}`}
-            >
-              <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-24 sm:py-32">
-                <div
-                  className={`grid lg:grid-cols-2 gap-12 lg:gap-20 items-start ${isReverse ? 'lg:[&>*:first-child]:order-2' : ''}`}
-                >
-                  {/* Left — text */}
-                  <div>
-                    <FadeIn>
-                      <div
-                        className={`flex size-12 items-center justify-center mb-8 ${isDark ? 'bg-[#252525]' : 'bg-surface-alt'}`}
-                      >
-                        <Icon
-                          className={`size-5 ${isDark ? 'text-ink-light-muted' : 'text-ink-secondary'}`}
-                          strokeWidth={1.5}
-                        />
-                      </div>
-                    </FadeIn>
-                    <FadeIn delay={0.05}>
-                      <p
-                        className={`font-label text-[11px] font-bold uppercase tracking-[0.1em] mb-5 ${isDark ? 'text-ink-light-muted' : 'text-ink-muted'}`}
-                      >
-                        {feature.label}
-                      </p>
-                    </FadeIn>
-                    <FadeIn delay={0.1}>
-                      <h2
-                        className={`text-[32px] sm:text-[44px] font-semibold leading-[1.08] tracking-[-0.03em] mb-6 ${isDark ? 'text-ink-light' : 'text-ink'}`}
-                      >
-                        {feature.title}
-                      </h2>
-                    </FadeIn>
-                    <FadeIn delay={0.15}>
-                      <p
-                        className={`text-[15px] leading-[1.7] mb-8 max-w-[500px] ${isDark ? 'text-ink-light-muted' : 'text-ink-secondary'}`}
-                      >
-                        {feature.description}
-                      </p>
-                    </FadeIn>
-                    <FadeIn delay={0.2}>
-                      <ul className="flex flex-col gap-3">
-                        {feature.bullets.map((bullet) => (
-                          <li key={bullet} className="flex items-start gap-3">
-                            <span
-                              className={`mt-2 size-1 rounded-full shrink-0 ${isDark ? 'bg-ink-light-muted' : 'bg-ink-muted'}`}
-                            />
-                            <span
-                              className={`text-[14px] ${isDark ? 'text-ink-light-muted' : 'text-ink-secondary'}`}
-                            >
-                              {bullet}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </FadeIn>
-                  </div>
-
-                  {/* Right — code snippet */}
-                  <FadeIn delay={0.2}>
+      {/* Feature sections — alternating layouts */}
+      {features.map((feature, i) => {
+        const Icon = feature.icon;
+        const isDark = i % 2 === 1;
+        const isReverse = i % 2 === 1;
+        return (
+          <section
+            key={feature.title}
+            className={`${isDark ? 'bg-surface-dark' : 'bg-surface'} border-t ${isDark ? 'border-line-dark' : 'border-line'}`}
+          >
+            <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-24 sm:py-32">
+              <div
+                className={`grid lg:grid-cols-2 gap-12 lg:gap-20 items-start ${isReverse ? 'lg:[&>*:first-child]:order-2' : ''}`}
+              >
+                {/* Left — text */}
+                <div>
+                  <FadeIn>
                     <div
-                      className={`p-8 lg:p-10 font-mono text-[12px] leading-[1.7] border ${isDark ? 'bg-[#161616] border-line-dark text-ink-light-muted' : 'bg-surface-alt border-line text-ink-secondary'}`}
+                      className={`flex size-12 items-center justify-center mb-8 ${isDark ? 'bg-[#252525]' : 'bg-surface-alt'}`}
                     >
-                      <pre className="whitespace-pre-wrap break-words">
-                        <code>{feature.code}</code>
-                      </pre>
+                      <Icon
+                        className={`size-5 ${isDark ? 'text-ink-light-muted' : 'text-ink-secondary'}`}
+                        strokeWidth={1.5}
+                      />
                     </div>
                   </FadeIn>
+                  <FadeIn delay={0.05}>
+                    <p
+                      className={`font-label text-[11px] font-bold uppercase tracking-[0.1em] mb-5 ${isDark ? 'text-ink-light-muted' : 'text-ink-muted'}`}
+                    >
+                      {feature.label}
+                    </p>
+                  </FadeIn>
+                  <FadeIn delay={0.1}>
+                    <h2
+                      className={`text-[32px] sm:text-[44px] font-semibold leading-[1.08] tracking-[-0.03em] mb-6 ${isDark ? 'text-ink-light' : 'text-ink'}`}
+                    >
+                      {feature.title}
+                    </h2>
+                  </FadeIn>
+                  <FadeIn delay={0.15}>
+                    <p
+                      className={`text-[15px] leading-[1.7] mb-8 max-w-[500px] ${isDark ? 'text-ink-light-muted' : 'text-ink-secondary'}`}
+                    >
+                      {feature.description}
+                    </p>
+                  </FadeIn>
+                  <FadeIn delay={0.2}>
+                    <ul className="flex flex-col gap-3">
+                      {feature.bullets.map((bullet) => (
+                        <li key={bullet} className="flex items-start gap-3">
+                          <span
+                            className={`mt-2 size-1 rounded-full shrink-0 ${isDark ? 'bg-ink-light-muted' : 'bg-ink-muted'}`}
+                          />
+                          <span
+                            className={`text-[14px] ${isDark ? 'text-ink-light-muted' : 'text-ink-secondary'}`}
+                          >
+                            {bullet}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </FadeIn>
                 </div>
-              </div>
-            </section>
-          );
-        })}
 
-        <CTA />
-      </main>
-      <Footer />
-    </>
+                {/* Right — code snippet */}
+                <FadeIn delay={0.2}>
+                  <div
+                    className={`p-8 lg:p-10 font-mono text-[12px] leading-[1.7] border ${isDark ? 'bg-[#161616] border-line-dark text-ink-light-muted' : 'bg-surface-alt border-line text-ink-secondary'}`}
+                  >
+                    <pre className="whitespace-pre-wrap break-words">
+                      <code>{feature.code}</code>
+                    </pre>
+                  </div>
+                </FadeIn>
+              </div>
+            </div>
+          </section>
+        );
+      })}
+
+      <CTA />
+    </main>
   );
 }

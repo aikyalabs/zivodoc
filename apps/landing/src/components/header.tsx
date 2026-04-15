@@ -1,10 +1,7 @@
-'use client';
-
 import { useState } from 'react';
-import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:5173';
+const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
 
 const navLinks = [
   { href: '/features', label: 'FEATURES' },
@@ -17,15 +14,19 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-line">
-      <nav className="max-w-[1440px] mx-auto h-[54px] flex items-center">
-        {/* Logo */}
-        <div className="pl-8 lg:pl-14 pr-10">
-          <Link href="/" className="text-[16px] font-bold tracking-[-0.03em]">
+      {/* Full-width nav — no max-width, BOOK A DEMO flush to right edge */}
+      <nav className="h-[54px] w-full flex items-center">
+        {/* Logo — flush left with padding */}
+        <div className="pl-8 lg:pl-14 pr-10 shrink-0">
+          <a
+            href="/"
+            className="text-[16px] font-bold tracking-[-0.03em] hover:text-ink-secondary transition-colors"
+          >
             SaaS Template
-          </Link>
+          </a>
         </div>
 
-        {/* Nav links — left-biased, right after logo */}
+        {/* Nav links — grouped after logo */}
         <div className="hidden md:flex items-center gap-0">
           {navLinks.map((link) => (
             <a
@@ -38,26 +39,35 @@ export function Header() {
           ))}
         </div>
 
-        {/* Spacer */}
+        {/* Spacer — pushes right content to the edge */}
         <div className="flex-1" />
 
-        {/* Right side — login + CTA */}
-        <div className="hidden md:flex items-center h-full">
-          <Link
+        {/* Right side — login + CTA, flush to right edge */}
+        <div className="hidden md:flex items-center h-full shrink-0">
+          <a
             href={`${APP_URL}/login`}
-            className="font-label flex items-center h-[54px] px-5 text-[14px] tracking-[-0.04em] text-ink hover:text-ink-secondary transition-colors"
+            className="font-label flex items-center h-full px-6 text-[14px] tracking-[-0.04em] text-ink hover:text-ink-secondary transition-colors"
           >
             LOG IN
-          </Link>
-          <Link
+          </a>
+          <a
             href={`${APP_URL}/login`}
-            className="font-label flex items-center h-[54px] px-4 min-w-[118px] justify-center bg-surface-button text-white text-[14px] tracking-[-0.04em]"
+            className="font-label flex items-center h-full px-6 min-w-[132px] justify-center gap-2.5 bg-surface-button text-white text-[14px] tracking-[-0.04em] hover:bg-[#333] transition-colors"
           >
             BOOK A DEMO
-          </Link>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path
+                d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </a>
         </div>
 
-        {/* Mobile */}
+        {/* Mobile menu button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden ml-auto mr-6 p-2"
@@ -67,6 +77,7 @@ export function Header() {
         </button>
       </nav>
 
+      {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-line bg-white px-8 py-8 flex flex-col gap-5">
           {navLinks.map((link) => (
@@ -80,15 +91,15 @@ export function Header() {
             </a>
           ))}
           <div className="flex flex-col gap-3 pt-5 border-t border-line">
-            <Link href={`${APP_URL}/login`} className="font-label text-[14px] text-ink">
+            <a href={`${APP_URL}/login`} className="font-label text-[14px] text-ink">
               LOG IN
-            </Link>
-            <Link
+            </a>
+            <a
               href={`${APP_URL}/login`}
               className="font-label flex items-center justify-center h-[54px] bg-surface-button text-white text-[14px]"
             >
               BOOK A DEMO
-            </Link>
+            </a>
           </div>
         </div>
       )}

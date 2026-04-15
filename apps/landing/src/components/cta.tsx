@@ -1,7 +1,6 @@
-import Link from 'next/link';
-import { FadeIn } from '@src/components/fade-in';
+import { FadeIn } from './fade-in';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:5173';
+const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
 
 export function CTA() {
   return (
@@ -30,12 +29,12 @@ export function CTA() {
 
         <FadeIn delay={0.2}>
           <div className="mt-10 flex flex-wrap items-center gap-3">
-            <Link
+            <a
               href={`${APP_URL}/login`}
               className="font-label inline-flex items-center gap-2.5 h-[52px] px-6 bg-surface-button text-white text-[14px] border border-[#262626] hover:bg-[#333] transition-colors"
             >
               GET STARTED
-              <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                 <path
                   d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9"
                   stroke="currentColor"
@@ -44,7 +43,7 @@ export function CTA() {
                   strokeLinejoin="round"
                 />
               </svg>
-            </Link>
+            </a>
             <a
               href="https://github.com"
               target="_blank"
