@@ -2,9 +2,9 @@ import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
 
-import type { ApiPaginatedResponse } from '@template/shared';
+import type { ApiPaginatedResponse } from '@zivodoc/shared';
 import type { z } from 'zod';
-import type { roleModelSchema } from '@template/shared';
+import type { roleModelSchema } from '@zivodoc/shared';
 
 type Role = z.output<typeof roleModelSchema>;
 

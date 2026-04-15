@@ -13,8 +13,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
 COPY . .
-RUN pnpm --filter @template/shared build
-RUN pnpm --filter @template/web build
+RUN pnpm --filter @zivodoc/shared build
+RUN pnpm --filter @zivodoc/web build
 
 FROM nginxinc/nginx-unprivileged:alpine AS runner
 COPY --from=builder /app/apps/web/dist /usr/share/nginx/html

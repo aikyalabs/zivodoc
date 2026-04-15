@@ -8,7 +8,7 @@ import { SidebarRouteMenuItem } from '@src/components/molecules/SidebarRouteMenu
 import { useProfile } from '@src/hooks/useProfile';
 
 import type { NavGroup } from '@src/lib/navigation';
-import type { UserRole } from '@template/shared';
+import type { UserRole } from '@zivodoc/shared';
 
 interface SidebarRouteGroupProps {
   group: NavGroup;

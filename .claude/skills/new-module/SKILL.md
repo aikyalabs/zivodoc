@@ -85,7 +85,7 @@ Create `apps/api/src/{entities}/{entities}.service.ts` with CRUD methods using t
 Create `apps/api/src/{entities}/{entities}.dto.ts`:
 ```typescript
 import { createZodDto } from 'nestjs-zod';
-import { create{Entity}Schema, {entity}ResponseSchema, {entities}ResponseSchema } from '@template/shared';
+import { create{Entity}Schema, {entity}ResponseSchema, {entities}ResponseSchema } from '@zivodoc/shared';
 
 export class Create{Entity}Request extends createZodDto(create{Entity}Schema) {}
 export class {Entity}Response extends createZodDto({entity}ResponseSchema) {}
@@ -106,6 +106,6 @@ Use `/new-schema` skill to create schemas in the shared package.
 
 ## Step 10: Verify
 
-- `pnpm --filter @template/shared build`
-- `pnpm --filter @template/api build`
+- `pnpm --filter @zivodoc/shared build`
+- `pnpm --filter @zivodoc/api build`
 - No TypeScript errors

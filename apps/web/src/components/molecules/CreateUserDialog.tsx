@@ -23,7 +23,7 @@ import { useCreateUser } from '@src/hooks/mutations/useCreateUser';
 import { useOrganization } from '@src/hooks/queries/useOrganization';
 import { useProfile } from '@src/hooks/useProfile';
 
-import { type UserRole, isUserRole } from '@template/shared';
+import { type UserRole, isUserRole } from '@zivodoc/shared';
 
 const orgRoles: { value: UserRole; label: string }[] = [
   { value: 'owner', label: 'Owner' },

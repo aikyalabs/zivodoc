@@ -2,9 +2,9 @@ import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
 
-import type { ApiPaginatedResponse } from '@template/shared';
+import type { ApiPaginatedResponse } from '@zivodoc/shared';
 import type { z } from 'zod';
-import type { organizationModelSchema } from '@template/shared';
+import type { organizationModelSchema } from '@zivodoc/shared';
 
 type Organization = z.output<typeof organizationModelSchema>;
 

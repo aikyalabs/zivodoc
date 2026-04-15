@@ -8,7 +8,7 @@ Production-ready SaaS monorepo template with auth, RBAC, multi-tenancy, and full
 saas-template/
 ├── apps/api/        NestJS 11 + Express + TypeORM + PostgreSQL 17
 ├── apps/web/        React 19 + TanStack Router + TanStack Query + Tailwind CSS 4
-├── packages/shared/ Zod schemas, enums, API response types (@template/shared)
+├── packages/shared/ Zod schemas, enums, API response types (@zivodoc/shared)
 ```
 
 ## Tech Stack
@@ -28,20 +28,20 @@ pnpm build                              # Build all packages (shared → api + w
 pnpm dev                                # Start all apps in dev mode
 
 # Per-app
-pnpm --filter @template/api dev         # API on :3000
-pnpm --filter @template/web dev         # Web on :5173
+pnpm --filter @zivodoc/api dev         # API on :3000
+pnpm --filter @zivodoc/web dev         # Web on :5173
 
 # Database (TypeORM migrations)
-pnpm --filter @template/api migration:generate src/database/migrations/MyMigration
-pnpm --filter @template/api migration:run
-pnpm --filter @template/api migration:revert
+pnpm --filter @zivodoc/api migration:generate src/database/migrations/MyMigration
+pnpm --filter @zivodoc/api migration:run
+pnpm --filter @zivodoc/api migration:revert
 
 # Seed
-pnpm --filter @template/api seed        # Creates admin + owner + default org
+pnpm --filter @zivodoc/api seed        # Creates admin + owner + default org
 
 # Testing
-pnpm --filter @template/api test:e2e    # API e2e tests
-pnpm --filter @template/web test        # Frontend tests
+pnpm --filter @zivodoc/api test:e2e    # API e2e tests
+pnpm --filter @zivodoc/web test        # Frontend tests
 
 # Linting
 pnpm lint                               # Lint all

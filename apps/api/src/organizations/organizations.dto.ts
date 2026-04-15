@@ -5,7 +5,7 @@ import {
   updateOrganizationSchema,
   organizationResponseSchema,
   organizationsResponseSchema,
-} from '@template/shared';
+} from '@zivodoc/shared';
 
 export class CreateOrganizationRequest extends createZodDto(createOrganizationSchema) {}
 export class UpdateOrganizationRequest extends createZodDto(updateOrganizationSchema) {}

@@ -24,7 +24,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Build shared package
-        run: pnpm --filter @template/shared build
+        run: pnpm --filter @zivodoc/shared build
 
       - name: Lint
         run: pnpm lint
@@ -62,11 +62,11 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @template/shared build
-      - run: pnpm --filter @template/api migration:run
+      - run: pnpm --filter @zivodoc/shared build
+      - run: pnpm --filter @zivodoc/api migration:run
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:15432/saas_template_test
-      - run: pnpm --filter @template/api test:e2e
+      - run: pnpm --filter @zivodoc/api test:e2e
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:15432/saas_template_test
 
@@ -86,5 +86,5 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @template/shared build
-      - run: pnpm --filter @template/web test -- --run
+      - run: pnpm --filter @zivodoc/shared build
+      - run: pnpm --filter @zivodoc/web test -- --run

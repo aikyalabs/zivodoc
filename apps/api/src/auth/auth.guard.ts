@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import { UserRole } from '@template/shared';
+import { UserRole } from '@zivodoc/shared';
 
 import { AuthService } from '@src/auth/auth.service';
 import { IS_PUBLIC_KEY } from '@src/auth/public.decorator';

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
 
-import type { ApiOkResponse, UserAuthProfile } from '@template/shared';
+import type { ApiOkResponse, UserAuthProfile } from '@zivodoc/shared';
 
 export const useProfile = () => {
   return useQuery({

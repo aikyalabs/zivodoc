@@ -1,103 +1,81 @@
-import { FadeIn } from './fade-in';
+import { FadeIn, FadeInStagger, FadeInStaggerItem } from './fade-in';
 
-const row1 = [
-  'NestJS',
-  'React 19',
-  'TanStack Router',
-  'TanStack Query',
-  'PostgreSQL',
-  'TypeORM',
-  'Redis',
-  'MinIO',
-  'Docker',
-  'Turborepo',
+const categories = [
+  {
+    label: 'Docs Frameworks',
+    items: [
+      'Docusaurus',
+      'GitBook',
+      'Mintlify',
+      'ReadMe',
+      'Nextra',
+      'Starlight',
+      'VitePress',
+      'Sphinx',
+      'MkDocs',
+    ],
+  },
+  {
+    label: 'Languages',
+    items: ['JavaScript', 'TypeScript', 'Python', 'Go', 'Ruby', 'cURL', 'Java', 'PHP'],
+  },
+  {
+    label: 'API Specs',
+    items: ['OpenAPI 3.x', 'Swagger 2.0', 'GraphQL', 'REST', 'gRPC'],
+  },
+  {
+    label: 'Content',
+    items: ['Markdown', 'MDX', 'AsciiDoc', 'reStructuredText'],
+  },
 ];
-
-const row2 = [
-  'Zod',
-  'bcrypt',
-  'Session Auth',
-  'ULID',
-  'JSONB Permissions',
-  'Audit Logs',
-  'Rate Limiting',
-  'TypeScript',
-  'Tailwind CSS 4',
-  'pnpm Workspaces',
-];
-
-function MarqueeRow({
-  items,
-  direction = 'left',
-  duration = 40,
-}: {
-  items: string[];
-  direction?: 'left' | 'right';
-  duration?: number;
-}) {
-  const animationName = direction === 'left' ? 'marquee-left' : 'marquee-right';
-
-  return (
-    <div
-      className="relative overflow-hidden"
-      style={{
-        maskImage: 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)',
-        WebkitMaskImage:
-          'linear-gradient(to right, transparent, black 12%, black 88%, transparent)',
-      }}
-    >
-      <div
-        className="flex items-center gap-12 w-max"
-        style={{
-          animation: `${animationName} ${duration}s linear infinite`,
-        }}
-      >
-        {[...items, ...items, ...items].map((item, i) => (
-          <div key={i} className="flex items-center gap-12 flex-shrink-0">
-            <span className="text-[32px] sm:text-[44px] font-bold tracking-[-0.03em] text-ink whitespace-nowrap select-none hover:text-pop transition-colors cursor-default">
-              {item}
-            </span>
-            <span className="size-2 rounded-full bg-ink-muted/40 flex-shrink-0" />
-          </div>
-        ))}
-      </div>
-
-      <style>{`
-        @keyframes marquee-left {
-          from { transform: translateX(0); }
-          to { transform: translateX(-33.333%); }
-        }
-        @keyframes marquee-right {
-          from { transform: translateX(-33.333%); }
-          to { transform: translateX(0); }
-        }
-      `}</style>
-    </div>
-  );
-}
 
 export function TechMarquee() {
   return (
-    <section className="bg-surface-alt border-y border-line overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14 pt-20 sm:pt-24 pb-8">
-        <FadeIn>
-          <p className="font-label text-[11px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-4">
-            Technical Stack
-          </p>
-        </FadeIn>
-        <FadeIn delay={0.1}>
-          <h2 className="text-[28px] sm:text-[36px] lg:text-[44px] font-semibold leading-[1.08] tracking-[-0.03em] max-w-[640px] mb-12 sm:mb-16">
-            The modern toolkit, assembled and wired up for you.
-          </h2>
-        </FadeIn>
-      </div>
+    <section className="bg-surface-alt border-y border-line">
+      <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
+        <div className="grid lg:grid-cols-[1fr_2fr] gap-16 lg:gap-24">
+          {/* Left — heading */}
+          <div>
+            <FadeIn>
+              <p className="font-label text-[11px] font-bold uppercase tracking-[0.12em] text-ink-muted mb-5">
+                Works With
+              </p>
+            </FadeIn>
+            <FadeIn delay={0.1}>
+              <h2 className="text-[32px] sm:text-[40px] lg:text-[48px] font-semibold leading-[1.08] tracking-[-0.03em]">
+                Every docs framework, every language, every spec.
+              </h2>
+            </FadeIn>
+            <FadeIn delay={0.15}>
+              <p className="mt-6 text-[15px] text-ink-secondary leading-[1.65] max-w-[360px]">
+                zivodoc auto-detects your stack. No config needed — just point it at your repo.
+              </p>
+            </FadeIn>
+          </div>
 
-      <div className="py-10 sm:py-14 flex flex-col gap-8 sm:gap-10">
-        <MarqueeRow items={row1} direction="left" duration={50} />
-        <MarqueeRow items={row2} direction="right" duration={50} />
+          {/* Right — categorized grid */}
+          <div className="grid sm:grid-cols-2 gap-12">
+            {categories.map((cat, ci) => (
+              <FadeInStagger key={cat.label} className="flex flex-col">
+                <FadeIn>
+                  <p className="font-label text-[10px] font-bold uppercase tracking-[0.1em] text-ink-muted mb-4">
+                    {cat.label}
+                  </p>
+                </FadeIn>
+                <div className="flex flex-wrap gap-2">
+                  {cat.items.map((item, i) => (
+                    <FadeInStaggerItem key={item}>
+                      <span className="inline-flex items-center h-[32px] px-3 border border-line text-[12px] text-ink-secondary font-label tracking-[-0.01em] hover:border-line-hover hover:text-ink transition-colors cursor-default">
+                        {item}
+                      </span>
+                    </FadeInStaggerItem>
+                  ))}
+                </div>
+              </FadeInStagger>
+            ))}
+          </div>
+        </div>
       </div>
-
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-14 pb-20 sm:pb-24" />
     </section>
   );
 }

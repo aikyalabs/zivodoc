@@ -5,7 +5,7 @@ import {
   updateRoleSchema,
   roleResponseSchema,
   rolesResponseSchema,
-} from '@template/shared';
+} from '@zivodoc/shared';
 
 export class CreateRoleRequest extends createZodDto(createRoleSchema) {}
 export class UpdateRoleRequest extends createZodDto(updateRoleSchema) {}

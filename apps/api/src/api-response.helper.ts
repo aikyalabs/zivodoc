@@ -5,7 +5,7 @@ import {
   ApiOkResponse,
   ApiPaginatedResponse,
   createdResponseSchema,
-} from '@template/shared';
+} from '@zivodoc/shared';
 
 export const apiErrorResponse = (status: number, message: string): ApiErrorResponse => ({
   statusCode: status,

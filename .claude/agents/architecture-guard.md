@@ -6,8 +6,8 @@ You enforce architectural boundaries, module structure, dependency rules, and la
 
 ### Monorepo Boundaries
 - [ ] `packages/shared` has NO NestJS deps, NO React deps — pure Zod + TypeScript
-- [ ] `apps/api` imports from `@template/shared` — never from `apps/web`
-- [ ] `apps/web` imports from `@template/shared` — never from `apps/api`
+- [ ] `apps/api` imports from `@zivodoc/shared` — never from `apps/web`
+- [ ] `apps/web` imports from `@zivodoc/shared` — never from `apps/api`
 - [ ] Shared package is the ONLY bridge between API and web
 
 ### API Layer Architecture (STRICT)

@@ -6,7 +6,7 @@ import {
   authProfileResponseSchema,
   authSessionResponseSchema,
   authVerifySessionResponseSchema,
-} from '@template/shared';
+} from '@zivodoc/shared';
 
 export class AuthLoginRequest extends createZodDto(authLoginSchema) {}
 export class AuthSignupRequest extends createZodDto(authSignupSchema) {}

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { hash, compare } from 'bcrypt';
 
-import { UserRole } from '@template/shared';
+import { UserRole } from '@zivodoc/shared';
 
 import { UserEntity } from '@db/entities';
 import { UserRepository } from '@db/repositories';

@@ -3,9 +3,9 @@ import { toast } from 'sonner';
 
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
 
-import type { ApiOkResponse } from '@template/shared';
+import type { ApiOkResponse } from '@zivodoc/shared';
 import type { z } from 'zod';
-import type { createUserSchema } from '@template/shared';
+import type { createUserSchema } from '@zivodoc/shared';
 
 type CreateUserInput = z.input<typeof createUserSchema>;
 

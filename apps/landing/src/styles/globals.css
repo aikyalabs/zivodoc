@@ -1,24 +1,32 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-surface: #FCFCFD;
-  --color-surface-alt: #FAFAFA;
-  --color-surface-card: #F3F3F3;
-  --color-surface-dark: #1D1D1D;
-  --color-surface-dark-card: #1A1A1A;
-  --color-surface-button: #272727;
+  /* Surfaces — near-black base like Linear */
+  --color-surface: #0A0A0B;
+  --color-surface-alt: #0F0F10;
+  --color-surface-card: #141415;
+  --color-surface-elevated: #1A1A1C;
+  --color-surface-button: #F5F5F5;
 
-  --color-ink: #272727;
-  --color-ink-secondary: #6E6E6E;
-  --color-ink-muted: #969696;
-  --color-ink-light: #FAFAFA;
-  --color-ink-light-muted: #C0C0C0;
+  /* Text */
+  --color-ink: #F5F5F5;
+  --color-ink-secondary: #888888;
+  --color-ink-muted: #555555;
+  --color-ink-dim: #333333;
 
-  --color-line: #EAEAEA;
-  --color-line-dark: #333333;
+  /* Borders */
+  --color-line: #1E1E1F;
+  --color-line-hover: #2A2A2C;
 
-  --color-pop: #F56023;
-  --color-accent: #A8ECFF;
+  /* Accent — cool white, almost no color like Linear */
+  --color-accent: #EDEDEF;
+  --color-accent-muted: #D4D4D8;
+  --color-accent-glow: rgba(255, 255, 255, 0.04);
+
+  /* Status colors for scan results */
+  --color-green: #34D399;
+  --color-red: #F87171;
+  --color-yellow: #FBBF24;
 }
 
 html {
@@ -26,16 +34,16 @@ html {
 }
 
 body {
-  background: #FCFCFD;
-  color: #272727;
+  background: #0A0A0B;
+  color: #F5F5F5;
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: #272727;
-  color: #fff;
+  background: #F5F5F5;
+  color: #0A0A0B;
 }
 
 .font-label {

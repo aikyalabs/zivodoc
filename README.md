@@ -14,10 +14,10 @@ docker compose up -d
 pnpm install
 
 # 3. Build shared package
-pnpm --filter @template/shared build
+pnpm --filter @zivodoc/shared build
 
 # 4. Run database migrations
-pnpm --filter @template/api drizzle:migrate
+pnpm --filter @zivodoc/api drizzle:migrate
 
 # 5. Start development
 pnpm dev

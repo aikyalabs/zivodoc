@@ -100,4 +100,4 @@ Add to `packages/shared/src/enums/index.ts`.
 
 ## Step 5: Build & Verify
 
-Run `pnpm --filter @template/shared build` to compile and verify no type errors.
+Run `pnpm --filter @zivodoc/shared build` to compile and verify no type errors.

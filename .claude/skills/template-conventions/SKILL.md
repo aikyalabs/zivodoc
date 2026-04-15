@@ -138,7 +138,7 @@ export class ResourceController {
 
 ```typescript
 import { createZodDto } from 'nestjs-zod';
-import { createEntitySchema, entityResponseSchema, entitiesResponseSchema } from '@template/shared';
+import { createEntitySchema, entityResponseSchema, entitiesResponseSchema } from '@zivodoc/shared';
 
 export class CreateEntityRequest extends createZodDto(createEntitySchema) {}
 export class EntityResponse extends createZodDto(entityResponseSchema) {}
@@ -182,7 +182,7 @@ export const isStatus = isEnumType(Status);
 ```typescript
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
-import type { ApiPaginatedResponse } from '@template/shared';
+import type { ApiPaginatedResponse } from '@zivodoc/shared';
 
 export const useResources = (opts?: { limit?: number; offset?: number }) =>
   useQuery({

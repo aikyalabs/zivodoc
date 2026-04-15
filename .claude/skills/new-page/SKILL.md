@@ -26,7 +26,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
 import { usePagination } from '@src/hooks/usePagination';
-import type { ApiPaginatedResponse } from '@template/shared';
+import type { ApiPaginatedResponse } from '@zivodoc/shared';
 
 export const Route = createFileRoute('/_authentication/{resource}')({
   component: {Resource}Page,
@@ -52,7 +52,7 @@ Create `hooks/queries/use{Resources}.ts`:
 ```typescript
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
-import type { ApiPaginatedResponse } from '@template/shared';
+import type { ApiPaginatedResponse } from '@zivodoc/shared';
 
 export const use{Resources} = (options?: { limit?: number; offset?: number }) => {
   return useQuery({
@@ -98,6 +98,6 @@ Update `routes/_authentication.tsx` to add navigation link for the new resource.
 
 ## Step 6: Verify
 
-- Run `pnpm --filter @template/web dev` and navigate to the new route
+- Run `pnpm --filter @zivodoc/web dev` and navigate to the new route
 - TanStack Router auto-generates the route tree
 - Test data fetching and mutations

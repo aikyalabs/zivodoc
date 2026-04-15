@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { SessionContext, SESSION_TOKEN_STORAGE_KEY } from '@src/lib/contexts/SessionContext';
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
 
-import type { ApiOkResponse } from '@template/shared';
+import type { ApiOkResponse } from '@zivodoc/shared';
 
 export const SessionProvider: ComponentType<PropsWithChildren> = ({ children }) => {
   const queryClient = useQueryClient();

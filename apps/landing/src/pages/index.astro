@@ -1,27 +1,30 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { Header } from '../components/header';
-import { Hero } from '../components/hero';
-import { LogoMarquee } from '../components/logo-marquee';
+import { HeroSplit } from '../components/hero-split';
+
 import { Problem } from '../components/problem';
 import { Solution } from '../components/solution';
+import { DashboardSection } from '../components/dashboard-section';
 import { Stats } from '../components/stats';
 import { Features } from '../components/features';
+import { ScanVisual } from '../components/scan-visual';
 import { TechMarquee } from '../components/tech-marquee';
 import { Testimonials } from '../components/testimonials';
 import { CTA } from '../components/cta';
 import { Footer } from '../components/footer';
 ---
 
-<Layout title="SaaS Template — Ship in Days, Not Months">
+<Layout title="zivodoc — Automated QA for Developer Documentation">
   <Header client:load />
   <main>
-    <Hero client:load />
-    <LogoMarquee />
+    <HeroSplit client:load />
     <Problem client:visible />
     <Solution client:visible />
+    <DashboardSection client:visible />
     <Stats client:visible />
     <Features client:visible />
+    <ScanVisual client:visible />
     <TechMarquee client:visible />
     <Testimonials client:visible />
     <CTA client:visible />

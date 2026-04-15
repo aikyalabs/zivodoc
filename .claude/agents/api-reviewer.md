@@ -18,7 +18,7 @@ You review REST API endpoint design, DTOs, validation, response formats, and con
 - [ ] Services verify resource ownership via organizationId
 
 ### DTOs & Validation
-- [ ] Request DTOs created via `createZodDto(schema)` from `@template/shared`
+- [ ] Request DTOs created via `createZodDto(schema)` from `@zivodoc/shared`
 - [ ] Response DTOs created via `createZodDto(responseSchema)`
 - [ ] `@ZodResponse({ type: DtoClass })` on every endpoint
 - [ ] Global `ZodValidationPipe` handles request validation

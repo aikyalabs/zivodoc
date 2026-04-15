@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
 
 import type { z } from 'zod';
-import type { updateUserSchema } from '@template/shared';
+import type { updateUserSchema } from '@zivodoc/shared';
 
 type UpdateUserInput = z.input<typeof updateUserSchema>;
 

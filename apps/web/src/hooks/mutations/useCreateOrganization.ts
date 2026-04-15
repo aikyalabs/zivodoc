@@ -3,9 +3,9 @@ import { toast } from 'sonner';
 
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
 
-import type { ApiOkResponse } from '@template/shared';
+import type { ApiOkResponse } from '@zivodoc/shared';
 import type { z } from 'zod';
-import type { createOrganizationSchema } from '@template/shared';
+import type { createOrganizationSchema } from '@zivodoc/shared';
 
 type CreateOrganizationInput = z.input<typeof createOrganizationSchema>;
 

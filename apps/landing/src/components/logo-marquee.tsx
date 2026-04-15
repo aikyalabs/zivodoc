@@ -1,22 +1,22 @@
 const logos = [
-  'Acme Corp',
-  'Globex',
-  'Initech',
-  'Hooli',
-  'Pied Piper',
-  'Massive Dynamic',
-  'Stark Industries',
-  'Wayne Enterprises',
-  'Umbrella Corp',
-  'Cyberdyne',
-  'Soylent',
-  'Wonka Industries',
+  'Stripe',
+  'Twilio',
+  'Vercel',
+  'Supabase',
+  'Cloudflare',
+  'Datadog',
+  'PlanetScale',
+  'Linear',
+  'Resend',
+  'Clerk',
+  'Neon',
+  'Turso',
 ];
 
 export function LogoMarquee() {
   return (
     <section
-      className="py-12 overflow-hidden bg-surface"
+      className="py-12 overflow-hidden bg-surface border-y border-line"
       style={{
         maskImage: 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)',
         WebkitMaskImage:
@@ -27,7 +27,7 @@ export function LogoMarquee() {
         {[...logos, ...logos].map((name, i) => (
           <span
             key={i}
-            className="text-[14px] font-medium text-ink-muted/50 whitespace-nowrap select-none"
+            className="text-[14px] font-medium text-ink-muted whitespace-nowrap select-none"
           >
             {name}
           </span>

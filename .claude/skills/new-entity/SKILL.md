@@ -52,7 +52,7 @@ packages/shared/src/schemas/{entity}/
 ```
 
 Register in `packages/shared/src/schemas/index.ts`.
-Build: `pnpm --filter @template/shared build`
+Build: `pnpm --filter @zivodoc/shared build`
 
 ## Step 3: Create API Module
 
@@ -81,7 +81,7 @@ Register in `apps/api/src/app.module.ts`.
 
 Generate a TypeORM migration for the new entity:
 ```bash
-pnpm --filter @template/api migration:generate src/database/migrations/Add{Entity}Table
+pnpm --filter @zivodoc/api migration:generate src/database/migrations/Add{Entity}Table
 ```
 
 ## Step 5: Create Frontend
@@ -94,9 +94,9 @@ Follow `/new-page` pattern. Create:
 
 ## Step 6: Verify
 
-1. `pnpm --filter @template/shared build` — shared compiles
-2. `pnpm --filter @template/api build` — API compiles (0 issues)
-3. `pnpm --filter @template/web build` — web compiles
+1. `pnpm --filter @zivodoc/shared build` — shared compiles
+2. `pnpm --filter @zivodoc/api build` — API compiles (0 issues)
+3. `pnpm --filter @zivodoc/web build` — web compiles
 4. Full flow: create → list → view → edit → delete
 
 ## Checklist

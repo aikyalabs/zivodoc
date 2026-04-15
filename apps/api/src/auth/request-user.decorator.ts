@@ -1,7 +1,7 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { Request } from 'express';
 
-import { UserRole } from '@template/shared';
+import { UserRole } from '@zivodoc/shared';
 
 export interface AuthUser {
   id: string;

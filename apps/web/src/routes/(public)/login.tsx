@@ -11,7 +11,7 @@ import { Separator } from '@src/components/atoms/separator';
 import { useSession } from '@src/hooks/useSession';
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
 
-import type { ApiOkResponse } from '@template/shared';
+import type { ApiOkResponse } from '@zivodoc/shared';
 
 export const Route = createFileRoute('/(public)/login')({
   component: LoginPage,

@@ -8,7 +8,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import type { UserRole } from '@template/shared';
+import type { UserRole } from '@zivodoc/shared';
 
 export interface NavSubItem {
   title: string;

@@ -3,42 +3,44 @@ import { FadeIn, FadeInStagger, FadeInStaggerItem } from './fade-in';
 const testimonials = [
   {
     quote:
-      'This template saved us months. Auth, RBAC, and multi-tenancy worked out of the box. We shipped our MVP in 10 days.',
+      'We had no idea 30% of our code examples were broken until zivodoc scanned us. Fixed everything in a week with the auto-generated PRs.',
     name: 'Sarah Chen',
-    title: 'CTO, Flowbase',
+    title: 'Head of DevRel, API Platform',
     initials: 'SC',
   },
   {
     quote:
-      'Type safety across the entire stack. Not a single runtime type error since we switched to this.',
+      'Our support tickets about docs dropped 40% in the first month. zivodoc catches things we never would have found manually.',
     name: 'Marcus Rivera',
-    title: 'Lead Engineer, Stackwise',
+    title: 'Lead Engineer, Developer Tools',
     initials: 'MR',
   },
   {
-    quote: 'Best DX in a SaaS starter. Monorepo with Turborepo is buttery smooth.',
+    quote:
+      'The OpenAPI validation alone was worth it. Found 14 mismatches between our spec and our docs that had been there for months.',
     name: 'Emily Park',
-    title: 'Founder, Devcraft',
+    title: 'Founder, API Startup',
     initials: 'EP',
   },
   {
     quote:
-      'Idea to production in two weeks. Migration system and seed data made onboarding painless for the whole team.',
+      "We run zivodoc in CI on every push. Broken docs never make it to production anymore. It's like having a dedicated docs QA engineer.",
     name: 'James Okonkwo',
-    title: 'Eng Lead, Layerform',
+    title: 'Eng Lead, Infrastructure Co',
     initials: 'JO',
   },
   {
     quote:
-      'Finally treats RBAC as first-class. The caller pattern is elegant and scales beautifully.',
+      'The AI contradiction detection is genuinely impressive. It found places where our quickstart guide contradicted our API reference.',
     name: 'Priya Sharma',
-    title: 'Senior Dev, Nimbus',
+    title: 'Senior Dev, Cloud Platform',
     initials: 'PS',
   },
   {
-    quote: 'Audit logging alone was worth it. Passed SOC 2 with minimal extra work.',
+    quote:
+      "Set it up in 5 minutes, caught 40+ issues on the first scan. Now our whole company is on the paid plan. Best docs tooling investment we've made.",
     name: 'Daniel Kim',
-    title: 'Head of Eng, Comply.io',
+    title: 'VP Engineering, DevTool Co',
     initials: 'DK',
   },
 ];
@@ -61,7 +63,7 @@ function TestimonialCard({
 }) {
   return (
     <FadeInStaggerItem
-      className={`${wide ? 'sm:col-span-3' : 'sm:col-span-2'} ${featured ? 'bg-accent' : 'bg-surface-card'}`}
+      className={`${wide ? 'sm:col-span-3' : 'sm:col-span-2'} ${featured ? 'bg-surface-elevated border border-line-hover' : 'bg-surface-card border border-line'}`}
     >
       <div className="p-10">
         <p
@@ -71,15 +73,13 @@ function TestimonialCard({
         </p>
         <div className="flex items-center gap-3">
           <div
-            className={`size-[42px] rounded-full text-[12px] font-bold flex items-center justify-center shrink-0 ${featured ? 'bg-ink text-white' : 'bg-surface-button text-white'}`}
+            className={`size-[42px] rounded-full text-[12px] font-bold flex items-center justify-center shrink-0 ${featured ? 'bg-ink text-surface' : 'bg-surface-elevated text-ink-secondary'}`}
           >
             {t.initials}
           </div>
           <div>
             <p className="text-[14px] font-semibold text-ink">{t.name}</p>
-            <p className={`text-[12px] ${featured ? 'text-ink/60' : 'text-ink-muted'}`}>
-              {t.title}
-            </p>
+            <p className="text-[12px] text-ink-muted">{t.title}</p>
           </div>
         </div>
       </div>
@@ -89,11 +89,11 @@ function TestimonialCard({
 
 export function Testimonials() {
   return (
-    <section id="testimonials" className="bg-surface">
+    <section id="testimonials" className="bg-surface-alt">
       <div className="max-w-[1440px] mx-auto px-8 lg:px-14 py-28 sm:py-36 lg:py-44">
         <FadeIn className="text-center mb-20 sm:mb-24">
           <h2 className="text-[36px] sm:text-[48px] lg:text-[58px] font-semibold leading-[1.04] tracking-[-0.04em]">
-            Loved by top engineers
+            Trusted by developer tool teams
           </h2>
         </FadeIn>
 

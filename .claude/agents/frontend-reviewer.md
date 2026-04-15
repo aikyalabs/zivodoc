@@ -36,7 +36,7 @@ You review React frontend code for compliance with established patterns.
 
 ### Forms
 - [ ] TanStack Form or controlled inputs with Zod validation
-- [ ] Import schemas from `@template/shared` — no schema duplication
+- [ ] Import schemas from `@zivodoc/shared` — no schema duplication
 
 ### Error Handling
 - [ ] Toast notifications via Sonner for user-facing errors

@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
-import { UserRole } from '@template/shared';
+import { UserRole } from '@zivodoc/shared';
 
 import { BaseEntity } from './base.entity';
 import { OrganizationEntity } from './organization.entity';

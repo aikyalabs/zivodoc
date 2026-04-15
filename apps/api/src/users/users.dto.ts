@@ -5,7 +5,7 @@ import {
   updateUserSchema,
   userResponseSchema,
   usersResponseSchema,
-} from '@template/shared';
+} from '@zivodoc/shared';
 
 export class CreateUserRequest extends createZodDto(createUserSchema) {}
 export class UpdateUserRequest extends createZodDto(updateUserSchema) {}

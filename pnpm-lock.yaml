@@ -50,7 +50,7 @@ importers:
       '@nestjs/typeorm':
         specifier: ^11.0.0
         version: 11.0.0(@nestjs/common@11.1.17(class-transformer@0.5.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(pg@8.20.0)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@22.19.15)(typescript@5.9.3)))
-      '@template/shared':
+      '@zivodoc/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       bcrypt:
@@ -250,7 +250,7 @@ importers:
       '@tanstack/zod-adapter':
         specifier: ^1.114.0
         version: 1.166.9(@tanstack/react-router@1.168.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(zod@3.25.76)
-      '@template/shared':
+      '@zivodoc/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       axios:
