@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://zivodoc.com/sitemap-index.xml
+Sitemap: https://zivodoc.com/sitemap.xml
