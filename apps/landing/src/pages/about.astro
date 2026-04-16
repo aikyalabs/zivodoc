@@ -3,9 +3,30 @@ import Layout from '../layouts/Layout.astro';
 import { Header } from '../components/header';
 import AboutContent from '../components/about-content';
 import { Footer } from '../components/footer';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: 'About — zivodoc',
+  description: 'Why we built zivodoc and what we believe about developer documentation quality.',
+  url: 'https://zivodoc.com/about',
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'zivodoc',
+    foundingDate: '2025',
+    description: 'Automated QA for developer documentation. Finds broken code examples, stale API references, and dead links — then opens PRs to fix them.',
+  },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://zivodoc.com' },
+      { '@type': 'ListItem', position: 2, name: 'About', item: 'https://zivodoc.com/about' },
+    ],
+  },
+};
 ---
 
-<Layout title="About — zivodoc" description="Why we built zivodoc and what we believe about developer documentation quality.">
+<Layout title="About — zivodoc" description="Why we built zivodoc and what we believe about developer documentation quality." jsonLd={jsonLd}>
   <Header client:load />
   <AboutContent client:load />
   <Footer />

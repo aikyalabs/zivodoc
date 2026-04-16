@@ -3,9 +3,24 @@ import Layout from '../layouts/Layout.astro';
 import { Header } from '../components/header';
 import PricingContent from '../components/pricing-content';
 import { Footer } from '../components/footer';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Pricing — zivodoc',
+  description: 'Simple, transparent pricing. Coming soon. Free during early access.',
+  url: 'https://zivodoc.com/pricing',
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://zivodoc.com' },
+      { '@type': 'ListItem', position: 2, name: 'Pricing', item: 'https://zivodoc.com/pricing' },
+    ],
+  },
+};
 ---
 
-<Layout title="Pricing — zivodoc" description="Simple, transparent pricing. Coming soon. Free during early access.">
+<Layout title="Pricing — zivodoc" description="Simple, transparent pricing. Coming soon. Free during early access." jsonLd={jsonLd}>
   <Header client:load />
   <PricingContent client:load />
   <Footer />

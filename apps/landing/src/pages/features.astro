@@ -3,9 +3,25 @@ import Layout from '../layouts/Layout.astro';
 import { Header } from '../components/header';
 import FeaturesContent from '../components/features-content';
 import { Footer } from '../components/footer';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Features — zivodoc',
+  description: 'Code execution, API validation, dead link detection, AI analysis, and auto-fix PRs for your developer docs.',
+  url: 'https://zivodoc.com/features',
+  isPartOf: { '@type': 'WebSite', url: 'https://zivodoc.com' },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://zivodoc.com' },
+      { '@type': 'ListItem', position: 2, name: 'Features', item: 'https://zivodoc.com/features' },
+    ],
+  },
+};
 ---
 
-<Layout title="Features — zivodoc" description="Code execution, API validation, dead link detection, AI analysis, and auto-fix PRs for your developer docs.">
+<Layout title="Features — zivodoc" description="Code execution, API validation, dead link detection, AI analysis, and auto-fix PRs for your developer docs." jsonLd={jsonLd}>
   <Header client:load />
   <FeaturesContent client:load />
   <Footer />

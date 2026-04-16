@@ -6,14 +6,34 @@ import { CustomCursor } from '../components/custom-cursor';
 interface Props {
   title: string;
   description?: string;
+  jsonLd?: Record<string, unknown>;
 }
 
 const {
   title,
   description = 'Automated QA for developer documentation. Finds broken code examples, stale API references, and dead links — then opens PRs to fix them.',
+  jsonLd,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, 'https://zivodoc.com');
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'zivodoc',
+  url: 'https://zivodoc.com',
+  logo: 'https://zivodoc.com/logo.svg',
+  description: 'Automated QA for developer documentation.',
+  sameAs: [],
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'zivodoc',
+  url: 'https://zivodoc.com',
+  description,
+};
 ---
 
 <!doctype html>
@@ -50,6 +70,11 @@ const canonicalURL = new URL(Astro.url.pathname, 'https://zivodoc.com');
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="https://zivodoc.com/og-image.png" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

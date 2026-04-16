@@ -13,9 +13,33 @@ import { TechMarquee } from '../components/tech-marquee';
 import { Testimonials } from '../components/testimonials';
 import { CTA } from '../components/cta';
 import { Footer } from '../components/footer';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'zivodoc',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Web',
+  description: 'Automated QA for developer documentation. Scans for broken code examples, stale API references, and dead links — then opens PRs to fix them.',
+  url: 'https://zivodoc.com',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+    description: 'Free during early access',
+  },
+  featureList: [
+    'Code block execution in sandboxes',
+    'API reference validation against OpenAPI specs',
+    'Dead link detection',
+    'AI-powered contradiction detection',
+    'Automatic fix PR generation',
+    'CI pipeline integration',
+  ],
+};
 ---
 
-<Layout title="zivodoc — Automated QA for Developer Documentation">
+<Layout title="zivodoc — Automated QA for Developer Documentation" jsonLd={jsonLd}>
   <Header client:load />
   <main>
     <HeroSplit client:load />
