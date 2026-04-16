@@ -12,6 +12,8 @@ const {
   title,
   description = 'Automated QA for developer documentation. Finds broken code examples, stale API references, and dead links — then opens PRs to fix them.',
 } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, 'https://zivodoc.com');
 ---
 
 <!doctype html>
@@ -20,12 +22,40 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#0A0A0B" />
+    <meta name="robots" content="index, follow" />
     <title>{title}</title>
-    <link rel="icon" href="/favicon.ico" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href={canonicalURL.href} />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="zivodoc" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:image" content="https://zivodoc.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://zivodoc.com/og-image.png" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Fragment+Mono&family=Silkscreen:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Fragment+Mono&display=swap"
       rel="stylesheet"
     />
   </head>

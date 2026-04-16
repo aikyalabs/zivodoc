@@ -17,11 +17,21 @@ export function Header() {
       <nav className="h-[54px] w-full flex items-center">
         {/* Logo */}
         <div className="pl-5 sm:pl-8 lg:pl-14 pr-10 shrink-0">
-          <a
-            href="/"
-            className="text-[16px] font-bold tracking-[-0.03em] text-ink hover:text-ink-secondary transition-colors"
-          >
-            zivodoc
+          <a href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+            <svg
+              width="28"
+              height="18"
+              viewBox="0 0 480 320"
+              fillRule="evenodd"
+              className="shrink-0"
+            >
+              <path
+                d="M160,160 m-140,0 a140,140 0 1,0 280,0 a140,140 0 1,0 -280,0 M320,160 m-140,0 a140,140 0 1,0 280,0 a140,140 0 1,0 -280,0"
+                fill="currentColor"
+                className="text-ink"
+              />
+            </svg>
+            <span className="text-[16px] font-bold tracking-[-0.03em] text-ink">zivodoc</span>
           </a>
         </div>
 

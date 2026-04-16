@@ -1,3 +1,5 @@
+const isExternal = (href: string) => href.startsWith('http');
+
 const columns = [
   {
     title: 'Product',
@@ -25,14 +27,6 @@ const columns = [
       { label: 'Discord', href: 'https://discord.com' },
     ],
   },
-  {
-    title: 'Legal',
-    links: [
-      { label: 'Cookies Policy', href: '/cookies' },
-      { label: 'Terms of Service', href: '/terms' },
-      { label: 'Privacy Policy', href: '/privacy' },
-    ],
-  },
 ];
 
 export function Footer() {
@@ -45,7 +39,7 @@ export function Footer() {
         <div className="flex flex-col lg:flex-row gap-16">
           {/* Left side */}
           <div className="lg:w-[45%] shrink-0">
-            <h2 className="text-[16px] font-bold tracking-[-0.03em] text-ink">zivodoc</h2>
+            <p className="text-[16px] font-bold tracking-[-0.03em] text-ink">zivodoc</p>
             <div className="mt-6 space-y-6 max-w-[310px]">
               <p className="text-[15px] leading-[1.3] text-ink-secondary">
                 Automated QA for developer documentation. Finds broken code examples, stale API
@@ -61,11 +55,11 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Right side — 4 columns */}
-          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-x-10 gap-y-8">
+          {/* Right side — columns */}
+          <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-x-10 gap-y-8">
             {columns.map((col) => (
               <div key={col.title}>
-                <h3
+                <p
                   className="font-label uppercase text-ink-secondary"
                   style={{
                     fontSize: '12.6px',
@@ -75,13 +69,16 @@ export function Footer() {
                   }}
                 >
                   {col.title}
-                </h3>
+                </p>
                 <ul className="mt-5 space-y-2.5">
                   {col.links.map((link) => (
                     <li key={link.label}>
                       <a
                         href={link.href}
                         className="text-[14px] leading-[14px] text-ink-muted hover:text-ink-secondary transition-colors"
+                        {...(isExternal(link.href)
+                          ? { target: '_blank', rel: 'noopener noreferrer' }
+                          : {})}
                       >
                         {link.label}
                       </a>
