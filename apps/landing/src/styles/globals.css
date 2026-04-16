@@ -50,3 +50,91 @@ body {
 .font-label {
   font-family: 'Fragment Mono', monospace;
 }
+
+/* Blog prose — dark-friendly long-form typography */
+.prose-zivodoc {
+  color: #C8C8CC;
+  font-size: 17px;
+  line-height: 1.75;
+}
+.prose-zivodoc h2 {
+  color: #F5F5F5;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+.prose-zivodoc h3 {
+  color: #F5F5F5;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+.prose-zivodoc p {
+  margin-bottom: 1.5rem;
+}
+.prose-zivodoc a {
+  color: #F5F5F5;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: #555555;
+  transition: text-decoration-color 0.15s;
+}
+.prose-zivodoc a:hover {
+  text-decoration-color: #F5F5F5;
+}
+.prose-zivodoc strong {
+  color: #F5F5F5;
+  font-weight: 600;
+}
+.prose-zivodoc ul, .prose-zivodoc ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.prose-zivodoc ul { list-style-type: disc; }
+.prose-zivodoc ol { list-style-type: decimal; }
+.prose-zivodoc li {
+  margin-bottom: 0.5rem;
+}
+.prose-zivodoc li::marker {
+  color: #555555;
+}
+.prose-zivodoc blockquote {
+  border-left: 2px solid #1E1E1F;
+  padding-left: 1.25rem;
+  color: #888888;
+  font-style: italic;
+  margin: 2rem 0;
+}
+.prose-zivodoc code {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 0.9em;
+  background: #141415;
+  border: 1px solid #1E1E1F;
+  padding: 0.15em 0.35em;
+  color: #F5F5F5;
+}
+.prose-zivodoc pre {
+  background: #0F0F10;
+  border: 1px solid #1E1E1F;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 2rem 0;
+}
+.prose-zivodoc pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.prose-zivodoc hr {
+  border: none;
+  border-top: 1px solid #1E1E1F;
+  margin: 3rem 0;
+}

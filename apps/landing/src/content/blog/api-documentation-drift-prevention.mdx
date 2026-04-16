@@ -1,0 +1,84 @@
+---
+title: "API Documentation Drift: Why Your Docs Are Already Wrong"
+description: "Every API change creates documentation drift. Learn what causes it, how to detect it, and how to prevent stale API references automatically."
+date: 2026-04-12
+author: "zivodoc team"
+tags: ["api-docs", "openapi", "docs-drift"]
+---
+
+## What is documentation drift?
+
+Documentation drift is what happens when your API changes but your docs don't. It's the gap between what your code actually does and what your documentation says it does.
+
+Unlike a bug that crashes your application, documentation drift is silent. No error logs. No alerts. No failing tests. Just a steadily growing disconnect between your docs and your API — discovered only when a developer follows your instructions and gets an unexpected result.
+
+## How drift happens
+
+Every API change is a potential drift event. Here's how it compounds:
+
+### Parameter renames
+
+Your team renames `userId` to `user_id` to match your naming convention. The API update ships, tests pass, the changelog mentions it. But 14 pages across your docs still show `userId`. None of them throw errors — they just silently accept the wrong parameter name and return confusing results.
+
+### Added required fields
+
+A new `region` field becomes required on the `/create-project` endpoint. Your API returns a 400 with a clear error message. But your docs still show the old request body without `region`, so every developer who copies the example gets a 400 and has to figure out why.
+
+### Response schema changes
+
+You add a `metadata` object to API responses. The docs still show the old response shape. Developers write code expecting the documented structure, then get surprised by extra fields — or worse, they build type definitions from the docs that don't match the actual API.
+
+### Deprecated endpoints
+
+An endpoint gets deprecated and replaced with a v2 version. The old endpoint still works for now, so no one complains. But your migration guide links to the deprecated endpoint, and new developers start building on the version you're trying to kill.
+
+## Why traditional approaches fail
+
+### Manual review doesn't scale
+
+Asking engineers to "update the docs when you change the API" works for the first month of a project. By month six, with 15 developers shipping multiple times a day, docs updates are the first thing that gets skipped when a deadline is tight.
+
+### Periodic audits are too late
+
+Scheduling a quarterly docs review means drift accumulates for three months before anyone looks. By then, the person who made the API change has forgotten the context, and the docs reviewer doesn't know which changes affected which pages.
+
+### Linters only catch syntax
+
+Documentation linters can verify that your API docs follow a consistent format and that links aren't broken. They can't tell you that the parameter you documented as optional is actually required in the current API version.
+
+## The solution: spec-as-source-of-truth validation
+
+If you have an OpenAPI spec (or Swagger, or GraphQL schema), you already have a machine-readable definition of your API. The missing piece is continuously comparing that spec against what your docs say.
+
+Automated spec-vs-docs validation checks:
+
+- **Parameter accuracy** — every param documented matches the spec's name, type, and required/optional status
+- **Response schemas** — documented response examples match the actual response structure
+- **Endpoint existence** — no docs reference endpoints that were removed or renamed
+- **Authentication requirements** — docs correctly describe which endpoints need auth and what kind
+- **Status codes** — documented error codes match what the API actually returns
+
+This comparison should run on every push — ideally as a CI check that blocks merging if the docs have drifted from the spec.
+
+## Measuring drift
+
+Before you can fix drift, you need to measure it. Here are the metrics that matter:
+
+- **Drift rate** — percentage of documented API endpoints with at least one inaccuracy
+- **Time to detection** — how long after an API change until the docs drift is discovered
+- **Time to fix** — how long after detection until the docs are updated
+- **Coverage** — what percentage of your API endpoints are documented at all
+
+For most teams without automated validation, the drift rate is between 15-30%, time to detection is measured in weeks or months, and coverage has significant gaps they don't know about.
+
+## Getting started
+
+1. **Ensure your OpenAPI spec is up to date** — if your spec drifts from your code, validating docs against it won't help. Use spec-generation tools that derive the spec from your code.
+
+2. **Run a baseline scan** — find out how much drift you already have. Most teams are surprised by the results.
+
+3. **Add validation to CI** — make docs accuracy a merge requirement, just like passing tests.
+
+4. **Automate fixes** — when drift is detected, generate PRs that update the docs to match the spec. Don't just report the problem — fix it.
+
+zivodoc does all four steps automatically. Point it at your repo and OpenAPI spec, and it continuously validates every API reference in your docs — then opens PRs to fix what's drifted.

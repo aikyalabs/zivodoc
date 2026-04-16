@@ -9,6 +9,7 @@
     "preview": "astro preview --port 3001"
   },
   "dependencies": {
+    "@astrojs/mdx": "^5.0.3",
     "@astrojs/react": "^4.2.1",
     "@astrojs/sitemap": "^3.7.2",
     "astro": "^5.7.10",

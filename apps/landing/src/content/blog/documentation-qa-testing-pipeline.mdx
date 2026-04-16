@@ -1,0 +1,105 @@
+---
+title: "Docs Need a QA Pipeline, Not Just Proofreading"
+description: "Your code has CI/CD, tests, and linters. Why doesn't your documentation? Here's how to build a docs QA pipeline."
+date: 2026-04-10
+author: "zivodoc team"
+tags: ["docs-qa", "ci-cd", "automation"]
+---
+
+## The documentation double standard
+
+Think about what happens when a developer pushes code to your repository:
+
+1. A linter checks code style and catches common mistakes
+2. Unit tests verify individual functions behave correctly
+3. Integration tests confirm components work together
+4. E2E tests simulate real user workflows
+5. A CI pipeline runs all of the above automatically
+6. The merge is blocked if any check fails
+
+Now think about what happens when someone pushes a documentation change:
+
+1. Maybe a spell checker runs
+2. A human reviewer skims it
+3. It merges
+
+Your code gets five layers of automated quality assurance. Your documentation gets a spell checker and a prayer. This is the documentation double standard — and it's why docs rot.
+
+## The six layers of documentation QA
+
+A comprehensive docs QA pipeline should cover six layers, from the most mechanical to the most semantic:
+
+### Layer 1: Link validation
+
+The simplest and most commonly implemented layer. Every internal link, external URL, and anchor reference gets checked. Dead links are surprisingly common — pages get reorganized, external resources disappear, sections get renamed.
+
+**What to catch:** 404s, redirect chains, missing anchors, links to deprecated pages.
+
+### Layer 2: Code execution
+
+Every code example in your docs should actually run. Extract code blocks, spin up the appropriate language runtime in a sandbox, execute the code, and verify it doesn't throw errors.
+
+**What to catch:** Import errors, syntax errors, deprecated function calls, missing dependencies, wrong output.
+
+### Layer 3: API spec validation
+
+If you have an OpenAPI, Swagger, or GraphQL schema, every API reference in your docs should match it exactly. Parameters, types, required fields, response shapes — all verified against the spec.
+
+**What to catch:** Wrong parameter names, incorrect types, missing required fields, outdated response schemas, removed endpoints.
+
+### Layer 4: Content consistency
+
+Different pages in your docs shouldn't contradict each other. If your auth guide says tokens expire in 1 hour but your API reference says 24 hours, one of them is wrong. Cross-page consistency checks catch these contradictions.
+
+**What to catch:** Conflicting information across pages, inconsistent terminology, duplicate content with different details.
+
+### Layer 5: Freshness detection
+
+Version numbers, SDK references, and feature descriptions go stale over time. If your quickstart guide mentions SDK v2 but the latest release is v4.2.1, the guide is outdated even if the code still technically works.
+
+**What to catch:** Outdated version references, deprecated feature descriptions, screenshots of old UI, references to removed configuration options.
+
+### Layer 6: Clarity analysis
+
+The hardest layer to automate but the most impactful for developer experience. AI can read your docs the way a developer would and flag content that's confusing, ambiguous, or poorly structured.
+
+**What to catch:** Ambiguous instructions, missing prerequisites, unclear error handling guidance, jargon without definitions, confusing page structure.
+
+## Building your pipeline
+
+### Start with layers 1-3
+
+Link checking, code execution, and API validation are deterministic — they either pass or fail, with no judgment calls required. These give you the highest confidence-to-effort ratio and catch the most damaging issues (broken examples and incorrect API references).
+
+### Add layers 4-6 incrementally
+
+Content consistency, freshness detection, and clarity analysis require more sophisticated tooling (typically AI-powered). Layer these in once the mechanical checks are solid.
+
+### Run on every push
+
+A docs QA pipeline that runs monthly is barely better than no pipeline at all. Documentation drift happens on every code change, so your checks need to run on every push. Integrate them into your CI so that broken docs block the merge, just like failing tests.
+
+### Fix, don't just report
+
+The biggest difference between a useful docs QA pipeline and a dashboard full of ignored warnings: **automated fixes**. When your pipeline finds a broken import, it shouldn't just file a ticket — it should open a PR with the corrected import. When an API reference drifts from the spec, the fix should be generated automatically.
+
+Reports get ignored. PRs get merged.
+
+## The ROI of docs QA
+
+Teams that implement automated docs QA typically see:
+
+- **40% fewer support tickets** related to documentation issues
+- **Faster developer onboarding** because getting-started guides actually work
+- **Higher SDK adoption** because code examples can be trusted
+- **Less engineering time** spent on manual docs reviews and fixing reported issues
+
+The investment is minimal — typically a one-line addition to your CI config — and the payoff is immediate. Your first scan will probably find issues you didn't know existed.
+
+## Getting started today
+
+You don't need to build a docs QA pipeline from scratch. zivodoc covers all six layers — from link checking to AI-powered clarity analysis — in a single tool. Add it to your CI, run the first scan, and see what it finds.
+
+Most teams are surprised by the results. The average first scan finds 30+ issues across link checking, code validation, and API spec comparison alone. Those are 30 problems your users are currently hitting and your support team is fielding.
+
+Stop treating documentation like second-class content. Give it the same QA rigor you give your code.

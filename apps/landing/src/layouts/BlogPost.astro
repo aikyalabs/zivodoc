@@ -1,0 +1,107 @@
+---
+import Layout from './Layout.astro';
+import { Header } from '../components/header';
+import { Footer } from '../components/footer';
+
+interface Props {
+  title: string;
+  description: string;
+  date: Date;
+  updatedDate?: Date;
+  author: string;
+  tags: string[];
+}
+
+const { title, description, date, updatedDate, author, tags } = Astro.props;
+
+const rawContent = await Astro.slots.render('default');
+const wordCount = rawContent.replace(/<[^>]*>/g, '').split(/\s+/).length;
+const readingTime = Math.max(1, Math.ceil(wordCount / 250));
+
+const canonicalURL = new URL(Astro.url.pathname, 'https://zivodoc.com');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description,
+  url: canonicalURL.href,
+  datePublished: date.toISOString(),
+  ...(updatedDate && { dateModified: updatedDate.toISOString() }),
+  author: {
+    '@type': 'Organization',
+    name: author,
+    url: 'https://zivodoc.com',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'zivodoc',
+    url: 'https://zivodoc.com',
+    logo: { '@type': 'ImageObject', url: 'https://zivodoc.com/logo.svg' },
+  },
+  image: 'https://zivodoc.com/og-image.png',
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalURL.href },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://zivodoc.com' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://zivodoc.com/blog' },
+      { '@type': 'ListItem', position: 3, name: title, item: canonicalURL.href },
+    ],
+  },
+};
+
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<Layout title={`${title} — zivodoc`} description={description} jsonLd={jsonLd}>
+  <Header client:load />
+  <main>
+    <article class="bg-surface">
+      <div class="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 pt-24 sm:pt-32 lg:pt-40 pb-12 sm:pb-16">
+        <a
+          href="/blog"
+          class="font-label inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.08em] text-ink-muted hover:text-ink-secondary transition-colors mb-10"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M9.5 6H2.5M2.5 6L5.5 3M2.5 6L5.5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Back to Blog
+        </a>
+
+        <div class="flex flex-wrap items-center gap-2 mb-6">
+          {tags.map((tag) => (
+            <span class="font-label text-[10px] uppercase tracking-[0.06em] text-ink-muted border border-line px-2.5 py-1">
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <h1 class="text-[32px] sm:text-[44px] lg:text-[56px] font-semibold leading-[1.08] tracking-[-0.04em] max-w-[900px] text-ink">
+          {title}
+        </h1>
+
+        <div class="mt-6 flex flex-wrap items-center gap-3 sm:gap-4 text-[13px] sm:text-[14px] text-ink-secondary">
+          <span>{author}</span>
+          <span class="text-ink-dim">/</span>
+          <time datetime={date.toISOString()}>{formattedDate}</time>
+          <span class="text-ink-dim">/</span>
+          <span>{readingTime} min read</span>
+        </div>
+      </div>
+
+      <div class="border-t border-line" />
+
+      <div class="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-12 sm:py-16 lg:py-20">
+        <div class="prose-zivodoc max-w-[720px]">
+          <slot />
+        </div>
+      </div>
+    </article>
+  </main>
+  <Footer />
+</Layout>

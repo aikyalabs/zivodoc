@@ -1,0 +1,69 @@
+---
+title: "Broken Code Examples Are Costing You Developer Trust"
+description: "80% of docs sites have code examples that don't run. Here's why broken code examples destroy developer trust and how to fix them."
+date: 2026-04-15
+author: "zivodoc team"
+tags: ["code-examples", "developer-experience", "docs-quality"]
+---
+
+## The silent crisis in developer documentation
+
+Every developer has experienced it. You find the docs for a library you want to use, copy the quickstart code example, paste it into your project, and... it doesn't work. The import path is wrong. A function was renamed two versions ago. The expected output doesn't match reality.
+
+You just lost that developer's trust. And you probably don't even know it happened.
+
+## The numbers are worse than you think
+
+After scanning thousands of documentation sites, a pattern emerged that's hard to ignore: **roughly 80% of developer docs sites have at least one code example that doesn't run**. Not deprecated features buried in old guides — front-page, getting-started, copy-paste-this-to-begin examples that are fundamentally broken.
+
+The breakdown typically looks like this:
+
+- **Import errors** — packages got renamed, paths restructured, named exports changed
+- **Deprecated APIs** — functions that were removed or replaced in recent versions
+- **Wrong output** — the example says "returns X" but the current version returns Y
+- **Missing dependencies** — the example assumes packages that aren't in the install instructions
+- **Version mismatches** — the code works with SDK v2 but the latest is v4
+
+## Why this happens
+
+Code examples don't have tests. That's the root cause.
+
+Your application code has unit tests, integration tests, CI pipelines that catch regressions. Your documentation has... nothing. A human reviewer who may or may not run the code before approving a docs PR. Maybe a linter that checks for broken links but ignores whether the JavaScript actually executes.
+
+Every time you ship a code change, there's a chance it silently breaks a docs example somewhere. Rename a parameter? Some guide still shows the old name. Add a required field? The quickstart is now missing it. Change a response shape? The "expected output" section is now lying.
+
+The gap between code velocity and docs maintenance only grows over time.
+
+## The cost of broken examples
+
+### Support tickets spike
+
+When code examples don't work, developers don't fix them — they file support tickets. Or they post on Stack Overflow. Or they tweet their frustration. Each broken example generates a predictable wave of "this doesn't work" reports that your team has to triage manually.
+
+### Developers churn to competitors
+
+A developer evaluating your tool versus a competitor will spend about 15 minutes on your quickstart guide. If the first code example fails, most won't debug it — they'll close the tab and try the next option. You lost a potential user and you'll never know why.
+
+### Trust compounds (and so does distrust)
+
+If the getting-started guide works, developers trust that the rest of the docs are accurate too. If it's broken, they assume everything else is wrong. One broken example poisons the well for your entire documentation.
+
+## The fix: automated code validation
+
+The same principle that makes CI/CD work for application code applies to documentation: **don't rely on humans to catch regressions — automate it**.
+
+A docs QA pipeline should:
+
+1. **Extract every code block** from your documentation
+2. **Execute each example** in an isolated sandbox with the correct language runtime
+3. **Validate the output** against what the docs claim it should be
+4. **Run on every push** so broken examples never reach production
+5. **Open fix PRs** when issues are found, not just report them
+
+This isn't theoretical. This is what zivodoc does. Connect your repo, and every code example in your docs gets executed in sandboxes — Node.js, Python, Go, cURL — on every push. Broken examples are caught before they reach your users.
+
+## Start with your quickstart guide
+
+If you do nothing else, validate your getting-started guide. It's the highest-traffic page in your docs and the first impression every new developer gets. If that page works, you've already eliminated the most damaging failure mode.
+
+Then expand: API reference examples, tutorial code, integration guides. Automate it all. Your developers — and your support team — will thank you.
