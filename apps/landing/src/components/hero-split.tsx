@@ -146,7 +146,7 @@ export function HeroSplit() {
 
             {/* Description — tighter to headline */}
             <motion.p
-              className="mt-6 text-[16px] leading-[1.65] text-ink-secondary max-w-[380px]"
+              className="mt-6 text-[15px] sm:text-[16px] leading-[1.65] text-ink-secondary max-w-full sm:max-w-[380px]"
               initial="hidden"
               animate="visible"
               custom={2}
@@ -158,7 +158,7 @@ export function HeroSplit() {
 
             {/* CTAs */}
             <motion.div
-              className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+              className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3"
               initial="hidden"
               animate="visible"
               custom={3}
@@ -262,7 +262,7 @@ export function HeroSplit() {
             </div>
 
             {/* Stat cards — same gap as terminal border creates visual unity */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[
                 { value: '32', label: 'Broken examples' },
                 { value: '14', label: 'API mismatches' },
