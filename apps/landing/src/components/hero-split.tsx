@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
+const WAITLIST_URL = '/waitlist';
 
 type TabKey = 'scan' | 'validate' | 'detect' | 'fix';
 
@@ -165,7 +165,7 @@ export function HeroSplit() {
               variants={fadeUp}
             >
               <a
-                href={`${APP_URL}/login`}
+                href={WAITLIST_URL}
                 className="font-label inline-flex items-center gap-2.5 h-[46px] px-5 bg-surface-button text-surface text-[13px] tracking-[-0.02em] hover:bg-white transition-colors"
               >
                 Get early access

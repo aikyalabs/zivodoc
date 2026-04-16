@@ -1,6 +1,6 @@
 import { FadeIn } from './fade-in';
 
-const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
+const WAITLIST_URL = '/waitlist';
 
 export function CTA() {
   return (
@@ -31,7 +31,7 @@ export function CTA() {
         <FadeIn delay={0.2}>
           <div className="mt-10 flex flex-wrap items-center gap-3">
             <a
-              href={`${APP_URL}/login`}
+              href={WAITLIST_URL}
               className="font-label inline-flex items-center gap-2.5 h-[52px] px-6 bg-surface-button text-surface text-[14px] hover:bg-white transition-colors"
             >
               GET EARLY ACCESS
