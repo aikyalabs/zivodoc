@@ -28,6 +28,13 @@ const columns = [
       { label: 'Discord', href: 'https://discord.com' },
     ],
   },
+  {
+    title: 'Legal',
+    links: [
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Terms of Service', href: '/terms' },
+    ],
+  },
 ];
 
 export function Footer() {
@@ -57,7 +64,7 @@ export function Footer() {
           </div>
 
           {/* Right side — columns */}
-          <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-x-10 gap-y-8">
+          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-x-10 gap-y-8">
             {columns.map((col) => (
               <div key={col.title}>
                 <p

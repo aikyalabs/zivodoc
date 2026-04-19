@@ -1,0 +1,73 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Header } from '../components/header';
+import { Footer } from '../components/footer';
+---
+
+<Layout title="Terms of Service — zivodoc" description="Terms and conditions for using zivodoc.">
+  <Header client:load />
+  <main>
+    <section class="bg-surface">
+      <div class="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 pt-24 sm:pt-32 lg:pt-40 pb-16 sm:pb-20">
+        <p class="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-6">Legal</p>
+        <h1 class="text-[36px] sm:text-[48px] lg:text-[56px] font-semibold leading-[1.08] tracking-[-0.04em] max-w-[700px]">
+          Terms of Service
+        </h1>
+        <p class="mt-4 text-[14px] text-ink-muted">Last updated: April 19, 2026</p>
+      </div>
+    </section>
+
+    <section class="bg-surface border-t border-line">
+      <div class="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 py-12 sm:py-16 lg:py-20">
+        <div class="prose-zivodoc max-w-[720px]">
+          <h2>1. Acceptance of Terms</h2>
+          <p>By accessing or using zivodoc ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+
+          <h2>2. Description of Service</h2>
+          <p>zivodoc is an automated quality assurance tool for developer documentation. The Service scans documentation for broken code examples, stale API references, dead links, and content issues, and can generate pull requests to fix identified problems.</p>
+
+          <h2>3. Account Registration</h2>
+          <p>To use the Service, you must create an account using Google OAuth or email verification. You are responsible for maintaining the security of your account credentials and for all activity under your account.</p>
+
+          <h2>4. Acceptable Use</h2>
+          <p>You agree not to:</p>
+          <ul>
+            <li>Use the Service for any illegal purpose</li>
+            <li>Attempt to gain unauthorized access to our systems</li>
+            <li>Use the Service to scan documentation you do not have authorization to access</li>
+            <li>Exceed rate limits or abuse the scanning infrastructure</li>
+            <li>Resell or redistribute the Service without permission</li>
+          </ul>
+
+          <h2>5. Repository and Documentation Access</h2>
+          <p>When you connect a repository or provide a documentation URL, you grant zivodoc permission to read and analyze the documentation content for the purpose of generating quality reports and fix suggestions. We access only the documentation paths you specify.</p>
+
+          <h2>6. Intellectual Property</h2>
+          <p>You retain all rights to your documentation and repository content. zivodoc does not claim ownership of any content you provide. The Service, including its design, code, and branding, is the intellectual property of Aikya Labs.</p>
+
+          <h2>7. Service Tiers and Limits</h2>
+          <p>The Service is offered in multiple tiers (Free, Pro, Team) with varying limits on projects, scans, and pages. We reserve the right to modify tier features and pricing with reasonable notice.</p>
+
+          <h2>8. Availability and Support</h2>
+          <p>We aim to maintain high availability but do not guarantee uninterrupted service. We are not liable for any downtime, data loss, or service interruptions.</p>
+
+          <h2>9. Termination</h2>
+          <p>You may close your account at any time. We may suspend or terminate your account if you violate these terms. Upon termination, your data will be deleted within 30 days.</p>
+
+          <h2>10. Limitation of Liability</h2>
+          <p>The Service is provided "as is" without warranties of any kind. Aikya Labs is not liable for any indirect, incidental, or consequential damages arising from your use of the Service.</p>
+
+          <h2>11. Changes to Terms</h2>
+          <p>We may update these terms from time to time. Continued use of the Service after changes constitutes acceptance of the updated terms.</p>
+
+          <h2>12. Contact</h2>
+          <p>For questions about these terms, contact us at <a href="mailto:legal@zivodoc.com">legal@zivodoc.com</a>.</p>
+
+          <hr />
+          <p>Aikya Labs<br />Operating as zivodoc</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
