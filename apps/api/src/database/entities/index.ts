@@ -4,3 +4,6 @@ export { UserEntity } from './user.entity';
 export { SessionEntity } from './session.entity';
 export { RoleEntity } from './role.entity';
 export { AuditLogEntity } from './audit-log.entity';
+export { ProjectEntity } from './project.entity';
+export { ScanEntity } from './scan.entity';
+export { FindingEntity } from './finding.entity';

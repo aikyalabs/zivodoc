@@ -1,15 +1,17 @@
 import { createZodDto } from 'nestjs-zod';
 
 import {
-  authLoginSchema,
-  authSignupSchema,
+  otpSendSchema,
+  otpVerifySchema,
+  otpSendResponseSchema,
   authProfileResponseSchema,
   authSessionResponseSchema,
   authVerifySessionResponseSchema,
 } from '@zivodoc/shared';
 
-export class AuthLoginRequest extends createZodDto(authLoginSchema) {}
-export class AuthSignupRequest extends createZodDto(authSignupSchema) {}
+export class OtpSendRequest extends createZodDto(otpSendSchema) {}
+export class OtpVerifyRequest extends createZodDto(otpVerifySchema) {}
+export class OtpSendResponse extends createZodDto(otpSendResponseSchema) {}
 export class AuthProfileResponse extends createZodDto(authProfileResponseSchema) {}
 export class AuthSessionResponse extends createZodDto(authSessionResponseSchema) {}
 export class AuthVerifySessionResponse extends createZodDto(authVerifySessionResponseSchema) {}

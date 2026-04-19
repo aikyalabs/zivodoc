@@ -4,7 +4,7 @@ import {
   Building2,
   Shield,
   Settings,
-  Lock,
+  FolderSearch,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -41,31 +41,35 @@ export const navigation: NavGroup[] = [
     ],
   },
   {
-    label: 'Management',
+    label: 'Docs QA',
+    items: [
+      {
+        title: 'Projects',
+        url: '/projects',
+        icon: FolderSearch,
+      },
+    ],
+  },
+  {
+    label: 'Platform',
     items: [
       {
         title: 'Users',
         url: '/users',
         icon: Users,
-        roles: ['admin', 'owner'],
-        items: [
-          {
-            title: 'All Users',
-            url: '/users',
-          },
-        ],
+        roles: ['admin'],
       },
       {
         title: 'Organizations',
         url: '/organizations',
         icon: Building2,
-        roles: ['admin', 'owner'],
+        roles: ['admin'],
       },
       {
         title: 'Roles & Permissions',
         url: '/roles',
         icon: Shield,
-        roles: ['admin', 'owner'],
+        roles: ['admin'],
       },
     ],
   },
@@ -76,11 +80,6 @@ export const navigation: NavGroup[] = [
         title: 'General',
         url: '/settings',
         icon: Settings,
-      },
-      {
-        title: 'Security',
-        url: '/settings/security',
-        icon: Lock,
       },
     ],
   },

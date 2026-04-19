@@ -14,13 +14,10 @@ export class UserRepository extends Repository<UserEntity> {
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
-    return this.createQueryBuilder('user')
-      .addSelect('user.password')
-      .where('user.email = :email', { email })
-      .getOne();
+    return this.findOne({ where: { email } });
   }
 
-  async findByEmailPublic(email: string): Promise<UserEntity | null> {
-    return this.findOne({ where: { email } });
+  async findByGoogleId(googleId: string): Promise<UserEntity | null> {
+    return this.findOne({ where: { googleId } });
   }
 }

@@ -1,6 +1,6 @@
 import { LogOut } from 'lucide-react';
 
-import { Avatar, AvatarFallback } from '@src/components/atoms/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@src/components/atoms/avatar';
 import { Button } from '@src/components/atoms/button';
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative size-8 rounded-full">
           <Avatar className="size-8">
+            {profile?.avatar && <AvatarImage src={profile.avatar} alt={profile.firstName} />}
             <AvatarFallback className="text-xs">{initials}</AvatarFallback>
           </Avatar>
         </Button>

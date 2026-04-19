@@ -4,7 +4,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { hash, compare } from 'bcrypt';
 
 import { UserRole } from '@zivodoc/shared';
 
@@ -12,8 +11,6 @@ import { UserEntity } from '@db/entities';
 import { UserRepository } from '@db/repositories';
 import { RoleRepository } from '@db/repositories';
 import { Caller, isAdmin } from '@src/auth/request-user.decorator';
-
-const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class UsersService {
@@ -23,14 +20,44 @@ export class UsersService {
   ) {}
 
   public async findByEmail(email: string) {
-    return this.userRepository.findByEmailPublic(email);
+    return this.userRepository.findOne({ where: { email } });
   }
 
-  public async checkPassword(email: string, password: string): Promise<UserEntity | null> {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) return null;
-    const valid = await compare(password, user.password);
-    return valid ? user : null;
+  public async findByGoogleId(googleId: string) {
+    return this.userRepository.findOne({ where: { googleId } });
+  }
+
+  public async findOrCreateByEmail(data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    googleId?: string;
+    avatar?: string;
+    organizationId: string;
+  }): Promise<{ user: UserEntity; isNew: boolean }> {
+    const existing = await this.userRepository.findOne({ where: { email: data.email } });
+    if (existing) {
+      if (data.googleId && !existing.googleId) {
+        existing.googleId = data.googleId;
+        if (data.avatar) existing.avatar = data.avatar;
+        await this.userRepository.save(existing);
+      }
+      return { user: existing, isNew: false };
+    }
+
+    const user = this.userRepository.create({
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      googleId: data.googleId ?? null,
+      avatar: data.avatar ?? null,
+      role: 'owner' as UserRole,
+      organizationId: data.organizationId,
+      onboardingCompleted: false,
+    });
+
+    const saved = await this.userRepository.save(user);
+    return { user: saved, isNew: true };
   }
 
   public async create(
@@ -38,19 +65,17 @@ export class UsersService {
       firstName: string;
       lastName: string;
       email: string;
-      password: string;
       role: UserRole;
       organizationId?: string | null;
       roleId?: string | null;
     },
     caller?: Caller,
   ) {
-    const existing = await this.userRepository.findByEmailPublic(data.email);
+    const existing = await this.userRepository.findOne({ where: { email: data.email } });
     if (existing) {
       throw new BadRequestException('Email already in use.');
     }
 
-    // Only platform admins can assign the admin role
     if (data.role === 'admin' && caller && !isAdmin(caller)) {
       throw new ForbiddenException('Only platform admins can assign the admin role.');
     }
@@ -58,7 +83,6 @@ export class UsersService {
     const organizationId =
       !caller || isAdmin(caller) ? (data.organizationId ?? null) : caller.organizationId;
 
-    // Validate roleId belongs to the target organization
     const roleId = data.roleId ?? null;
     if (roleId && organizationId) {
       const role = await this.roleRepository.findOne({ where: { id: roleId } });
@@ -67,12 +91,10 @@ export class UsersService {
       }
     }
 
-    const hashedPassword = await hash(data.password, BCRYPT_ROUNDS);
     const user = this.userRepository.create({
       ...data,
       organizationId,
       roleId,
-      password: hashedPassword,
     });
 
     return this.userRepository.save(user);
@@ -115,8 +137,7 @@ export class UsersService {
       isDisabled?: boolean;
       organizationId?: string | null;
       roleId?: string | null;
-      currentPassword?: string;
-      newPassword?: string;
+      onboardingCompleted?: boolean;
     },
     caller: Caller,
   ) {
@@ -132,12 +153,10 @@ export class UsersService {
       );
     }
 
-    // Non-admin callers can only update users in their own org
     if (!isAdmin(caller) && !isSelf && user.organizationId !== caller.organizationId) {
       throw new NotFoundException('User not found.');
     }
 
-    // Only platform admins can assign the admin role
     if (data.role === 'admin' && !isAdmin(caller)) {
       throw new ForbiddenException('Only platform admins can assign the admin role.');
     }
@@ -146,14 +165,14 @@ export class UsersService {
     if (data.firstName) updateData.firstName = data.firstName;
     if (data.lastName) updateData.lastName = data.lastName;
     if (data.email) updateData.email = data.email;
+    if (data.onboardingCompleted !== undefined)
+      updateData.onboardingCompleted = data.onboardingCompleted;
 
-    // Only privileged callers can change role, isDisabled, organizationId, roleId
     if (isPrivileged) {
       if (data.role) updateData.role = data.role;
       if (data.isDisabled !== undefined) updateData.isDisabled = data.isDisabled;
       if (data.organizationId !== undefined) updateData.organizationId = data.organizationId;
       if (data.roleId !== undefined) {
-        // Validate roleId belongs to the user's organization
         const targetOrgId =
           data.organizationId !== undefined ? data.organizationId : user.organizationId;
         if (data.roleId && targetOrgId) {
@@ -164,20 +183,6 @@ export class UsersService {
         }
         updateData.roleId = data.roleId;
       }
-    }
-
-    if (data.newPassword) {
-      if (!data.currentPassword) {
-        throw new BadRequestException('Current password is required to change password.');
-      }
-      const userWithPassword = await this.userRepository.findByEmail(user.email);
-      if (!userWithPassword) throw new NotFoundException('User not found.');
-
-      const valid = await compare(data.currentPassword, userWithPassword.password);
-      if (!valid) {
-        throw new BadRequestException('Current password is incorrect.');
-      }
-      updateData.password = await hash(data.newPassword, BCRYPT_ROUNDS);
     }
 
     if (Object.keys(updateData).length > 0) {

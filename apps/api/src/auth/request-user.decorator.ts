@@ -11,6 +11,8 @@ export interface AuthUser {
   role: UserRole;
   organizationId: string | null;
   roleId: string | null;
+  avatar: string | null;
+  onboardingCompleted: boolean;
 }
 
 export interface SessionUser {
@@ -50,6 +52,8 @@ export const RequestUser = createParamDecorator(
       role: request.authSession.user.role,
       organizationId: request.authSession.user.organizationId,
       roleId: request.authSession.user.roleId,
+      avatar: request.authSession.user.avatar,
+      onboardingCompleted: request.authSession.user.onboardingCompleted,
     };
   },
 );

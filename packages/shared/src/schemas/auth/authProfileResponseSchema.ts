@@ -12,6 +12,8 @@ export const authProfileSchema = z.strictObject({
   role: z.enum(UserRole),
   organizationId: z.string().nullable(),
   roleId: z.string().nullable(),
+  avatar: z.string().nullable(),
+  onboardingCompleted: z.boolean(),
 });
 
 export const authProfileResponseSchema = buildOkResponse(

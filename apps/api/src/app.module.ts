@@ -13,6 +13,9 @@ import { AuthModule } from '@src/auth/auth.module';
 import { UsersModule } from '@src/users/users.module';
 import { OrganizationsModule } from '@src/organizations/organizations.module';
 import { RolesModule } from '@src/roles/roles.module';
+import { ProjectsModule } from '@src/projects/projects.module';
+import { ScansModule } from '@src/scans/scans.module';
+import { QueueModule } from '@src/queue/queue.module';
 import { HealthModule } from '@src/health/health.module';
 
 @Module({
@@ -28,6 +31,9 @@ import { HealthModule } from '@src/health/health.module';
     UsersModule,
     OrganizationsModule,
     RolesModule,
+    ProjectsModule,
+    ScansModule,
+    QueueModule,
     HealthModule,
   ],
   providers: [

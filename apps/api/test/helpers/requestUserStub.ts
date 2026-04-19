@@ -11,6 +11,8 @@ export const createAdminStub = (
   role: 'owner',
   organizationId,
   roleId,
+  avatar: null,
+  onboardingCompleted: true,
 });
 
 export const createMemberStub = (
@@ -24,4 +26,6 @@ export const createMemberStub = (
   role: 'member',
   organizationId,
   roleId,
+  avatar: null,
+  onboardingCompleted: true,
 });

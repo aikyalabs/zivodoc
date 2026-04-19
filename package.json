@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "pnpm --filter @zivodoc/shared build && turbo dev --filter=@zivodoc/api --filter=@zivodoc/web",
     "build": "turbo build",
     "lint": "turbo lint",
     "test": "turbo test",

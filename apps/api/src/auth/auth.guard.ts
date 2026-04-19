@@ -62,6 +62,8 @@ export class AuthGuard implements CanActivate {
         role: session.user.role,
         organizationId: session.user.organizationId,
         roleId: session.user.roleId,
+        avatar: session.user.avatar,
+        onboardingCompleted: session.user.onboardingCompleted,
       },
     };
 

@@ -7,7 +7,6 @@ import {
   BeforeInsert,
   DeleteDateColumn,
 } from 'typeorm';
-import { Exclude } from 'class-transformer';
 
 import { UserRole } from '@zivodoc/shared';
 
@@ -17,6 +16,7 @@ import { RoleEntity } from './role.entity';
 
 @Entity('users')
 @Index(['email'], { unique: true })
+@Index(['googleId'], { unique: true, where: '"googleId" IS NOT NULL' })
 @Index(['organizationId'])
 @Index(['roleId'])
 export class UserEntity extends BaseEntity {
@@ -34,9 +34,14 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 255, unique: true, nullable: false })
   email!: string;
 
-  @Exclude()
-  @Column({ type: 'varchar', length: 255, nullable: false, select: false })
-  password!: string;
+  @Column({ type: 'varchar', length: 100, nullable: true, unique: true })
+  googleId!: string | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  avatar!: string | null;
+
+  @Column({ type: 'boolean', nullable: false, default: false })
+  onboardingCompleted!: boolean;
 
   @Column({ type: 'varchar', length: 50, nullable: false, default: 'member' })
   role!: UserRole;

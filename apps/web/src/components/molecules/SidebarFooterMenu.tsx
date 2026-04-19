@@ -1,6 +1,6 @@
 import { ChevronsUpDown, LogOut } from 'lucide-react';
 
-import { Avatar, AvatarFallback } from '@src/components/atoms/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@src/components/atoms/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +39,7 @@ export function SidebarFooterMenu() {
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="size-8 rounded-lg">
+                  {profile?.avatar && <AvatarImage src={profile.avatar} alt={profile.firstName} />}
                   <AvatarFallback className="rounded-lg text-xs">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">

@@ -1,0 +1,39 @@
+{
+  "name": "@zivodoc/scanner",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "acorn": "^8.16.0",
+    "cheerio": "1.0.0-rc.12",
+    "crawlee": "^3.16.0",
+    "glob": "^11.1.0",
+    "mdast-util-to-string": "^4.0.0",
+    "playwright": "^1.59.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "simple-git": "^3.36.0",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/mdast": "^4.0.0",
+    "@types/node": "^22.19.15",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

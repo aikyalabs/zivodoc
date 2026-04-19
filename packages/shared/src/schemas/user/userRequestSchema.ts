@@ -2,10 +2,11 @@ import { z } from 'zod';
 
 import { UserRole } from '../../enums/UserRole';
 import { nonemptystring } from '../nonemptystring';
-import { optionalstring } from '../optionalstring';
-import { authSignupSchema, passwordSchema } from '../auth/authSignupSchema';
 
-export const createUserSchema = authSignupSchema.extend({
+export const createUserSchema = z.strictObject({
+  firstName: nonemptystring,
+  lastName: nonemptystring,
+  email: z.string().email(),
   role: z.enum(UserRole).default('member'),
   organizationId: nonemptystring.nullable().optional(),
   roleId: nonemptystring.nullable().optional(),
@@ -19,6 +20,5 @@ export const updateUserSchema = z.strictObject({
   isDisabled: z.boolean().optional(),
   organizationId: nonemptystring.nullable().optional(),
   roleId: nonemptystring.nullable().optional(),
-  currentPassword: optionalstring,
-  newPassword: passwordSchema.optional(),
+  onboardingCompleted: z.boolean().optional(),
 });

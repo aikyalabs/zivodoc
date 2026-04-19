@@ -35,7 +35,6 @@ export function CreateUserDialog() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [role, setRole] = useState<UserRole>('member');
   const [organizationId, setOrganizationId] = useState<string | null>(null);
 
@@ -50,7 +49,6 @@ export function CreateUserDialog() {
     setFirstName('');
     setLastName('');
     setEmail('');
-    setPassword('');
     setRole('member');
     setOrganizationId(null);
   };
@@ -62,7 +60,6 @@ export function CreateUserDialog() {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim(),
-        password,
         role,
         organizationId: isAdmin ? organizationId : undefined,
       },
@@ -87,7 +84,8 @@ export function CreateUserDialog() {
         <SheetHeader>
           <SheetTitle>Create User</SheetTitle>
           <SheetDescription>
-            Add a new user{isAdmin ? ' to the platform' : ' to your organization'}.
+            Add a new user{isAdmin ? ' to the platform' : ' to your organization'}. They will sign
+            in via Google or email code.
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-4 pt-4">
@@ -123,18 +121,6 @@ export function CreateUserDialog() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="john@example.com"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="newPassword">Password</Label>
-            <Input
-              id="newPassword"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Min 12 chars, 1 letter + 1 number"
             />
           </div>
 

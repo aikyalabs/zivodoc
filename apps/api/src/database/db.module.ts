@@ -9,6 +9,9 @@ import {
   SessionEntity,
   RoleEntity,
   AuditLogEntity,
+  ProjectEntity,
+  ScanEntity,
+  FindingEntity,
 } from './entities';
 import {
   OrganizationRepository,
@@ -16,10 +19,22 @@ import {
   SessionRepository,
   RoleRepository,
   AuditLogRepository,
+  ProjectRepository,
+  ScanRepository,
+  FindingRepository,
 } from './repositories';
 import { AppConfig } from '@src/config.module';
 
-const entities = [OrganizationEntity, UserEntity, SessionEntity, RoleEntity, AuditLogEntity];
+const entities = [
+  OrganizationEntity,
+  UserEntity,
+  SessionEntity,
+  RoleEntity,
+  AuditLogEntity,
+  ProjectEntity,
+  ScanEntity,
+  FindingEntity,
+];
 
 const repositories = [
   OrganizationRepository,
@@ -27,6 +42,9 @@ const repositories = [
   SessionRepository,
   RoleRepository,
   AuditLogRepository,
+  ProjectRepository,
+  ScanRepository,
+  FindingRepository,
 ];
 
 @Global()
@@ -34,11 +52,6 @@ const repositories = [
   imports: [
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      // NOTE: Entity properties use camelCase which TypeORM maps directly to
-      // column names.  Our migrations define columns in snake_case and each
-      // entity column that differs uses an explicit `{ name: 'snake_case' }`
-      // option.  If you prefer automatic conversion, install
-      // `typeorm-naming-strategies` and set `namingStrategy` here.
       useFactory: (config: ConfigService<AppConfig, true>): TypeOrmModuleOptions => ({
         type: 'postgres',
         url: config.get('DATABASE_URL'),

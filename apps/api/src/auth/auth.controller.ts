@@ -8,14 +8,20 @@ import {
   Patch,
   Post,
   Req,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { ZodResponse } from 'nestjs-zod';
-import { Request } from 'express';
+import { Request, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 import { apiOkResponse } from '@src/api-response.helper';
+import { AppConfig } from '@src/config.module';
 import {
-  AuthLoginRequest,
-  AuthSignupRequest,
+  OtpSendRequest,
+  OtpVerifyRequest,
+  OtpSendResponse,
   AuthProfileResponse,
   AuthSessionResponse,
   AuthVerifySessionResponse,
@@ -23,14 +29,15 @@ import {
 import { AuthService } from '@src/auth/auth.service';
 import { Public } from '@src/auth/public.decorator';
 import { AuthUser, AuthenticatedRequest, RequestUser } from '@src/auth/request-user.decorator';
-import { OrganizationsService } from '@src/organizations/organizations.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly organizationsService: OrganizationsService,
+    private readonly config: ConfigService<AppConfig, true>,
   ) {}
+
+  // ── Profile ──
 
   @ZodResponse({ type: AuthProfileResponse })
   @Get('profile')
@@ -45,9 +52,13 @@ export class AuthController {
         role: user.role,
         organizationId: user.organizationId,
         roleId: user.roleId,
+        avatar: user.avatar,
+        onboardingCompleted: user.onboardingCompleted,
       },
     });
   }
+
+  // ── Session verification ──
 
   @ZodResponse({ type: AuthVerifySessionResponse })
   @Public()
@@ -55,6 +66,8 @@ export class AuthController {
   verifySession(@Req() req: AuthenticatedRequest, @RequestUser() user: AuthUser | undefined) {
     return apiOkResponse({ expiresAt: user ? (req.authSession?.expiresAt ?? null) : null });
   }
+
+  // ── Refresh token ──
 
   @ZodResponse({ type: AuthSessionResponse })
   @Patch()
@@ -65,29 +78,64 @@ export class AuthController {
     return apiOkResponse({ token: session.token });
   }
 
-  @ZodResponse({ type: AuthSessionResponse })
+  // ── Google OAuth ──
+
   @Public()
-  @Post('login')
-  async login(@Body() body: AuthLoginRequest) {
-    const session = await this.authService.login(body.email, body.password);
-    return apiOkResponse({ token: session.token });
+  @Get('google')
+  @UseGuards(PassportAuthGuard('google'))
+  googleAuth() {
+    // Passport redirects to Google
+  }
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(PassportAuthGuard('google'))
+  async googleCallback(@Req() req: Request, @Res() res: Response) {
+    const profile = req.user as {
+      googleId: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      avatar?: string;
+    };
+
+    const session = await this.authService.handleGoogleAuth(profile);
+    const frontendUrl = this.config.get('FRONTEND_URL');
+    res.redirect(`${frontendUrl}/auth/callback?token=${session.token}`);
+  }
+
+  // ── Email OTP ──
+
+  @ZodResponse({ type: OtpSendResponse })
+  @Public()
+  @Post('otp/send')
+  async sendOtp(@Body() body: OtpSendRequest) {
+    await this.authService.sendOtp(body.email);
+    return apiOkResponse({ sent: true });
   }
 
   @ZodResponse({ type: AuthSessionResponse })
   @Public()
-  @Post('signup')
-  async signup(@Body() body: AuthSignupRequest) {
-    const randomSuffix = Math.random().toString(36).slice(2, 8);
-    const slug = `${body.email.split('@')[0]}-${randomSuffix}`;
-
-    const org = await this.organizationsService.create({
-      name: `${body.firstName}'s Organization`,
-      slug,
-    });
-
-    const session = await this.authService.signup(body, org.id);
+  @Post('otp/verify')
+  async verifyOtp(@Body() body: OtpVerifyRequest) {
+    const session = await this.authService.verifyOtp(body.email, body.code);
     return apiOkResponse({ token: session.token });
   }
+
+  // ── Onboarding ──
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('onboarding')
+  async completeOnboarding(@RequestUser() user: AuthUser) {
+    // Directly update via service
+    await this.authService['usersService'].update(
+      user.id,
+      { onboardingCompleted: true },
+      { id: user.id, role: user.role, organizationId: user.organizationId },
+    );
+  }
+
+  // ── Logout ──
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
