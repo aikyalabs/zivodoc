@@ -5,11 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { ScanMode } from '@zivodoc/shared';
+import { ScanMode, FindingCategory, FindingSeverity, FindingStatus } from '@zivodoc/shared';
 
 import { ProjectEntity } from '@db/entities';
-import { ProjectRepository } from '@db/repositories';
-import { OrganizationRepository } from '@db/repositories';
+import { ProjectRepository, type ProjectWithStats } from '@db/repositories';
+import { OrganizationRepository, FindingRepository } from '@db/repositories';
 import { Caller, isAdmin } from '@src/auth/request-user.decorator';
 
 @Injectable()
@@ -17,6 +17,7 @@ export class ProjectsService {
   constructor(
     private readonly projectRepository: ProjectRepository,
     private readonly organizationRepository: OrganizationRepository,
+    private readonly findingRepository: FindingRepository,
   ) {}
 
   public async create(
@@ -77,17 +78,12 @@ export class ProjectsService {
   public async list(
     caller: Caller,
     options?: { limit?: number; offset?: number },
-  ): Promise<[ProjectEntity[], number]> {
+  ): Promise<[ProjectWithStats[], number]> {
     if (!isAdmin(caller) && !caller.organizationId) {
       throw new ForbiddenException('No organization context.');
     }
     const where = isAdmin(caller) ? {} : { organizationId: caller.organizationId! };
-    return this.projectRepository.findAndCount({
-      where,
-      take: options?.limit ?? 20,
-      skip: options?.offset ?? 0,
-      order: { createdAt: 'DESC' },
-    });
+    return this.projectRepository.findWithStats(where, options);
   }
 
   public async update(
@@ -95,7 +91,14 @@ export class ProjectsService {
     data: Partial<
       Pick<
         ProjectEntity,
-        'name' | 'siteUrl' | 'repoUrl' | 'defaultBranch' | 'docPaths' | 'scanMode' | 'maxPages'
+        | 'name'
+        | 'siteUrl'
+        | 'repoUrl'
+        | 'defaultBranch'
+        | 'docPaths'
+        | 'scanMode'
+        | 'maxPages'
+        | 'scanSchedule'
       >
     >,
     caller: Caller,
@@ -117,5 +120,56 @@ export class ProjectsService {
     }
 
     await this.projectRepository.remove(project);
+  }
+
+  public async getFindings(
+    projectId: string,
+    caller: Caller,
+    filters: {
+      category?: FindingCategory;
+      severity?: FindingSeverity;
+      status?: FindingStatus;
+      limit?: number;
+      offset?: number;
+    },
+  ) {
+    const project = await this.projectRepository.findOne({ where: { id: projectId } });
+    if (!project) throw new NotFoundException('Project not found.');
+    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+      throw new NotFoundException('Project not found.');
+    }
+
+    return this.findingRepository.findByProjectId(
+      projectId,
+      { category: filters.category, severity: filters.severity, status: filters.status },
+      filters.limit ?? 25,
+      filters.offset ?? 0,
+    );
+  }
+
+  public async exportFindingsCsv(projectId: string, caller: Caller): Promise<string> {
+    const project = await this.projectRepository.findOne({ where: { id: projectId } });
+    if (!project) throw new NotFoundException('Project not found.');
+    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+      throw new NotFoundException('Project not found.');
+    }
+
+    const [findings] = await this.findingRepository.findByProjectId(projectId, {}, 10000, 0);
+
+    const header = 'Severity,Category,Status,Title,Source,Line,Description,Suggestion';
+    const rows = findings.map((f) =>
+      [
+        f.severity,
+        f.category,
+        f.status,
+        `"${f.title.replace(/"/g, '""')}"`,
+        f.source,
+        f.line,
+        `"${f.description.replace(/"/g, '""')}"`,
+        `"${(f.suggestion ?? '').replace(/"/g, '""')}"`,
+      ].join(','),
+    );
+
+    return [header, ...rows].join('\n');
   }
 }

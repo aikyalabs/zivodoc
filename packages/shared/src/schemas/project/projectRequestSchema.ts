@@ -11,6 +11,7 @@ export const createProjectSchema = z.strictObject({
   docPaths: z.array(nonemptystring).default(['docs/', 'README.md']),
   scanMode: z.enum(ScanMode).default('site'),
   maxPages: z.number().int().min(1).max(5000).default(500),
+  scanSchedule: z.enum(['manual', 'daily', 'weekly']).default('manual'),
 });
 
 export const updateProjectSchema = z.strictObject({
@@ -21,4 +22,5 @@ export const updateProjectSchema = z.strictObject({
   docPaths: z.array(nonemptystring).optional(),
   scanMode: z.enum(ScanMode).optional(),
   maxPages: z.number().int().min(1).max(5000).optional(),
+  scanSchedule: z.enum(['manual', 'daily', 'weekly']).optional(),
 });

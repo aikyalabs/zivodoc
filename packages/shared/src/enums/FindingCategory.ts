@@ -1,33 +1,32 @@
 import { Enum, isEnumType } from '../utils/enumType';
 
 export const FindingCategory = [
+  // Links (verified via HTTP)
   'broken_link',
   'broken_anchor',
   'redirect_chain',
-  'syntax_error',
-  'missing_page',
   'slow_link',
-  'stale_ref',
-  'insecure_link',
-  'leaked_secret',
-  'internal_url',
-  'placeholder_text',
-  'empty_section',
+  // Code (verified via parser)
+  'syntax_error',
   'empty_code_block',
   'missing_code_lang',
+  // Security (verified via pattern + context)
+  'leaked_secret',
+  'insecure_link',
+  'internal_url',
+  // Structure (verified via AST/DOM)
+  'missing_page',
   'heading_skip',
   'multiple_h1',
+  'empty_section',
   'broken_image',
-  'todo_left',
-  'outdated_date',
-  'readability',
-  'duplicate_content',
-  'inclusive_lang',
-  'duplicate_word',
-  'long_sentence',
-  'passive_voice',
   'missing_alt_text',
-  'brand_inconsistency',
+  // Content (verified with context-awareness)
+  'todo_left',
+  'placeholder_text',
+  'outdated_date',
+  'duplicate_content',
+  'stale_ref',
 ] as const;
 
 export type FindingCategory = Enum<typeof FindingCategory>;

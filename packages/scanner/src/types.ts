@@ -1,33 +1,4 @@
 export type ScanMode = 'site' | 'repo' | 'both';
-export type FindingSeverity = 'error' | 'warning' | 'info';
-export type FindingCategory =
-  | 'broken_link'
-  | 'broken_anchor'
-  | 'redirect_chain'
-  | 'syntax_error'
-  | 'missing_page'
-  | 'slow_link'
-  | 'stale_ref'
-  | 'insecure_link'
-  | 'leaked_secret'
-  | 'internal_url'
-  | 'placeholder_text'
-  | 'empty_section'
-  | 'empty_code_block'
-  | 'missing_code_lang'
-  | 'heading_skip'
-  | 'multiple_h1'
-  | 'broken_image'
-  | 'todo_left'
-  | 'outdated_date'
-  | 'readability'
-  | 'duplicate_content'
-  | 'inclusive_lang'
-  | 'duplicate_word'
-  | 'long_sentence'
-  | 'passive_voice'
-  | 'missing_alt_text'
-  | 'brand_inconsistency';
 
 export interface ScanOptions {
   mode: ScanMode;
@@ -37,6 +8,69 @@ export interface ScanOptions {
   docPaths?: string[];
   maxPages?: number;
   concurrency?: number;
+}
+
+export type FindingSeverity = 'error' | 'warning' | 'info';
+export type FindingConfidence = 'high' | 'medium' | 'low';
+
+/**
+ * Only categories where we can be objectively correct.
+ * Subjective/noisy checks (readability, inclusive_lang, duplicate_word,
+ * long_sentence, passive_voice, brand_inconsistency) are removed —
+ * those are better handled by AI analysis in Phase 3.
+ */
+export type FindingCategory =
+  | 'broken_link'
+  | 'broken_anchor'
+  | 'redirect_chain'
+  | 'slow_link'
+  | 'syntax_error'
+  | 'empty_code_block'
+  | 'missing_code_lang'
+  | 'leaked_secret'
+  | 'insecure_link'
+  | 'internal_url'
+  | 'missing_page'
+  | 'heading_skip'
+  | 'multiple_h1'
+  | 'empty_section'
+  | 'broken_image'
+  | 'missing_alt_text'
+  | 'todo_left'
+  | 'placeholder_text'
+  | 'outdated_date'
+  | 'duplicate_content'
+  | 'stale_ref';
+
+export interface FindingEvidence {
+  /** The exact text/snippet that triggered the finding */
+  snippet: string;
+  /** Surrounding context (e.g., 3 lines before/after) */
+  context?: string;
+  /** HTTP status code for link checks */
+  httpStatus?: number;
+  /** Response time in ms for link checks */
+  responseTimeMs?: number;
+  /** Redirect chain for redirect_chain findings */
+  redirectChain?: string[];
+  /** The regex/pattern that matched for security checks */
+  matchedPattern?: string;
+  /** Expected value (e.g., expected heading level) */
+  expected?: string;
+  /** Actual value found */
+  actual?: string;
+}
+
+export interface Finding {
+  category: FindingCategory;
+  severity: FindingSeverity;
+  confidence: FindingConfidence;
+  source: string;
+  line: number;
+  title: string;
+  description: string;
+  suggestion?: string;
+  evidence: FindingEvidence;
 }
 
 export interface ScannedPage {
@@ -68,7 +102,9 @@ export interface LinkCheckResult {
   link: PageLink;
   status: 'ok' | 'broken' | 'timeout' | 'redirect';
   httpStatus?: number;
+  responseTimeMs?: number;
   redirectUrl?: string;
+  redirectChain?: string[];
 }
 
 export interface CodeCheckResult {
@@ -77,15 +113,50 @@ export interface CodeCheckResult {
   errors: { message: string; line: number; column: number }[];
 }
 
-export interface Finding {
-  category: FindingCategory;
-  severity: FindingSeverity;
-  source: string;
-  line: number;
+export type ScanStepName =
+  | 'crawl'
+  | 'check_links'
+  | 'check_code'
+  | 'check_security'
+  | 'check_structure'
+  | 'check_content'
+  | 'report';
+
+export interface ScanStep {
+  name: ScanStepName;
+  label: string;
+  status: 'pending' | 'running' | 'completed' | 'skipped';
+  startedAt?: number;
+  completedAt?: number;
+  durationMs?: number;
+  itemsProcessed?: number;
+  findingsCount?: number;
+}
+
+export interface ScanReportSection {
+  step: ScanStepName;
   title: string;
-  description: string;
-  suggestion?: string;
-  rawData?: Record<string, unknown>;
+  summary: string;
+  findings: Finding[];
+  stats: Record<string, number | string>;
+}
+
+export interface ScanReport {
+  title: string;
+  url?: string;
+  generatedAt: string;
+  durationMs: number;
+  summary: {
+    pagesScanned: number;
+    linksChecked: number;
+    codeBlocksFound: number;
+    totalFindings: number;
+    byConfidence: { high: number; medium: number; low: number };
+    bySeverity: { error: number; warning: number; info: number };
+  };
+  sections: ScanReportSection[];
+  /** Full markdown report for LLM consumption */
+  markdown: string;
 }
 
 export interface ScanResult {
@@ -94,5 +165,7 @@ export interface ScanResult {
   codeBlocksFound: number;
   linksChecked: number;
   findings: Finding[];
+  steps: ScanStep[];
+  report: ScanReport;
   duration: number;
 }

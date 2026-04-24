@@ -34,7 +34,13 @@ import { FindingCategory, FindingSeverity, FindingStatus } from '@zivodoc/shared
 export class ScansController {
   constructor(private readonly scansService: ScansService) {}
 
-  // Trigger a scan for a project
+  @Get('dashboard/stats')
+  async dashboardStats(@RequestUser() user: AuthUser) {
+    const stats = await this.scansService.getDashboardStats(user);
+    const topFindings = await this.scansService.getTopFindings(user);
+    return apiOkResponse({ ...stats, topFindings });
+  }
+
   @ZodResponse({ type: CreatedResponse })
   @Post('projects/:projectId/scans')
   async trigger(
@@ -46,7 +52,6 @@ export class ScansController {
     return apiCreatedResponse(scan.id);
   }
 
-  // List scans for a project
   @ZodResponse({ type: ScansResponse })
   @Get('projects/:projectId/scans')
   async listByProject(
@@ -60,7 +65,6 @@ export class ScansController {
     return apiPaginatedResponse(items, Number(total));
   }
 
-  // Get scan detail
   @ZodResponse({ type: ScanResponse })
   @Get('scans/:id')
   async findOne(@RequestUser() user: AuthUser, @Param('id') id: string) {
@@ -68,7 +72,6 @@ export class ScansController {
     return apiOkResponse(scan);
   }
 
-  // Get findings for a scan
   @ZodResponse({ type: FindingsResponse })
   @Get('scans/:id/findings')
   async getFindings(
@@ -90,7 +93,6 @@ export class ScansController {
     return apiPaginatedResponse(items, Number(total));
   }
 
-  // Update finding status
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('findings/:id')
   async updateFinding(

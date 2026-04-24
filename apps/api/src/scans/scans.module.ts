@@ -4,11 +4,12 @@ import { QueueModule } from '@src/queue/queue.module';
 import { ScansController } from '@src/scans/scans.controller';
 import { ScansService } from '@src/scans/scans.service';
 import { ScanProcessor } from '@src/scans/scan.processor';
+import { ScanSchedulerService } from '@src/scans/scan-scheduler.service';
 
 @Module({
   imports: [QueueModule],
   controllers: [ScansController],
-  providers: [ScansService, ScanProcessor],
+  providers: [ScansService, ScanProcessor, ScanSchedulerService],
   exports: [ScansService],
 })
 export class ScansModule {}

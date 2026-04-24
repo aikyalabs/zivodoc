@@ -1,12 +1,17 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import crypto from 'node:crypto';
+import { Injectable, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
 import { AppConfig } from '@src/config.module';
 
-const OTP_TTL_SECONDS = 300; // 5 minutes
+const OTP_TTL_SECONDS = 300;
 const OTP_PREFIX = 'otp:';
+const SEND_RATE_PREFIX = 'otp_send:';
+const VERIFY_RATE_PREFIX = 'otp_verify:';
+const MAX_SEND_PER_HOUR = 5;
+const MAX_VERIFY_ATTEMPTS = 5;
 
 @Injectable()
 export class OtpService {
@@ -27,23 +32,59 @@ export class OtpService {
   }
 
   async sendOtp(email: string): Promise<void> {
+    await this.checkSendRateLimit(email);
+
     const code = this.generateCode();
     await this.redis.set(`${OTP_PREFIX}${email}`, code, 'EX', OTP_TTL_SECONDS);
     await this.sendEmail(email, code);
   }
 
   async verifyOtp(email: string, code: string): Promise<boolean> {
+    await this.checkVerifyRateLimit(email);
+
     const stored = await this.redis.get(`${OTP_PREFIX}${email}`);
     if (!stored || stored !== code) {
+      await this.incrementVerifyAttempts(email);
       throw new BadRequestException('Invalid or expired code.');
     }
-    // One-time use — delete after verification
+
     await this.redis.del(`${OTP_PREFIX}${email}`);
+    await this.redis.del(`${VERIFY_RATE_PREFIX}${email}`);
     return true;
   }
 
+  private async checkSendRateLimit(email: string): Promise<void> {
+    const key = `${SEND_RATE_PREFIX}${email}`;
+    const count = await this.redis.incr(key);
+    if (count === 1) await this.redis.expire(key, 3600);
+    if (count > MAX_SEND_PER_HOUR) {
+      throw new HttpException(
+        'Too many code requests. Try again in an hour.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+  }
+
+  private async checkVerifyRateLimit(email: string): Promise<void> {
+    const key = `${VERIFY_RATE_PREFIX}${email}`;
+    const attempts = await this.redis.get(key);
+    if (attempts && parseInt(attempts) >= MAX_VERIFY_ATTEMPTS) {
+      await this.redis.del(`${OTP_PREFIX}${email}`);
+      throw new HttpException(
+        'Too many failed attempts. Request a new code.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+  }
+
+  private async incrementVerifyAttempts(email: string): Promise<void> {
+    const key = `${VERIFY_RATE_PREFIX}${email}`;
+    const count = await this.redis.incr(key);
+    if (count === 1) await this.redis.expire(key, OTP_TTL_SECONDS);
+  }
+
   private generateCode(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    return crypto.randomInt(100000, 999999).toString();
   }
 
   private async sendEmail(to: string, code: string): Promise<void> {

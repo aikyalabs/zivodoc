@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { SESSION_TOKEN_STORAGE_KEY } from '@src/lib/contexts/SessionContext';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const apiClient = axios.create({
   baseURL: API_URL,

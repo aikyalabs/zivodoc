@@ -39,4 +39,27 @@ export class FindingRepository extends Repository<FindingEntity> {
       skip,
     });
   }
+
+  async findByProjectId(
+    projectId: string,
+    filters: FindingFilters = {},
+    take = 25,
+    skip = 0,
+  ): Promise<[FindingEntity[], number]> {
+    const qb = this.createQueryBuilder('f').where('f."projectId" = :projectId', { projectId });
+
+    if (filters.category) qb.andWhere('f.category = :category', { category: filters.category });
+    if (filters.severity) qb.andWhere('f.severity = :severity', { severity: filters.severity });
+
+    if (filters.status) {
+      qb.andWhere('f.status = :status', { status: filters.status });
+    } else {
+      // Default: show open + reopened (hide resolved/ignored/auto_resolved)
+      qb.andWhere('f.status IN (:...statuses)', { statuses: ['open', 'reopened'] });
+    }
+
+    qb.orderBy('f.severity', 'ASC').addOrderBy('f."createdAt"', 'DESC').take(take).skip(skip);
+
+    return qb.getManyAndCount();
+  }
 }

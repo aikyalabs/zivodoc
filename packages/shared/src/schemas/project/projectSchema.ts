@@ -12,7 +12,13 @@ export const projectModelSchema = z.strictObject({
   docPaths: z.array(z.string()),
   scanMode: z.enum(ScanMode),
   maxPages: z.number(),
+  scanSchedule: z.enum(['manual', 'daily', 'weekly']),
   organizationId: z.string(),
   createdAt: timestamp,
   updatedAt: timestamp,
+  // Stats from latest scan (populated by list query)
+  lastScanStatus: z.string().nullable().optional(),
+  lastScanDate: timestamp.nullable().optional(),
+  totalScans: z.number().optional(),
+  totalFindings: z.number().optional(),
 });

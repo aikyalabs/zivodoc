@@ -1,7 +1,9 @@
 export type {
   ScanMode,
   FindingSeverity,
+  FindingConfidence,
   FindingCategory,
+  FindingEvidence,
   ScanOptions,
   ScannedPage,
   CodeBlock,
@@ -9,6 +11,10 @@ export type {
   LinkCheckResult,
   CodeCheckResult,
   Finding,
+  ScanStep,
+  ScanStepName,
+  ScanReport,
+  ScanReportSection,
   ScanResult,
 } from './types.js';
 
@@ -20,6 +26,7 @@ export { validateCodeBlock, validateCodeBlocks } from './repo/code-validator.js'
 export { checkLinks } from './shared/link-checker.js';
 export { createFinding } from './shared/finding-builder.js';
 export { analyzeContent } from './analyze/content-analyzer.js';
+export { generateReport } from './report/report-generator.js';
 
 import type {
   ScanOptions,
@@ -28,6 +35,8 @@ import type {
   PageLink,
   CodeBlock,
   ScannedPage,
+  ScanStep,
+  ScanStepName,
 } from './types.js';
 import { crawlSite } from './crawl/site-crawler.js';
 import { cloneRepo } from './repo/repo-cloner.js';
@@ -35,32 +44,59 @@ import { discoverMarkdownFiles } from './repo/file-discoverer.js';
 import { parseMarkdownFile } from './repo/markdown-parser.js';
 import { validateCodeBlocks } from './repo/code-validator.js';
 import { checkLinks } from './shared/link-checker.js';
-import { syntaxErrorFinding } from './shared/finding-builder.js';
+import { syntaxErrorFinding, createFinding } from './shared/finding-builder.js';
 import { analyzeContent } from './analyze/content-analyzer.js';
+import { generateReport } from './report/report-generator.js';
 
-/**
- * Run a documentation scan based on the provided options.
- *
- * Supports three modes:
- * - 'site': Crawl a live docs URL
- * - 'repo': Clone a repo and parse markdown files
- * - 'both': Run both site crawl and repo scan, merge results
- */
+function createStep(name: ScanStepName, label: string): ScanStep {
+  return { name, label, status: 'pending' };
+}
+
+function startStep(step: ScanStep): ScanStep {
+  return { ...step, status: 'running', startedAt: Date.now() };
+}
+
+function completeStep(step: ScanStep, itemsProcessed: number, findingsCount: number): ScanStep {
+  const now = Date.now();
+  return {
+    ...step,
+    status: 'completed',
+    completedAt: now,
+    durationMs: step.startedAt ? now - step.startedAt : 0,
+    itemsProcessed,
+    findingsCount,
+  };
+}
+
 export async function scan(options: ScanOptions): Promise<ScanResult> {
   const startTime = Date.now();
   const maxPages = options.maxPages ?? 100;
   const concurrency = options.concurrency ?? 5;
 
-  const allFindings: Finding[] = [];
+  const steps: ScanStep[] = [
+    createStep('crawl', 'Crawl & Extract'),
+    createStep('check_links', 'Link Verification'),
+    createStep('check_code', 'Code Validation'),
+    createStep('check_security', 'Security Scan'),
+    createStep('check_structure', 'Structure Analysis'),
+    createStep('check_content', 'Content Quality'),
+    createStep('report', 'Report Generation'),
+  ];
+
+  const findingsByStep = new Map<ScanStepName, Finding[]>();
   let totalPagesScanned = 0;
   let totalCodeBlocksFound = 0;
   let totalLinksChecked = 0;
 
-  // Site crawl mode
+  const allPages: ScannedPage[] = [];
+  const allLinks: PageLink[] = [];
+  const allCodeBlocks: CodeBlock[] = [];
+
+  steps[0] = startStep(steps[0]);
+  const crawlFindings: Finding[] = [];
+
   if (options.mode === 'site' || options.mode === 'both') {
-    if (!options.siteUrl) {
-      throw new Error('siteUrl is required for site/both scan modes');
-    }
+    if (!options.siteUrl) throw new Error('siteUrl is required for site/both scan modes');
 
     const siteResult = await crawlSite({
       url: options.siteUrl,
@@ -68,17 +104,15 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
       concurrency,
     });
 
-    allFindings.push(...siteResult.findings);
+    crawlFindings.push(...siteResult.findings);
+    allPages.push(...siteResult.pages);
     totalPagesScanned += siteResult.pagesScanned;
     totalCodeBlocksFound += siteResult.codeBlocksFound;
     totalLinksChecked += siteResult.linksChecked;
   }
 
-  // Repo scan mode
   if (options.mode === 'repo' || options.mode === 'both') {
-    if (!options.repoUrl) {
-      throw new Error('repoUrl is required for repo/both scan modes');
-    }
+    if (!options.repoUrl) throw new Error('repoUrl is required for repo/both scan modes');
 
     const { localPath, cleanup } = await cloneRepo(options.repoUrl, options.branch);
 
@@ -86,71 +120,127 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
       const files = await discoverMarkdownFiles(localPath, options.docPaths);
       totalPagesScanned += files.length;
 
-      const allLinks: PageLink[] = [];
-      const allCodeBlocks: CodeBlock[] = [];
-      const scannedPages: ScannedPage[] = [];
-
-      // Parse all markdown files
       for (const file of files) {
         try {
           const page = await parseMarkdownFile(file);
-          scannedPages.push(page);
+          allPages.push(page);
           allLinks.push(...page.links);
           allCodeBlocks.push(...page.codeBlocks);
         } catch (err) {
-          allFindings.push({
-            category: 'missing_page',
-            severity: 'error',
-            source: file,
-            line: 0,
-            title: `Failed to parse file: ${file}`,
-            description: `Error parsing markdown: ${err instanceof Error ? err.message : String(err)}`,
-          });
+          crawlFindings.push(
+            createFinding({
+              category: 'missing_page',
+              severity: 'error',
+              confidence: 'high',
+              source: file,
+              line: 0,
+              title: `Failed to parse: ${file.split('/').pop()}`,
+              description: `Error: ${err instanceof Error ? err.message : String(err)}`,
+              evidence: { snippet: file },
+            }),
+          );
         }
       }
 
       totalCodeBlocksFound += allCodeBlocks.length;
-
-      // Validate code blocks
-      const codeResults = validateCodeBlocks(allCodeBlocks);
-      for (const result of codeResults) {
-        if (!result.valid) {
-          for (const error of result.errors) {
-            allFindings.push(
-              syntaxErrorFinding(
-                result.block.source,
-                result.block.lineStart,
-                result.block.language,
-                error.message,
-                error.line,
-                error.column,
-              ),
-            );
-          }
-        }
-      }
-
-      // Check external links
-      const externalLinks = allLinks.filter((l) => l.type === 'external');
-      totalLinksChecked += externalLinks.length;
-
-      if (externalLinks.length > 0) {
-        const { findings: linkFindings } = await checkLinks(allLinks);
-        allFindings.push(...linkFindings);
-      }
-
-      // Run content quality analysis
-      const contentFindings = analyzeContent(scannedPages);
-      allFindings.push(...contentFindings);
     } finally {
       await cleanup();
     }
   }
 
-  // Deduplicate findings by a composite key
+  findingsByStep.set('crawl', crawlFindings);
+  steps[0] = completeStep(steps[0], totalPagesScanned, crawlFindings.length);
+
+  steps[1] = startStep(steps[1]);
+  const linkFindings: Finding[] = [];
+
+  const externalLinks = allLinks.filter((l) => l.type === 'external');
+  totalLinksChecked += externalLinks.length;
+
+  if (externalLinks.length > 0) {
+    const { findings } = await checkLinks(allLinks);
+    linkFindings.push(...findings);
+  }
+
+  findingsByStep.set('check_links', linkFindings);
+  steps[1] = completeStep(steps[1], externalLinks.length, linkFindings.length);
+
+  steps[2] = startStep(steps[2]);
+  const codeFindings: Finding[] = [];
+
+  if (allCodeBlocks.length > 0) {
+    const codeResults = validateCodeBlocks(allCodeBlocks);
+    for (const result of codeResults) {
+      if (!result.valid) {
+        for (const error of result.errors) {
+          codeFindings.push(
+            syntaxErrorFinding(
+              result.block.source,
+              result.block.lineStart,
+              result.block.language,
+              error.message,
+              result.block.code,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  findingsByStep.set('check_code', codeFindings);
+  steps[2] = completeStep(steps[2], allCodeBlocks.length, codeFindings.length);
+
+  steps[3] = startStep(steps[3]);
+  steps[4] = startStep(steps[4]);
+  steps[5] = startStep(steps[5]);
+
+  const contentFindings = analyzeContent(allPages);
+
+  const securityCats = new Set(['leaked_secret', 'insecure_link', 'internal_url']);
+  const structureCats = new Set([
+    'missing_page',
+    'heading_skip',
+    'multiple_h1',
+    'empty_section',
+    'broken_image',
+    'missing_alt_text',
+  ]);
+
+  const securityFindings = contentFindings.filter((f) => securityCats.has(f.category));
+  const structureFindings = contentFindings.filter((f) => structureCats.has(f.category));
+  const qualityFindings = contentFindings.filter(
+    (f) => !securityCats.has(f.category) && !structureCats.has(f.category),
+  );
+
+  findingsByStep.set('check_security', securityFindings);
+  findingsByStep.set('check_structure', structureFindings);
+  findingsByStep.set('check_content', qualityFindings);
+
+  steps[3] = completeStep(steps[3], allPages.length, securityFindings.length);
+  steps[4] = completeStep(steps[4], allPages.length, structureFindings.length);
+  steps[5] = completeStep(steps[5], allPages.length, qualityFindings.length);
+
+  const allFindings: Finding[] = [];
+  for (const findings of findingsByStep.values()) {
+    allFindings.push(...findings);
+  }
   const deduped = deduplicateFindings(allFindings);
 
+  steps[6] = startStep(steps[6]);
+
   const duration = Date.now() - startTime;
+  const report = generateReport({
+    mode: options.mode,
+    url: options.siteUrl ?? options.repoUrl,
+    pagesScanned: totalPagesScanned,
+    linksChecked: totalLinksChecked,
+    codeBlocksFound: totalCodeBlocksFound,
+    findings: deduped,
+    steps,
+    durationMs: duration,
+  });
+
+  steps[6] = completeStep(steps[6], 1, 0);
 
   return {
     mode: options.mode,
@@ -158,13 +248,12 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
     codeBlocksFound: totalCodeBlocksFound,
     linksChecked: totalLinksChecked,
     findings: deduped,
+    steps,
+    report,
     duration,
   };
 }
 
-/**
- * Deduplicate findings based on category + source + line + title.
- */
 function deduplicateFindings(findings: Finding[]): Finding[] {
   const seen = new Set<string>();
   const result: Finding[] = [];

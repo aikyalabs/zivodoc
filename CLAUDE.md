@@ -105,6 +105,55 @@ async list(caller: Caller, options?) {
 - Use `Select` component (Radix UI) for form selects, `DropdownMenu` only for action menus
 - TanStack Router: use `settings.index.tsx` for index routes when nested routes exist (not `settings.tsx`, which becomes a layout)
 
+## Code Quality Rules (NEVER violate)
+
+### TypeScript
+- **NEVER use `as unknown as`** — if types don't match, fix the type, don't cast through unknown
+- **NEVER use `any`** — use `unknown` with type guards, or define proper types
+- **NEVER use `as Record<string, unknown>`** on typed data — pass proper generic types through
+- **All functions must have explicit return types** on public/exported functions
+- **No loose string types for enums** — use the actual enum type from shared, not `string`
+- **No non-null assertions (`!`)** except on `caller.organizationId!` after admin check (established pattern)
+
+### Comments
+- **No section divider comments** like `// ── Section ──` in production code (OK in config/types)
+- **No comments that restate the code** — `// Delete findings` above `deleteFindings()` is noise
+- **No commented-out code** — delete it, git has history
+- **Only comment WHY, never WHAT** — if the code needs a WHAT comment, rename the function
+
+### Functions & Files
+- **Max 150 lines per file** — split into modules if larger
+- **Max 30 lines per function** — extract helpers if larger
+- **No inline anonymous functions over 5 lines** in JSX — extract to named component or function
+- **Single responsibility** — one function does one thing
+- **Extract repeated logic** into shared utils — if you write it twice, make it a function
+
+### Error Handling
+- **No empty catch blocks** — at minimum log the error
+- **No `catch { }` that silently swallow** — always handle or re-throw
+- **No try/catch around code that can't throw** — only wrap actual I/O operations
+
+### React / Frontend
+- **No `as unknown as` type assertions in component props** — define proper interfaces
+- **No inline objects/arrays in JSX** that cause re-renders — extract to constants or useMemo
+- **Column definitions, config objects** — define outside component as `const`
+- **Components over 100 lines** — split into sub-components
+- **All hooks must be in /hooks** directory — no API calls in components
+
+### Naming
+- **Variables**: camelCase, descriptive, no abbreviations (`findingList` not `fl`)
+- **Booleans**: prefix with `is/has/should` (`isLoading` not `loading` for state variables)
+- **Handlers**: prefix with `handle` (`handleSubmit` not `onSubmitForm`)
+- **Constants**: UPPER_SNAKE_CASE only for true constants (`PAGE_SIZE`), camelCase for config objects
+- **No Hungarian notation** — `strName`, `arrItems` are banned
+- **No `actual`, `real`, `temp`, `data`** as prefixes — be specific about what the variable holds
+
+### API
+- **Controllers are thin** — max 5 lines per handler, delegate to service
+- **Services own all business logic** — authorization, validation, data access
+- **Repository methods** — name by what they return (`findWithStats`), not what they do (`getProjectsAndJoinScans`)
+- **No raw SQL in repositories** — use TypeORM QueryBuilder
+
 ## Available Agents
 
 | Agent | Purpose | When to Use |

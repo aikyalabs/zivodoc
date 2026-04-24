@@ -5,6 +5,7 @@ import {
   Shield,
   Settings,
   FolderSearch,
+  Building,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -80,6 +81,11 @@ export const navigation: NavGroup[] = [
         title: 'General',
         url: '/settings',
         icon: Settings,
+      },
+      {
+        title: 'Organization',
+        url: '/settings/organization',
+        icon: Building,
       },
     ],
   },

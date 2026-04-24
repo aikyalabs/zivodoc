@@ -4,84 +4,222 @@ import {
   redirectChainFinding,
   slowLinkFinding,
   timeoutFinding,
+  insecureLinkFinding,
 } from './finding-builder.js';
 
-const CONCURRENCY = 10;
+const CONCURRENCY = 5;
 const TIMEOUT_MS = 10_000;
 const SLOW_THRESHOLD_MS = 5_000;
 const MAX_REDIRECT_HOPS = 2;
+const PLAYWRIGHT_TIMEOUT_MS = 15_000;
+
+const BROWSER_UA =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+/**
+ * HTTP status codes that indicate bot blocking, not a real broken link.
+ * These sites work fine in a browser but reject automated requests.
+ */
+const BOT_BLOCKED_STATUSES = new Set([403, 405, 406, 429, 999]);
 
 interface CheckResultInternal extends LinkCheckResult {
-  elapsedMs: number;
+  verified: boolean;
 }
 
-async function checkSingleLink(link: PageLink): Promise<CheckResultInternal> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-  const start = Date.now();
+function isHttpUrl(href: string): boolean {
+  return href.startsWith('http://') || href.startsWith('https://');
+}
 
+function isLocalUrl(href: string): boolean {
   try {
-    // Try HEAD first, fall back to GET if HEAD fails
-    let response: Response;
-    try {
-      response = await fetch(link.href, {
-        method: 'HEAD',
-        signal: controller.signal,
-        redirect: 'follow',
-      });
-    } catch {
-      response = await fetch(link.href, {
-        method: 'GET',
-        signal: controller.signal,
-        redirect: 'follow',
-      });
-    }
-
-    clearTimeout(timer);
-    const elapsedMs = Date.now() - start;
-    const status = response.status;
-
-    // Check for redirect chains by making a manual follow
-    if (response.redirected && response.url !== link.href) {
-      const hopsResult = await countRedirectHops(link.href);
-      if (hopsResult.hops > MAX_REDIRECT_HOPS) {
-        return {
-          link,
-          status: 'redirect',
-          httpStatus: status,
-          redirectUrl: response.url,
-          elapsedMs,
-        };
-      }
-    }
-
-    // 403 is often rate limiting/bot blocking, not truly broken
-    if (status === 403) {
-      return { link, status: 'ok', httpStatus: status, elapsedMs };
-    }
-
-    if (status >= 400) {
-      return { link, status: 'broken', httpStatus: status, elapsedMs };
-    }
-
-    return { link, status: 'ok', httpStatus: status, elapsedMs };
-  } catch (err) {
-    clearTimeout(timer);
-    const elapsedMs = Date.now() - start;
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      return { link, status: 'timeout', elapsedMs };
-    }
-    return { link, status: 'broken', elapsedMs };
+    const host = new URL(href).hostname.toLowerCase();
+    return (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '0.0.0.0' ||
+      host === '::1' ||
+      host.endsWith('.local')
+    );
+  } catch {
+    return false;
   }
 }
 
-async function countRedirectHops(url: string): Promise<{ hops: number; finalUrl: string }> {
+const EXAMPLE_DOMAINS = new Set([
+  'example.com',
+  'example.org',
+  'example.net',
+  'mysite.com',
+  'my.store.com',
+  'your-site.com',
+  'yoursite.com',
+  'yourdomain.com',
+  'your-domain.com',
+  'yourcompany.com',
+  'mycompany.com',
+  'test.com',
+]);
+
+function isExampleUrl(href: string): boolean {
+  try {
+    const host = new URL(href).hostname.toLowerCase();
+    return (
+      EXAMPLE_DOMAINS.has(host) ||
+      host.endsWith('.test') ||
+      host.endsWith('.example') ||
+      host.endsWith('.example.com') ||
+      host.endsWith('.example.org') ||
+      host.endsWith('.invalid') ||
+      // Punycode/IDN trick domains used in phishing examples
+      host.startsWith('xn--')
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function fetchWithTimeout(
+  url: string,
+  method: 'HEAD' | 'GET',
+  timeoutMs: number,
+  userAgent?: string,
+): Promise<{ response: Response; elapsedMs: number }> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const start = Date.now();
+
+  const headers: Record<string, string> = {};
+  if (userAgent) headers['User-Agent'] = userAgent;
+
+  try {
+    const response = await fetch(url, {
+      method,
+      signal: controller.signal,
+      redirect: 'follow',
+      headers,
+    });
+    clearTimeout(timer);
+    return { response, elapsedMs: Date.now() - start };
+  } catch (err) {
+    clearTimeout(timer);
+    throw err;
+  }
+}
+
+async function httpCheck(
+  href: string,
+): Promise<{ status: number; elapsedMs: number; redirected: boolean; finalUrl: string }> {
+  try {
+    const { response, elapsedMs } = await fetchWithTimeout(href, 'HEAD', TIMEOUT_MS, BROWSER_UA);
+    if (response.status < 400 || BOT_BLOCKED_STATUSES.has(response.status)) {
+      return {
+        status: response.status,
+        elapsedMs,
+        redirected: response.redirected,
+        finalUrl: response.url,
+      };
+    }
+  } catch {}
+
+  try {
+    const { response, elapsedMs } = await fetchWithTimeout(href, 'GET', TIMEOUT_MS, BROWSER_UA);
+    return {
+      status: response.status,
+      elapsedMs,
+      redirected: response.redirected,
+      finalUrl: response.url,
+    };
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      return { status: 0, elapsedMs: TIMEOUT_MS, redirected: false, finalUrl: href };
+    }
+    return { status: 0, elapsedMs: 0, redirected: false, finalUrl: href };
+  }
+}
+
+let playwrightBrowser: import('playwright').Browser | null = null;
+let playwrightUnavailable = false;
+
+async function getPlaywrightBrowser(): Promise<import('playwright').Browser | null> {
+  if (playwrightUnavailable) return null;
+  if (playwrightBrowser?.isConnected()) return playwrightBrowser;
+
+  try {
+    const { chromium } = await import('playwright');
+    playwrightBrowser = await chromium.launch({ headless: true });
+    return playwrightBrowser;
+  } catch {
+    playwrightUnavailable = true;
+    return null;
+  }
+}
+
+/**
+ * Verify a URL with a real browser. Used as a last resort for links
+ * that return 4xx to fetch() but might work in a browser (JS-rendered SPAs).
+ * Returns the final HTTP status observed by the browser.
+ */
+async function playwrightCheck(href: string): Promise<{ status: number; elapsedMs: number }> {
+  const start = Date.now();
+  try {
+    const browser = await getPlaywrightBrowser();
+    if (!browser) return { status: 0, elapsedMs: 0 };
+    const context = await browser.newContext({ userAgent: BROWSER_UA });
+    const page = await context.newPage();
+
+    const response = await page.goto(href, {
+      waitUntil: 'domcontentloaded',
+      timeout: PLAYWRIGHT_TIMEOUT_MS,
+    });
+
+    const httpStatus = response?.status() ?? 0;
+
+    // Some SPAs return 4xx HTTP status but render valid content via client-side routing.
+    // We need to distinguish "real 404 with custom error page" from "SPA that works fine".
+    if (httpStatus >= 400) {
+      const pageSignals = await page.evaluate(() => {
+        const title = document.title?.toLowerCase() ?? '';
+        const h1 = document.querySelector('h1')?.textContent?.toLowerCase() ?? '';
+        const bodyLength = document.body?.innerText?.length ?? 0;
+        const finalUrl = window.location.href;
+        return { title, h1, bodyLength, finalUrl };
+      });
+
+      const has404Indicator =
+        pageSignals.title.includes('404') ||
+        pageSignals.title.includes('not found') ||
+        pageSignals.h1.includes('404') ||
+        pageSignals.h1.includes('not found') ||
+        pageSignals.h1.includes('page not found');
+
+      // SPA with content + no 404 indicators = page works, just wrong HTTP status
+      if (pageSignals.bodyLength > 200 && !has404Indicator) {
+        await context.close();
+        return { status: 200, elapsedMs: Date.now() - start };
+      }
+    }
+
+    await context.close();
+    return { status: httpStatus, elapsedMs: Date.now() - start };
+  } catch {
+    return { status: 0, elapsedMs: Date.now() - start };
+  }
+}
+
+export async function closeBrowser(): Promise<void> {
+  if (playwrightBrowser) {
+    await playwrightBrowser.close().catch(() => {});
+    playwrightBrowser = null;
+  }
+}
+
+async function countRedirectHops(url: string): Promise<{ hops: number; chain: string[] }> {
   let hops = 0;
   let currentUrl = url;
+  const chain: string[] = [url];
 
   for (;;) {
-    if (hops > 10) break; // Safety limit
-
+    if (hops > 10) break;
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 5_000);
@@ -89,6 +227,7 @@ async function countRedirectHops(url: string): Promise<{ hops: number; finalUrl:
         method: 'HEAD',
         signal: controller.signal,
         redirect: 'manual',
+        headers: { 'User-Agent': BROWSER_UA },
       });
       clearTimeout(timer);
 
@@ -96,6 +235,7 @@ async function countRedirectHops(url: string): Promise<{ hops: number; finalUrl:
         hops++;
         const location = response.headers.get('location')!;
         currentUrl = new URL(location, currentUrl).href;
+        chain.push(currentUrl);
       } else {
         break;
       }
@@ -104,12 +244,9 @@ async function countRedirectHops(url: string): Promise<{ hops: number; finalUrl:
     }
   }
 
-  return { hops, finalUrl: currentUrl };
+  return { hops, chain };
 }
 
-/**
- * Process items in batches with a concurrency limit.
- */
 async function processBatch<T, R>(
   items: T[],
   concurrency: number,
@@ -136,122 +273,157 @@ async function processBatch<T, R>(
   return results;
 }
 
-function isLocalUrl(href: string): boolean {
-  try {
-    const url = new URL(href);
-    const host = url.hostname.toLowerCase();
-    return (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host === '0.0.0.0' ||
-      host === '::1' ||
-      host.endsWith('.local')
-    );
-  } catch {
-    return false;
-  }
-}
-
-function isExampleUrl(href: string): boolean {
-  try {
-    const url = new URL(href);
-    const host = url.hostname.toLowerCase();
-    return (
-      host.endsWith('.test') ||
-      host.endsWith('.example') ||
-      host === 'example.com' ||
-      host.endsWith('.example.com')
-    );
-  } catch {
-    return false;
-  }
-}
-
 export async function checkLinks(
   links: PageLink[],
 ): Promise<{ results: LinkCheckResult[]; findings: Finding[] }> {
-  // Separate local/example URLs — flag them as info, don't HTTP check them
   const findings: Finding[] = [];
-  const checkableLinks: PageLink[] = [];
+  const checkable: PageLink[] = [];
 
   for (const link of links) {
     if (link.type !== 'external') continue;
 
-    if (isLocalUrl(link.href)) {
-      findings.push({
-        category: 'stale_ref',
-        severity: 'info',
-        source: link.source,
-        line: link.line,
-        title: `Local URL reference: ${link.href}`,
-        description: `Documentation references a local URL (${link.href}). This may be intentional (example code) or an accidental dev URL that should be replaced with a production URL.`,
-        rawData: { href: link.href, type: 'local_url' },
-      });
-      continue;
-    }
+    if (!isHttpUrl(link.href)) continue;
+    if (isLocalUrl(link.href) || isExampleUrl(link.href)) continue;
 
-    if (isExampleUrl(link.href)) {
-      // example.com URLs are intentional placeholders — skip silently
-      continue;
-    }
-
-    checkableLinks.push(link);
+    checkable.push(link);
   }
 
-  // Deduplicate by href
   const seen = new Map<string, PageLink>();
-  for (const link of checkableLinks) {
-    if (!seen.has(link.href)) {
-      seen.set(link.href, link);
-    }
+  for (const link of checkable) {
+    if (!seen.has(link.href)) seen.set(link.href, link);
   }
   const uniqueLinks = Array.from(seen.values());
 
-  const internalResults = await processBatch(uniqueLinks, CONCURRENCY, checkSingleLink);
+  const httpResults = await processBatch(
+    uniqueLinks,
+    CONCURRENCY,
+    async (link): Promise<CheckResultInternal> => {
+      const result = await httpCheck(link.href);
 
-  // Build a map from href to result for lookup
-  const resultMap = new Map<string, CheckResultInternal>();
-  for (const r of internalResults) {
-    resultMap.set(r.link.href, r);
+      if (result.status === 0) {
+        return { link, status: 'timeout', responseTimeMs: result.elapsedMs, verified: false };
+      }
+
+      if (BOT_BLOCKED_STATUSES.has(result.status)) {
+        return {
+          link,
+          status: 'ok',
+          httpStatus: result.status,
+          responseTimeMs: result.elapsedMs,
+          verified: true,
+        };
+      }
+
+      if (result.redirected && result.finalUrl !== link.href) {
+        const { hops, chain } = await countRedirectHops(link.href);
+        if (hops > MAX_REDIRECT_HOPS) {
+          return {
+            link,
+            status: 'redirect',
+            httpStatus: result.status,
+            redirectUrl: result.finalUrl,
+            redirectChain: chain,
+            responseTimeMs: result.elapsedMs,
+            verified: true,
+          };
+        }
+      }
+
+      if (result.status >= 400) {
+        return {
+          link,
+          status: 'broken',
+          httpStatus: result.status,
+          responseTimeMs: result.elapsedMs,
+          verified: false,
+        };
+      }
+
+      return {
+        link,
+        status: 'ok',
+        httpStatus: result.status,
+        responseTimeMs: result.elapsedMs,
+        verified: true,
+      };
+    },
+  );
+
+  // Broken links need browser verification — JS-rendered SPAs return 404 to fetch
+  const failedLinks = httpResults.filter((r) => r.status === 'broken' && !r.verified);
+
+  if (failedLinks.length > 0) {
+    await processBatch(failedLinks, 3, async (result) => {
+      const { status } = await playwrightCheck(result.link.href);
+
+      if (status >= 200 && status < 400) {
+        result.status = 'ok';
+        result.httpStatus = status;
+        result.verified = true;
+      } else {
+        result.verified = true;
+      }
+    });
+
+    await closeBrowser();
   }
 
-  // Generate findings from HTTP checks (one per unique href)
-  const reportedHrefs = new Set<string>();
+  const reported = new Set<string>();
 
-  for (const link of checkableLinks) {
-    if (reportedHrefs.has(link.href)) continue;
-    reportedHrefs.add(link.href);
-
-    const result = resultMap.get(link.href);
-    if (!result) continue;
+  for (const result of httpResults) {
+    const href = result.link.href;
+    if (reported.has(href)) continue;
+    reported.add(href);
 
     switch (result.status) {
       case 'broken':
-        findings.push(brokenLinkFinding(link.source, link.line, link.href, result.httpStatus));
+        findings.push(
+          brokenLinkFinding(
+            result.link.source,
+            result.link.line,
+            href,
+            result.httpStatus,
+            result.responseTimeMs,
+          ),
+        );
         break;
       case 'redirect':
         findings.push(
-          redirectChainFinding(link.source, link.line, link.href, result.redirectUrl ?? link.href),
+          redirectChainFinding(
+            result.link.source,
+            result.link.line,
+            href,
+            result.redirectChain ?? [result.redirectUrl ?? href],
+          ),
         );
         break;
       case 'timeout':
-        findings.push(timeoutFinding(link.source, link.line, link.href));
+        findings.push(
+          timeoutFinding(result.link.source, result.link.line, href, result.responseTimeMs),
+        );
         break;
       case 'ok':
-        if (result.elapsedMs > SLOW_THRESHOLD_MS) {
-          findings.push(slowLinkFinding(link.source, link.line, link.href, result.elapsedMs));
+        if (result.responseTimeMs && result.responseTimeMs > SLOW_THRESHOLD_MS) {
+          findings.push(
+            slowLinkFinding(result.link.source, result.link.line, href, result.responseTimeMs),
+          );
         }
         break;
     }
+
+    if (href.startsWith('http://') && !isLocalUrl(href)) {
+      findings.push(insecureLinkFinding(result.link.source, result.link.line, href));
+    }
   }
 
-  // Convert internal results to public LinkCheckResult (strip elapsedMs)
-  const results: LinkCheckResult[] = internalResults.map(
-    ({ link, status, httpStatus, redirectUrl }) => ({
+  const results: LinkCheckResult[] = httpResults.map(
+    ({ link, status, httpStatus, redirectUrl, redirectChain, responseTimeMs }) => ({
       link,
       status,
       httpStatus,
       redirectUrl,
+      redirectChain,
+      responseTimeMs,
     }),
   );
 

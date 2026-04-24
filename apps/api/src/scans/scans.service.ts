@@ -1,6 +1,12 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { In } from 'typeorm';
 
 import { ScanEntity } from '@db/entities';
 import {
@@ -26,18 +32,28 @@ export class ScansService {
     projectId: string,
     data: { mode?: ScanMode; branch?: string },
     caller: Caller,
-  ) {
+  ): Promise<ScanEntity> {
     const project = await this.projectRepository.findOne({ where: { id: projectId } });
     if (!project) throw new NotFoundException('Project not found.');
     if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
       throw new NotFoundException('Project not found.');
     }
 
-    // Check scan quota
+    const activeScan = await this.scanRepository.findOne({
+      where: { projectId, status: In(['pending', 'running']) },
+    });
+    if (activeScan) {
+      throw new ConflictException(
+        'A scan is already running for this project. Wait for it to complete.',
+      );
+    }
+
     const org = await this.organizationRepository.findOne({
       where: { id: project.organizationId },
     });
     if (!org) throw new NotFoundException('Organization not found.');
+
+    this.resetQuotaIfNewMonth(org);
 
     if (org.scansUsedThisMonth >= org.scanQuota) {
       throw new BadRequestException(
@@ -48,37 +64,40 @@ export class ScansService {
     const scan = this.scanRepository.create({
       projectId: project.id,
       organizationId: project.organizationId,
-      mode: (data.mode ?? project.scanMode) as ScanMode,
+      mode: data.mode ?? project.scanMode,
       status: 'pending',
       branch: data.branch ?? project.defaultBranch,
     });
 
     const saved = await this.scanRepository.save(scan);
 
-    // Increment usage
+    // Enqueue FIRST, increment quota AFTER — if enqueue fails, quota isn't wasted
+    await this.scanQueue.add(
+      'scan.execute',
+      {
+        scanId: saved.id,
+        projectId: project.id,
+        organizationId: project.organizationId,
+        siteUrl: project.siteUrl,
+        repoUrl: project.repoUrl,
+        branch: data.branch ?? project.defaultBranch,
+        docPaths: project.docPaths,
+        scanMode: saved.mode,
+        maxPages: project.maxPages,
+      },
+      { attempts: 1, removeOnComplete: true, removeOnFail: false },
+    );
+
     await this.organizationRepository.increment(
       { id: project.organizationId },
       'scansUsedThisMonth',
       1,
     );
 
-    // Enqueue scan job for background processing
-    await this.scanQueue.add('scan.execute', {
-      scanId: saved.id,
-      projectId: project.id,
-      organizationId: project.organizationId,
-      siteUrl: project.siteUrl,
-      repoUrl: project.repoUrl,
-      branch: data.branch ?? project.defaultBranch,
-      docPaths: project.docPaths,
-      scanMode: saved.mode,
-      maxPages: project.maxPages,
-    });
-
     return saved;
   }
 
-  public async findById(id: string, caller: Caller) {
+  public async findById(id: string, caller: Caller): Promise<ScanEntity> {
     const scan = await this.scanRepository.findOne({ where: { id } });
     if (!scan) throw new NotFoundException('Scan not found.');
     if (!isAdmin(caller) && scan.organizationId !== caller.organizationId) {
@@ -131,7 +150,11 @@ export class ScansService {
     );
   }
 
-  public async updateFindingStatus(findingId: string, status: FindingStatus, caller: Caller) {
+  public async updateFindingStatus(
+    findingId: string,
+    status: FindingStatus,
+    caller: Caller,
+  ): Promise<void> {
     const finding = await this.findingRepository.findOne({ where: { id: findingId } });
     if (!finding) throw new NotFoundException('Finding not found.');
     if (!isAdmin(caller) && finding.organizationId !== caller.organizationId) {
@@ -139,5 +162,63 @@ export class ScansService {
     }
 
     await this.findingRepository.update(findingId, { status });
+  }
+
+  // Reset quota on first access of a new month
+  public async getDashboardStats(caller: Caller): Promise<{
+    totalProjects: number;
+    totalScans: number;
+    openFindings: number;
+    resolvedFindings: number;
+    recentScans: ScanEntity[];
+  }> {
+    const orgFilter = isAdmin(caller) ? {} : { organizationId: caller.organizationId! };
+
+    const [totalProjects, totalScans, openFindings, resolvedFindings, recentScans] =
+      await Promise.all([
+        this.projectRepository.count({ where: orgFilter }),
+        this.scanRepository.count({ where: orgFilter }),
+        this.findingRepository.count({ where: { ...orgFilter, status: In(['open', 'reopened']) } }),
+        this.findingRepository.count({
+          where: { ...orgFilter, status: In(['resolved', 'auto_resolved']) },
+        }),
+        this.scanRepository.find({
+          where: orgFilter,
+          order: { createdAt: 'DESC' },
+          take: 10,
+        }),
+      ]);
+
+    return { totalProjects, totalScans, openFindings, resolvedFindings, recentScans };
+  }
+
+  public async getTopFindings(caller: Caller, limit = 5) {
+    const orgFilter = isAdmin(caller) ? {} : { organizationId: caller.organizationId! };
+
+    return this.findingRepository.find({
+      where: {
+        ...orgFilter,
+        status: In(['open', 'reopened']),
+        severity: 'error' as FindingSeverity,
+      },
+      order: { createdAt: 'DESC' },
+      take: limit,
+    });
+  }
+
+  private resetQuotaIfNewMonth(org: {
+    id: string;
+    updatedAt: Date;
+    scansUsedThisMonth: number;
+  }): void {
+    const now = new Date();
+    const lastUpdate = new Date(org.updatedAt);
+    if (
+      now.getMonth() !== lastUpdate.getMonth() ||
+      now.getFullYear() !== lastUpdate.getFullYear()
+    ) {
+      org.scansUsedThisMonth = 0;
+      this.organizationRepository.update(org.id, { scansUsedThisMonth: 0 }).catch(() => {});
+    }
   }
 }

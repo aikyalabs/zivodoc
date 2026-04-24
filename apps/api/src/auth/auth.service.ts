@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { addMinutes, addSeconds } from 'date-fns';
@@ -28,8 +29,6 @@ export class AuthService {
     return this.sessionRepository.findValidSession(token);
   }
 
-  // ── Google OAuth ──
-
   public async handleGoogleAuth(profile: {
     googleId: string;
     email: string;
@@ -52,8 +51,6 @@ export class AuthService {
     return this.createSession(user.id);
   }
 
-  // ── Email OTP ──
-
   public async sendOtp(email: string): Promise<void> {
     await this.otpService.sendOtp(email);
   }
@@ -74,7 +71,16 @@ export class AuthService {
     return this.createSession(user.id);
   }
 
-  // ── Session management ──
+  public async completeOnboarding(
+    userId: string,
+    caller: { id: string; role: string; organizationId: string | null },
+  ): Promise<void> {
+    await this.usersService.update(
+      userId,
+      { onboardingCompleted: true },
+      caller as import('@src/auth/request-user.decorator').Caller,
+    );
+  }
 
   public async logout(token: string): Promise<void> {
     await this.invalidateSession(token);
@@ -95,8 +101,6 @@ export class AuthService {
     return this.createSession(session.userId);
   }
 
-  // ── Private helpers ──
-
   private async findOrCreateUser(data: {
     email: string;
     firstName: string;
@@ -106,7 +110,6 @@ export class AuthService {
   }) {
     const existing = await this.usersService.findByEmail(data.email);
     if (existing) {
-      // Link Google account if not already linked
       if (data.googleId && !existing.googleId) {
         existing.googleId = data.googleId;
         if (data.avatar) existing.avatar = data.avatar;
@@ -114,8 +117,7 @@ export class AuthService {
       return { user: existing, isNew: false };
     }
 
-    // New user — auto-create org
-    const slug = `${data.email.split('@')[0]}-${Math.random().toString(36).slice(2, 8)}`;
+    const slug = `${data.email.split('@')[0]}-${crypto.randomBytes(4).toString('hex')}`;
     const org = await this.organizationsService.create({
       name: `${data.firstName || data.email.split('@')[0]}'s workspace`,
       slug,

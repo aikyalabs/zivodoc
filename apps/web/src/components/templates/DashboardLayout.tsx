@@ -1,4 +1,7 @@
-import { Outlet, useMatches } from '@tanstack/react-router';
+import { Outlet, useMatches, useNavigate, useLocation } from '@tanstack/react-router';
+import { useEffect } from 'react';
+
+import { useProfile } from '@src/hooks/useProfile';
 
 import {
   Breadcrumb,
@@ -24,6 +27,9 @@ import { ThemeToggle } from '@src/components/molecules/ThemeToggle';
 import { UserNav } from '@src/components/molecules/UserNav';
 import { navigation } from '@src/lib/navigation';
 
+// ID prefixes used by entities — skip these in breadcrumbs
+const ID_PREFIXES = ['proj_', 'scan_', 'fnd_', 'user_', 'org_', 'role_'];
+
 function buildBreadcrumbs(matches: { pathname: string }[]) {
   const crumbs: { label: string; href: string }[] = [];
 
@@ -31,13 +37,14 @@ function buildBreadcrumbs(matches: { pathname: string }[]) {
     const path = match.pathname;
     if (path === '/' || path === '/_authentication') continue;
 
-    // Extract the last segment and format it
     const segments = path.split('/').filter(Boolean);
     const last = segments[segments.length - 1];
     if (!last) continue;
 
-    const label = last.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    // Skip segments that are entity IDs — the page itself handles showing the name
+    if (ID_PREFIXES.some((prefix) => last.toLowerCase().startsWith(prefix))) continue;
 
+    const label = last.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     crumbs.push({ label, href: path });
   }
 
@@ -47,6 +54,22 @@ function buildBreadcrumbs(matches: { pathname: string }[]) {
 export function DashboardLayout() {
   const matches = useMatches();
   const breadcrumbs = buildBreadcrumbs(matches);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { data: profile, isLoading: isLoadingProfile } = useProfile();
+
+  const isOnboardingRoute = location.pathname.includes('/onboarding');
+
+  useEffect(() => {
+    if (isLoadingProfile || isOnboardingRoute) return;
+    if (profile && !profile.onboardingCompleted) {
+      navigate({ to: '/onboarding' });
+    }
+  }, [profile, isLoadingProfile, isOnboardingRoute]);
+
+  if (isOnboardingRoute) {
+    return <Outlet />;
+  }
 
   return (
     <SidebarProvider>
@@ -88,7 +111,7 @@ export function DashboardLayout() {
             <UserNav />
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-6 pb-16">
           <Outlet />
         </main>
       </SidebarInset>

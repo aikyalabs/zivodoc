@@ -14,6 +14,7 @@ import { OrganizationEntity } from './organization.entity';
 @Index(['category'])
 @Index(['severity'])
 @Index(['status'])
+@Index(['fingerprint', 'projectId'])
 export class FindingEntity extends BaseEntity {
   @BeforeInsert()
   generateId() {
@@ -67,4 +68,20 @@ export class FindingEntity extends BaseEntity {
 
   @Column({ type: 'jsonb', nullable: true })
   rawData!: Record<string, unknown> | null;
+
+  /** Deterministic key for matching findings across scans: category|source|title_hash */
+  @Column({ type: 'varchar', length: 100, nullable: false, default: '' })
+  fingerprint!: string;
+
+  /** The scan where this finding was first detected */
+  @Column({ type: 'varchar', length: 50, nullable: false, default: '' })
+  firstSeenScanId!: string;
+
+  /** The most recent scan where this finding was detected */
+  @Column({ type: 'varchar', length: 50, nullable: false, default: '' })
+  lastSeenScanId!: string;
+
+  /** How many consecutive scans this finding has appeared in */
+  @Column({ type: 'int', nullable: false, default: 1 })
+  seenCount!: number;
 }

@@ -20,9 +20,7 @@ function classifyLink(href: string, baseUrl: string): 'internal' | 'external' | 
  * Extract links and code blocks from a Cheerio-loaded page.
  *
  * The `$` parameter is a CheerioAPI loaded document.
- * We type it as `any` to avoid coupling to cheerio types at the package level.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function extractFromPage(
   $: CheerioAPI,
   pageUrl: string,
@@ -90,7 +88,6 @@ function resolveHref(href: string, baseUrl: string): string {
 /**
  * Extract the page title from a Cheerio-loaded document.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function extractTitle($: CheerioAPI): string | null {
   // Try <h1> first, then <title>
   const h1 = $('h1').first().text().trim();
@@ -103,7 +100,6 @@ export function extractTitle($: CheerioAPI): string | null {
 /**
  * Extract the visible text length from a Cheerio-loaded document.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function extractTextLength($: CheerioAPI): number {
   return $('body').text().trim().length;
 }

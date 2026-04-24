@@ -37,8 +37,6 @@ export class AuthController {
     private readonly config: ConfigService<AppConfig, true>,
   ) {}
 
-  // ── Profile ──
-
   @ZodResponse({ type: AuthProfileResponse })
   @Get('profile')
   getProfile(@Req() req: AuthenticatedRequest, @RequestUser() user: AuthUser) {
@@ -58,16 +56,12 @@ export class AuthController {
     });
   }
 
-  // ── Session verification ──
-
   @ZodResponse({ type: AuthVerifySessionResponse })
   @Public()
   @Get()
   verifySession(@Req() req: AuthenticatedRequest, @RequestUser() user: AuthUser | undefined) {
     return apiOkResponse({ expiresAt: user ? (req.authSession?.expiresAt ?? null) : null });
   }
-
-  // ── Refresh token ──
 
   @ZodResponse({ type: AuthSessionResponse })
   @Patch()
@@ -78,14 +72,10 @@ export class AuthController {
     return apiOkResponse({ token: session.token });
   }
 
-  // ── Google OAuth ──
-
   @Public()
   @Get('google')
   @UseGuards(PassportAuthGuard('google'))
-  googleAuth() {
-    // Passport redirects to Google
-  }
+  googleAuth() {}
 
   @Public()
   @Get('google/callback')
@@ -104,8 +94,6 @@ export class AuthController {
     res.redirect(`${frontendUrl}/auth/callback?token=${session.token}`);
   }
 
-  // ── Email OTP ──
-
   @ZodResponse({ type: OtpSendResponse })
   @Public()
   @Post('otp/send')
@@ -122,20 +110,11 @@ export class AuthController {
     return apiOkResponse({ token: session.token });
   }
 
-  // ── Onboarding ──
-
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('onboarding')
-  async completeOnboarding(@RequestUser() user: AuthUser) {
-    // Directly update via service
-    await this.authService['usersService'].update(
-      user.id,
-      { onboardingCompleted: true },
-      { id: user.id, role: user.role, organizationId: user.organizationId },
-    );
+  async completeOnboarding(@RequestUser() user: AuthUser): Promise<void> {
+    await this.authService.completeOnboarding(user.id, user);
   }
-
-  // ── Logout ──
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()

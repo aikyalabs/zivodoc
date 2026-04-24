@@ -19,6 +19,11 @@ export const findingModelSchema = z.strictObject({
   suggestion: z.string().nullable(),
   status: z.enum(FindingStatus),
   rawData: z.record(z.unknown()).nullable(),
+  // Tracking fields for cross-scan reconciliation
+  fingerprint: z.string(),
+  firstSeenScanId: z.string(),
+  lastSeenScanId: z.string(),
+  seenCount: z.number(),
   createdAt: timestamp,
   updatedAt: timestamp,
 });

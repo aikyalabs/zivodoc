@@ -36,6 +36,9 @@ export class ProjectEntity extends BaseEntity {
   @Column({ type: 'int', nullable: false, default: 500 })
   maxPages!: number;
 
+  @Column({ type: 'varchar', length: 10, nullable: false, default: 'manual' })
+  scanSchedule!: 'manual' | 'daily' | 'weekly';
+
   @Column({ type: 'varchar', length: 50, nullable: false })
   organizationId!: string;
 

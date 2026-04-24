@@ -9,11 +9,9 @@ import { Input } from '@src/components/atoms/input';
 import { Label } from '@src/components/atoms/label';
 import { Separator } from '@src/components/atoms/separator';
 import { useSession } from '@src/hooks/useSession';
-import { apiClient } from '@src/lib/queries/defaultQueryFn';
+import { API_URL, apiClient } from '@src/lib/queries/defaultQueryFn';
 
 import type { ApiOkResponse } from '@zivodoc/shared';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const Route = createFileRoute('/(public)/login')({
   component: LoginPage,
