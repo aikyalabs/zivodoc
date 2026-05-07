@@ -7,5 +7,5 @@ export default defineConfig({
   clean: true,
   target: 'esnext',
   dts: true,
-  format: ['esm'],
+  format: ['esm', 'cjs'],
 });
