@@ -43,6 +43,7 @@
     "cookie-parser": "^1.4.7",
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
+    "express": "^5.2.1",
     "ioredis": "^5.10.1",
     "nestjs-zod": "^5.2.1",
     "openai": "^6.36.0",
