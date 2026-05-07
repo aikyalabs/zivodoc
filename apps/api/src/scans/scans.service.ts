@@ -14,6 +14,7 @@ import {
   FindingRepository,
   ProjectRepository,
   OrganizationRepository,
+  GitHubRepoLinkRepository,
 } from '@db/repositories';
 import { Caller, isAdmin } from '@src/auth/request-user.decorator';
 import { FindingCategory, FindingSeverity, FindingStatus, ScanMode } from '@zivodoc/shared';
@@ -25,6 +26,7 @@ export class ScansService {
     private readonly findingRepository: FindingRepository,
     private readonly projectRepository: ProjectRepository,
     private readonly organizationRepository: OrganizationRepository,
+    private readonly repoLinkRepository: GitHubRepoLinkRepository,
     @InjectQueue('scan') private readonly scanQueue: Queue,
   ) {}
 
@@ -71,6 +73,8 @@ export class ScansService {
 
     const saved = await this.scanRepository.save(scan);
 
+    const repoLink = await this.repoLinkRepository.findByProjectId(project.id);
+
     // Enqueue FIRST, increment quota AFTER — if enqueue fails, quota isn't wasted
     await this.scanQueue.add(
       'scan.execute',
@@ -84,6 +88,13 @@ export class ScansService {
         docPaths: project.docPaths,
         scanMode: saved.mode,
         maxPages: project.maxPages,
+        openapiSpecUrl: project.openapiSpecUrl,
+        ...(repoLink && {
+          githubInstallationId: repoLink.installationId,
+          repoFullName: repoLink.repoFullName,
+          checkRunsEnabled: repoLink.checkRunsEnabled,
+          prCommentsEnabled: repoLink.prCommentsEnabled,
+        }),
       },
       { attempts: 1, removeOnComplete: true, removeOnFail: false },
     );
@@ -93,6 +104,82 @@ export class ScansService {
       'scansUsedThisMonth',
       1,
     );
+
+    return saved;
+  }
+
+  public async uploadResults(
+    projectId: string,
+    data: {
+      pagesScanned: number;
+      codeBlocksFound: number;
+      linksChecked: number;
+      duration: number;
+      triggerSource?: string;
+      findings: Array<{
+        category: string;
+        severity: string;
+        confidence: string;
+        source: string;
+        line: number;
+        title: string;
+        description: string;
+        suggestion?: string;
+        evidence?: Record<string, unknown>;
+      }>;
+    },
+    caller: Caller,
+  ): Promise<ScanEntity> {
+    const project = await this.projectRepository.findOne({ where: { id: projectId } });
+    if (!project) throw new NotFoundException('Project not found.');
+    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+      throw new NotFoundException('Project not found.');
+    }
+
+    const scan = this.scanRepository.create({
+      projectId: project.id,
+      organizationId: project.organizationId,
+      mode: project.scanMode,
+      status: 'completed',
+      triggerSource: data.triggerSource ?? 'cli',
+      pagesScanned: data.pagesScanned,
+      codeBlocksFound: data.codeBlocksFound,
+      linksChecked: data.linksChecked,
+      findingsCount: data.findings.filter((f) => f.severity === 'error' || f.severity === 'warning')
+        .length,
+      duration: data.duration,
+      startedAt: new Date(Date.now() - data.duration),
+      completedAt: new Date(),
+    });
+    const saved = await this.scanRepository.save(scan);
+
+    if (data.findings.length > 0) {
+      const { FindingEntity } = await import('@db/entities');
+      const entities = data.findings.map((f) => {
+        const entity = new FindingEntity();
+        entity.scanId = saved.id;
+        entity.projectId = project.id;
+        entity.organizationId = project.organizationId;
+        entity.category = f.category as FindingCategory;
+        entity.severity = f.severity as FindingSeverity;
+        entity.source = f.source;
+        entity.line = f.line ?? 0;
+        entity.title = f.title;
+        entity.description = f.description;
+        entity.suggestion = f.suggestion ?? null;
+        entity.status = 'open';
+        entity.fingerprint = `${f.category}|${f.source}|${f.line}`;
+        entity.firstSeenScanId = saved.id;
+        entity.lastSeenScanId = saved.id;
+        entity.seenCount = 1;
+        entity.rawData = { confidence: f.confidence, evidence: f.evidence ?? null };
+        return entity;
+      });
+
+      for (let i = 0; i < entities.length; i += 100) {
+        await this.findingRepository.save(entities.slice(i, i + 100));
+      }
+    }
 
     return saved;
   }
@@ -218,7 +305,9 @@ export class ScansService {
       now.getFullYear() !== lastUpdate.getFullYear()
     ) {
       org.scansUsedThisMonth = 0;
-      this.organizationRepository.update(org.id, { scansUsedThisMonth: 0 }).catch(() => {});
+      this.organizationRepository.update(org.id, { scansUsedThisMonth: 0 }).catch(() => {
+        // Non-critical: quota will reset on next check
+      });
     }
   }
 }

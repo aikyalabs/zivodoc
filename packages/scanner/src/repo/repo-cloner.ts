@@ -11,7 +11,11 @@ export interface CloneResult {
 /**
  * Shallow clone a git repository to a temp directory.
  */
-export async function cloneRepo(repoUrl: string, branch?: string): Promise<CloneResult> {
+export async function cloneRepo(
+  repoUrl: string,
+  branch?: string,
+  authToken?: string,
+): Promise<CloneResult> {
   const tmpDir = path.join(
     os.tmpdir(),
     `zivodoc-repo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -25,7 +29,15 @@ export async function cloneRepo(repoUrl: string, branch?: string): Promise<Clone
     cloneOptions.push('--branch', branch);
   }
 
-  await git.clone(repoUrl, tmpDir, cloneOptions);
+  let cloneUrl = repoUrl;
+  if (authToken) {
+    const url = new URL(repoUrl);
+    url.username = 'x-access-token';
+    url.password = authToken;
+    cloneUrl = url.toString();
+  }
+
+  await git.clone(cloneUrl, tmpDir, cloneOptions);
 
   return {
     localPath: tmpDir,

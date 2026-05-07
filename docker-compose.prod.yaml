@@ -1,19 +1,19 @@
 services:
   db:
-    image: postgres:17-alpine
+    image: pgvector/pgvector:pg17
     environment:
-      POSTGRES_DB: saas_template
+      POSTGRES_DB: zivodoc
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d saas_template"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d zivodoc"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - saas
+      - zivodoc
     restart: unless-stopped
 
   redis:
@@ -21,19 +21,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - saas
-    restart: unless-stopped
-
-  minio:
-    image: minio/minio:latest
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
-    volumes:
-      - minio_data:/data
-    command: server /data --console-address ":9001"
-    networks:
-      - saas
+      - zivodoc
     restart: unless-stopped
 
   api:
@@ -46,17 +34,14 @@ services:
       NODE_ENV: production
       PORT: 3000
       HOST: 0.0.0.0
-      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@db:5432/saas_template
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@db:5432/zivodoc
       CORS_HOSTS: ${CORS_HOSTS:-http://localhost:8080}
-      MINIO_ENDPOINT: http://minio:9000
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       REDIS_URL: redis://redis:6379
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - saas
+      - zivodoc
     restart: unless-stopped
 
   web:
@@ -68,14 +53,13 @@ services:
     depends_on:
       - api
     networks:
-      - saas
+      - zivodoc
     restart: unless-stopped
 
 networks:
-  saas:
+  zivodoc:
     driver: bridge
 
 volumes:
   db_data:
   redis_data:
-  minio_data:

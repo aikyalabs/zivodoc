@@ -8,6 +8,8 @@ export interface ScanOptions {
   docPaths?: string[];
   maxPages?: number;
   concurrency?: number;
+  authToken?: string;
+  openapiSpecUrl?: string;
 }
 
 export type FindingSeverity = 'error' | 'warning' | 'info';
@@ -27,6 +29,8 @@ export type FindingCategory =
   | 'syntax_error'
   | 'empty_code_block'
   | 'missing_code_lang'
+  | 'runtime_error'
+  | 'type_error'
   | 'leaked_secret'
   | 'insecure_link'
   | 'internal_url'
@@ -40,7 +44,10 @@ export type FindingCategory =
   | 'placeholder_text'
   | 'outdated_date'
   | 'duplicate_content'
-  | 'stale_ref';
+  | 'stale_ref'
+  | 'missing_endpoint'
+  | 'undocumented_endpoint'
+  | 'wrong_http_method';
 
 export interface FindingEvidence {
   /** The exact text/snippet that triggered the finding */
@@ -113,6 +120,13 @@ export interface CodeCheckResult {
   errors: { message: string; line: number; column: number }[];
 }
 
+export interface CodeExecutionResult {
+  block: CodeBlock;
+  executed: boolean;
+  skipReason?: string;
+  error?: { type: string; message: string };
+}
+
 export type ScanStepName =
   | 'crawl'
   | 'check_links'
@@ -120,6 +134,7 @@ export type ScanStepName =
   | 'check_security'
   | 'check_structure'
   | 'check_content'
+  | 'check_openapi'
   | 'report';
 
 export interface ScanStep {
@@ -168,4 +183,5 @@ export interface ScanResult {
   steps: ScanStep[];
   report: ScanReport;
   duration: number;
+  pages: ScannedPage[];
 }

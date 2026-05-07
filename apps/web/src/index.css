@@ -2,139 +2,177 @@
 
 @custom-variant dark (&:is(.dark *));
 
-:root {
-  --radius: 0.375rem;
-  --sidebar-width: 15rem;
-  --sidebar-width-icon: 3rem;
-
-  /*
-   * ── Light theme ──
-   * Surface hierarchy: sidebar(dark) → bg(warm gray) → card(white) → muted(light fill)
-   * Clear contrast between every layer
-   */
-  --background: #F8F8FA;
-  --foreground: #0C0C0D;
-  --card: #FFFFFF;
-  --card-foreground: #0C0C0D;
-  --popover: #FFFFFF;
-  --popover-foreground: #0C0C0D;
-  --primary: #0C0C0D;
-  --primary-foreground: #F8F8FA;
-  --secondary: #F0F0F2;
-  --secondary-foreground: #0C0C0D;
-  --muted: #F0F0F2;
-  --muted-foreground: #6B6B76;
-  --accent: #EAEAEE;
-  --accent-foreground: #0C0C0D;
-  --destructive: #E5484D;
-  --border: #E4E4E9;
-  --input: #D8D8DE;
-  --ring: #0C0C0D;
-
-  /* Chart */
-  --chart-1: #10B981;
-  --chart-2: #3B82F6;
-  --chart-3: #F59E0B;
-  --chart-4: #EF4444;
-  --chart-5: #8B5CF6;
-
-  /* Sidebar — always dark (like Linear, Twenty, Notion) */
-  --sidebar: #0C0C0D;
-  --sidebar-foreground: #87878F;
-  --sidebar-primary: #F5F5F5;
-  --sidebar-primary-foreground: #0C0C0D;
-  --sidebar-accent: #1C1C1E;
-  --sidebar-accent-foreground: #F5F5F5;
-  --sidebar-border: #1E1E21;
-  --sidebar-ring: #555555;
-
-  /* Status */
-  --success: #10B981;
-  --warning: #F59E0B;
-  --info: #3B82F6;
-}
-
-/*
- * ── Dark theme — matching zivodoc.com brand ──
- * Surface hierarchy: sidebar(#0C0C0D) → bg(#111113) → card(#161618) → muted(#1C1C1E)
- * Each layer is a deliberate step lighter
- */
-.dark {
-  --background: #111113;
-  --foreground: #EDEDEF;
-  --card: #161618;
-  --card-foreground: #EDEDEF;
-  --popover: #161618;
-  --popover-foreground: #EDEDEF;
-  --primary: #EDEDEF;
-  --primary-foreground: #0C0C0D;
-  --secondary: #1C1C1E;
-  --secondary-foreground: #EDEDEF;
-  --muted: #1C1C1E;
-  --muted-foreground: #87878F;
-  --accent: #222224;
-  --accent-foreground: #EDEDEF;
-  --destructive: #F87171;
-  --border: #1E1E21;
-  --input: #2A2A2E;
-  --ring: #555558;
-
-  --sidebar: #0C0C0D;
-  --sidebar-foreground: #87878F;
-  --sidebar-primary: #EDEDEF;
-  --sidebar-primary-foreground: #0C0C0D;
-  --sidebar-accent: #1C1C1E;
-  --sidebar-accent-foreground: #EDEDEF;
-  --sidebar-border: #1E1E21;
-  --sidebar-ring: #555558;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-info: var(--info);
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
-  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --shadow-panel: 0 0 0 1px var(--color-border), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-overlay: 0 20px 60px rgba(0, 0, 0, 0.25);
+
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--panel);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--bg-1);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--text);
+  --color-primary-foreground: var(--bg);
+  --color-secondary: var(--bg-2);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--bg-2);
+  --color-muted-foreground: var(--text-3);
+  --color-accent: var(--bg-hover);
+  --color-accent-foreground: var(--text);
+  --color-destructive: var(--red);
+  --color-border: var(--border-1);
+  --color-input: var(--border-2);
+  --color-ring: var(--accent-ring);
+
+  --color-sidebar: var(--panel);
+  --color-sidebar-foreground: var(--text-2);
+  --color-sidebar-primary: var(--text);
+  --color-sidebar-primary-foreground: var(--bg);
+  --color-sidebar-accent: var(--bg-hover);
+  --color-sidebar-accent-foreground: var(--text);
+  --color-sidebar-border: var(--border-1);
+  --color-sidebar-ring: var(--accent-ring);
+
+  --color-success: var(--green);
+  --color-warning: var(--amber);
+  --color-info: var(--blue);
+
+  --sidebar-width: 240px;
+  --sidebar-width-icon: 64px;
+}
+
+/* Light theme (default for :root) */
+:root {
+  --bg: #f6f6f4;
+  --bg-1: #ffffff;
+  --bg-2: #fafaf8;
+  --bg-3: #f1f1ee;
+  --bg-hover: #eeeeea;
+  --panel: #ffffff;
+  --border-1: #e6e6e1;
+  --border-2: #dcdcd6;
+  --border-3: #c9c9c2;
+  --text: #141518;
+  --text-2: #4a4d55;
+  --text-3: #6f727b;
+  --text-4: #9a9ea7;
+
+  --accent-ring: rgba(20, 21, 24, 0.2);
+  --accent-tint: rgba(20, 21, 24, 0.06);
+
+  --green: #1f9d5b;
+  --amber: #e8b646;
+  --blue: #2f6feb;
+  --red: #c94343;
+  --gray-dot: #9a9ea7;
+}
+
+/* Dark theme — matching plate-dash / zivodoc.com brand */
+.dark {
+  --bg: #0a0b0d;
+  --bg-1: #0f1013;
+  --bg-2: #131519;
+  --bg-3: #181a1f;
+  --bg-hover: #1c1f25;
+  --panel: #0e0f12;
+  --border-1: #1e2127;
+  --border-2: #262a32;
+  --border-3: #343943;
+  --text: #e7e9ee;
+  --text-2: #aeb3be;
+  --text-3: #7c818d;
+  --text-4: #565b66;
+
+  --accent-ring: rgba(231, 233, 238, 0.25);
+  --accent-tint: rgba(231, 233, 238, 0.08);
+
+  --green: #52c08a;
+  --amber: #e8b646;
+  --blue: #5aa9ff;
+  --red: #ed6b6b;
+  --gray-dot: #6a707b;
+
+  --shadow-panel: 0 0 0 1px var(--border-1), 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-overlay: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01';
+  letter-spacing: -0.005em;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+::selection {
+  background: var(--accent-tint);
+  color: var(--text);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-3);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible,
+[role='button']:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-ring);
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.55; }
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 @layer base {
   * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  }
-  ::selection {
-    background: var(--primary);
-    color: var(--primary-foreground);
+    border-color: var(--border-1);
   }
 }

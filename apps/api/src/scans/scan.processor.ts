@@ -5,6 +5,9 @@ import { In, Not } from 'typeorm';
 
 import { ScanRepository, FindingRepository } from '@db/repositories';
 import { FindingEntity } from '@db/entities';
+import { GitHubAppService } from '@src/github/github-app.service';
+import { GitHubFeedbackService } from '@src/github/github-feedback.service';
+import { ChatIndexerService } from '@src/chat/chat-indexer.service';
 import type { FindingCategory, FindingSeverity } from '@zivodoc/shared';
 
 interface ScanJobPayload {
@@ -17,6 +20,13 @@ interface ScanJobPayload {
   docPaths?: string[];
   scanMode: string;
   maxPages: number;
+  openapiSpecUrl?: string | null;
+  githubInstallationId?: number;
+  commitSha?: string;
+  prNumber?: number;
+  repoFullName?: string;
+  checkRunsEnabled?: boolean;
+  prCommentsEnabled?: boolean;
 }
 
 interface ScannerFinding {
@@ -28,7 +38,34 @@ interface ScannerFinding {
   title: string;
   description: string;
   suggestion?: string;
-  evidence?: Record<string, unknown>;
+  evidence: {
+    snippet: string;
+    context?: string;
+    httpStatus?: number;
+    responseTimeMs?: number;
+    redirectChain?: string[];
+    matchedPattern?: string;
+    expected?: string;
+    actual?: string;
+  };
+}
+
+interface ScanStep {
+  name: string;
+  label: string;
+  status: 'pending' | 'running' | 'completed' | 'skipped';
+  startedAt?: number;
+  completedAt?: number;
+  durationMs?: number;
+  itemsProcessed?: number;
+  findingsCount?: number;
+}
+
+interface ScannerPage {
+  url?: string;
+  filePath?: string;
+  title: string | null;
+  rawContent?: string;
 }
 
 interface ScannerResult {
@@ -36,9 +73,10 @@ interface ScannerResult {
   codeBlocksFound: number;
   linksChecked: number;
   findings: ScannerFinding[];
-  steps: unknown[];
+  steps: ScanStep[];
   report: { markdown: string; summary: Record<string, unknown> };
   duration: number;
+  pages: ScannerPage[];
 }
 
 /** Fingerprint uses category + normalized source path + line — title-independent so minor wording changes don't create duplicate findings */
@@ -63,6 +101,9 @@ export class ScanProcessor extends WorkerHost {
   constructor(
     private readonly scanRepository: ScanRepository,
     private readonly findingRepository: FindingRepository,
+    private readonly githubAppService: GitHubAppService,
+    private readonly githubFeedbackService: GitHubFeedbackService,
+    private readonly chatIndexer: ChatIndexerService,
   ) {
     super();
   }
@@ -78,6 +119,7 @@ export class ScanProcessor extends WorkerHost {
       docPaths,
       scanMode,
       maxPages,
+      openapiSpecUrl,
     } = job.data;
     const startTime = Date.now();
 
@@ -93,7 +135,9 @@ export class ScanProcessor extends WorkerHost {
         docPaths,
         scanMode,
         maxPages,
+        openapiSpecUrl,
         startTime,
+        githubInstallationId: job.data.githubInstallationId,
       });
 
       if (scanResult.pagesScanned === 0 && scanResult.findings.length === 0) {
@@ -122,17 +166,54 @@ export class ScanProcessor extends WorkerHost {
         linksChecked: scanResult.linksChecked,
         findingsCount: reconciled.open,
         duration: Date.now() - startTime,
+        steps: scanResult.steps,
       });
 
       this.logger.log(
         `Scan ${scanId}: ${reconciled.created} new, ${reconciled.carried} carried, ${reconciled.autoResolved} fixed, ${reconciled.reopened} regressions`,
       );
+
+      this.chatIndexer
+        .indexProject(projectId, organizationId, scanId, scanResult.pages)
+        .catch((err) => {
+          this.logger.warn(
+            `Chat indexing failed for project ${projectId}: ${err instanceof Error ? err.message : err}`,
+          );
+        });
+
+      if (job.data.githubInstallationId && job.data.commitSha && job.data.repoFullName) {
+        await this.githubFeedbackService.postResults({
+          installationId: job.data.githubInstallationId,
+          repoFullName: job.data.repoFullName,
+          commitSha: job.data.commitSha,
+          prNumber: job.data.prNumber,
+          checkRunsEnabled: job.data.checkRunsEnabled ?? true,
+          prCommentsEnabled: job.data.prCommentsEnabled ?? true,
+          findings: scanResult.findings.map((f) => ({
+            category: f.category,
+            severity: f.severity,
+            title: f.title,
+            source: f.source,
+            line: f.line ?? 0,
+          })),
+          stats: {
+            pagesScanned: scanResult.pagesScanned,
+            linksChecked: scanResult.linksChecked,
+            findingsCount: reconciled.open,
+            duration: Date.now() - startTime,
+          },
+        });
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Scan ${scanId} failed: ${message}`);
 
       // Clean up any partial findings created during this scan
-      await this.findingRepository.delete({ scanId, firstSeenScanId: scanId }).catch(() => {});
+      await this.findingRepository.delete({ scanId, firstSeenScanId: scanId }).catch((err) => {
+        this.logger.warn(
+          `Failed to clean up partial findings for scan ${scanId}: ${err instanceof Error ? err.message : err}`,
+        );
+      });
 
       await this.scanRepository.update(scanId, {
         status: 'failed',
@@ -150,11 +231,17 @@ export class ScanProcessor extends WorkerHost {
     docPaths?: string[];
     scanMode: string;
     maxPages: number;
+    openapiSpecUrl?: string | null;
     startTime: number;
+    githubInstallationId?: number;
   }): Promise<ScannerResult> {
-    const dynamicImport = new Function('specifier', 'return import(specifier)');
-    const scanner = await dynamicImport('@zivodoc/scanner');
-    return scanner.scan({
+    let authToken: string | undefined;
+    if (params.githubInstallationId) {
+      authToken = await this.githubAppService.getInstallationToken(params.githubInstallationId);
+    }
+
+    const scanner = await import('@zivodoc/scanner');
+    const result = await scanner.scan({
       mode: params.scanMode as 'site' | 'repo' | 'both',
       siteUrl: params.siteUrl ?? undefined,
       repoUrl: params.repoUrl ?? undefined,
@@ -162,7 +249,10 @@ export class ScanProcessor extends WorkerHost {
       docPaths: params.docPaths,
       maxPages: params.maxPages,
       concurrency: 5,
+      authToken,
+      openapiSpecUrl: params.openapiSpecUrl ?? undefined,
     });
+    return result as ScannerResult;
   }
 
   /**

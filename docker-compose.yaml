@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:17-alpine
+    image: pgvector/pgvector:pg17
     ports:
       - "5432:5432"
     environment:
@@ -18,7 +18,7 @@ services:
       - saas
 
   db-test:
-    image: postgres:17-alpine
+    image: pgvector/pgvector:pg17
     ports:
       - "15432:5432"
     environment:

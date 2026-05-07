@@ -30,14 +30,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@src/components/atoms/
 import { DataTable, type DataTableColumn } from '@src/components/molecules/DataTable';
 import { EmptyState } from '@src/components/molecules/EmptyState';
 import { FindingRow } from '@src/components/molecules/FindingRow';
+import { ScanProgress } from '@src/components/molecules/ScanProgress';
 import { StatCard } from '@src/components/molecules/StatCard';
 import { StatusBadge } from '@src/components/molecules/StatusBadge';
+import { ChatEmbedSnippet } from '@src/components/molecules/ChatEmbedSnippet';
 import { useProject } from '@src/hooks/queries/useProject';
+import { useScan } from '@src/hooks/queries/useScan';
 import { useScans } from '@src/hooks/queries/useScans';
 import { useProjectFindings } from '@src/hooks/queries/useProjectFindings';
 import { useTriggerScan } from '@src/hooks/mutations/useTriggerScan';
 import { useUpdateFinding } from '@src/hooks/mutations/useUpdateFinding';
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
+import { formatDuration, formatDateTime } from '@src/lib/formatters';
 
 import type { FindingCategory, FindingSeverity, FindingStatus } from '@zivodoc/shared';
 import type { z } from 'zod';
@@ -48,21 +52,6 @@ type Scan = z.output<typeof scanModelSchema>;
 export const Route = createFileRoute('/_authentication/projects/$projectId')({
   component: ProjectDetailPage,
 });
-
-function formatDuration(ms: number): string {
-  if (ms < 1000) return `${ms}ms`;
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-  return `${Math.floor(ms / 60000)}m ${Math.round((ms % 60000) / 1000)}s`;
-}
-
-function formatDate(date: string): string {
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 const scanColumns: DataTableColumn<Scan>[] = [
   {
@@ -103,7 +92,7 @@ const scanColumns: DataTableColumn<Scan>[] = [
     key: 'date',
     header: 'Date',
     className: 'text-right text-muted-foreground',
-    render: (row) => <span>{formatDate(row.createdAt)}</span>,
+    render: (row) => <span>{formatDateTime(row.createdAt)}</span>,
   },
 ];
 
@@ -138,9 +127,11 @@ function ProjectDetailContent({ projectId }: { projectId: string }) {
   const latestScan = latestScanResponse?.payload?.[0];
   const isScanRunning = latestScan?.status === 'pending' || latestScan?.status === 'running';
 
-  const [severity, setSeverity] = useState<string>('all');
-  const [category, setCategory] = useState<string>('all');
-  const [status, setStatus] = useState<string>('all');
+  const { data: pollingScan } = useScan(latestScan?.id ?? '', isScanRunning);
+
+  const [severity, setSeverity] = useState<FindingSeverity | 'all'>('all');
+  const [category, setCategory] = useState<FindingCategory | 'all'>('all');
+  const [status, setStatus] = useState<FindingStatus | 'all'>('all');
   const [findingPage, setFindingPage] = useState(0);
 
   // Project-level findings (not scan-level)
@@ -284,6 +275,14 @@ function ProjectDetailContent({ projectId }: { projectId: string }) {
         </div>
       )}
 
+      {pollingScan?.steps && isScanRunning && (
+        <ScanProgress steps={pollingScan.steps} scanStatus={pollingScan.status} />
+      )}
+
+      {latestScan?.steps && latestScan.status === 'completed' && !isScanRunning && (
+        <ScanProgress steps={latestScan.steps} scanStatus={latestScan.status} />
+      )}
+
       {scanCount > 0 && (
         <Tabs defaultValue="findings">
           <TabsList>
@@ -301,6 +300,7 @@ function ProjectDetailContent({ projectId }: { projectId: string }) {
                 {scanCount}
               </Badge>
             </TabsTrigger>
+            <TabsTrigger value="embed">Chat Embed</TabsTrigger>
           </TabsList>
 
           <TabsContent value="findings">
@@ -368,6 +368,8 @@ function ProjectDetailContent({ projectId }: { projectId: string }) {
                       <SelectItem value="syntax_error">Syntax Error</SelectItem>
                       <SelectItem value="todo_left">TODO Left</SelectItem>
                       <SelectItem value="internal_url">Internal URL</SelectItem>
+                      <SelectItem value="runtime_error">Runtime Error</SelectItem>
+                      <SelectItem value="type_error">Type Error</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button variant="outline" size="sm" onClick={handleExportCsv}>
@@ -474,6 +476,19 @@ function ProjectDetailContent({ projectId }: { projectId: string }) {
                 onPageChange: setScanPage,
               }}
             />
+          </TabsContent>
+
+          <TabsContent value="embed">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium">Embed the docs chatbot</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Drop this snippet into any docs page. The widget renders a floating bubble that
+                  answers questions using the content indexed from the most recent successful scan.
+                </p>
+              </div>
+              <ChatEmbedSnippet projectId={projectId} />
+            </div>
           </TabsContent>
         </Tabs>
       )}

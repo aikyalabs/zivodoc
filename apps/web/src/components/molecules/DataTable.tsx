@@ -189,7 +189,7 @@ export function DataTable<T>({
 
       {/* Table */}
       {!loading && displayData.length > 0 && (
-        <div className="rounded-lg border bg-card overflow-hidden">
+        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">

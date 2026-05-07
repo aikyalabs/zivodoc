@@ -25,7 +25,13 @@ export { discoverMarkdownFiles } from './repo/file-discoverer.js';
 export { validateCodeBlock, validateCodeBlocks } from './repo/code-validator.js';
 export { checkLinks } from './shared/link-checker.js';
 export { createFinding } from './shared/finding-builder.js';
+export { executeCodeBlocks, analyzeBlockForExecution } from './repo/code-executor.js';
 export { analyzeContent } from './analyze/content-analyzer.js';
+export {
+  fetchAndParseSpec,
+  extractSpecEndpoints,
+  validateOpenApi,
+} from './analyze/openapi-validator.js';
 export { generateReport } from './report/report-generator.js';
 
 import type {
@@ -42,10 +48,16 @@ import { crawlSite } from './crawl/site-crawler.js';
 import { cloneRepo } from './repo/repo-cloner.js';
 import { discoverMarkdownFiles } from './repo/file-discoverer.js';
 import { parseMarkdownFile } from './repo/markdown-parser.js';
-import { validateCodeBlocks } from './repo/code-validator.js';
+import { validateCodeBlocks, PARSEABLE_LANGUAGES } from './repo/code-validator.js';
+import { executeCodeBlocks } from './repo/code-executor.js';
 import { checkLinks } from './shared/link-checker.js';
-import { syntaxErrorFinding, createFinding } from './shared/finding-builder.js';
+import {
+  syntaxErrorFinding,
+  runtimeErrorFinding,
+  createFinding,
+} from './shared/finding-builder.js';
 import { analyzeContent } from './analyze/content-analyzer.js';
+import { fetchAndParseSpec, validateOpenApi } from './analyze/openapi-validator.js';
 import { generateReport } from './report/report-generator.js';
 
 function createStep(name: ScanStepName, label: string): ScanStep {
@@ -80,6 +92,7 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
     createStep('check_security', 'Security Scan'),
     createStep('check_structure', 'Structure Analysis'),
     createStep('check_content', 'Content Quality'),
+    createStep('check_openapi', 'OpenAPI Spec Validation'),
     createStep('report', 'Report Generation'),
   ];
 
@@ -114,7 +127,11 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
   if (options.mode === 'repo' || options.mode === 'both') {
     if (!options.repoUrl) throw new Error('repoUrl is required for repo/both scan modes');
 
-    const { localPath, cleanup } = await cloneRepo(options.repoUrl, options.branch);
+    const { localPath, cleanup } = await cloneRepo(
+      options.repoUrl,
+      options.branch,
+      options.authToken,
+    );
 
     try {
       const files = await discoverMarkdownFiles(localPath, options.docPaths);
@@ -187,6 +204,29 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
     }
   }
 
+  const jsBlocks = allCodeBlocks.filter((b) => {
+    const lang = b.language?.toLowerCase();
+    return lang != null && PARSEABLE_LANGUAGES.has(lang);
+  });
+
+  if (jsBlocks.length > 0) {
+    const execResults = await executeCodeBlocks(jsBlocks);
+    for (const result of execResults) {
+      if (result.error) {
+        codeFindings.push(
+          runtimeErrorFinding(
+            result.block.source,
+            result.block.lineStart,
+            result.block.language,
+            result.error.type,
+            result.error.message,
+            result.block.code,
+          ),
+        );
+      }
+    }
+  }
+
   findingsByStep.set('check_code', codeFindings);
   steps[2] = completeStep(steps[2], allCodeBlocks.length, codeFindings.length);
 
@@ -220,13 +260,38 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
   steps[4] = completeStep(steps[4], allPages.length, structureFindings.length);
   steps[5] = completeStep(steps[5], allPages.length, qualityFindings.length);
 
+  steps[6] = startStep(steps[6]);
+  const openapiFindings: Finding[] = [];
+  if (options.openapiSpecUrl) {
+    try {
+      const spec = await fetchAndParseSpec(options.openapiSpecUrl);
+      openapiFindings.push(...validateOpenApi(spec, allPages, options.openapiSpecUrl));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      openapiFindings.push(
+        createFinding({
+          category: 'missing_endpoint',
+          severity: 'info',
+          confidence: 'low',
+          source: options.openapiSpecUrl,
+          line: 0,
+          title: 'OpenAPI spec could not be loaded',
+          description: `Failed to fetch or parse the OpenAPI spec: ${message}`,
+          evidence: { snippet: options.openapiSpecUrl, actual: message },
+        }),
+      );
+    }
+  }
+  findingsByStep.set('check_openapi', openapiFindings);
+  steps[6] = completeStep(steps[6], 1, openapiFindings.length);
+
   const allFindings: Finding[] = [];
   for (const findings of findingsByStep.values()) {
     allFindings.push(...findings);
   }
   const deduped = deduplicateFindings(allFindings);
 
-  steps[6] = startStep(steps[6]);
+  steps[7] = startStep(steps[7]);
 
   const duration = Date.now() - startTime;
   const report = generateReport({
@@ -240,7 +305,7 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
     durationMs: duration,
   });
 
-  steps[6] = completeStep(steps[6], 1, 0);
+  steps[7] = completeStep(steps[7], 1, 0);
 
   return {
     mode: options.mode,
@@ -251,6 +316,7 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
     steps,
     report,
     duration,
+    pages: allPages,
   };
 }
 

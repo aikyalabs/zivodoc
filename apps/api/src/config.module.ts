@@ -27,15 +27,27 @@ const configValidationSchema = z.object({
   // Frontend
   FRONTEND_URL: z.string().default('http://localhost:5173'),
 
-  // MinIO
-  MINIO_ENDPOINT: z.coerce.string().default('http://localhost:9000'),
-  MINIO_ACCESS_KEY: z.coerce.string().default('minioadmin'),
-  MINIO_SECRET_KEY: z.coerce.string().default('minioadmin'),
-  MINIO_BUCKET: z.coerce.string().default('uploads'),
-
   // Scanning
   SCAN_MAX_PAGES: z.coerce.number().default(500),
   SCAN_CONCURRENCY: z.coerce.number().default(2),
+
+  // Encryption — used to encrypt user-provided AI provider keys at rest. 64-char hex (32 bytes).
+  ENCRYPTION_KEY: z
+    .string()
+    .default('0000000000000000000000000000000000000000000000000000000000000000'),
+
+  // Embeddings: 384-dim. Uses org's OpenAI BYOK key if set (text-embedding-3-small with
+  // dimensions:384), otherwise runs Xenova/bge-small-en-v1.5 locally via onnxruntime.
+  EMBEDDING_DIMENSIONS: z.coerce.number().default(384),
+  EMBEDDING_LOCAL_MODEL: z.string().default('Xenova/bge-small-en-v1.5'),
+  EMBEDDING_OPENAI_MODEL: z.string().default('text-embedding-3-small'),
+
+  // GitHub App
+  GITHUB_APP_ID: z.string().default(''),
+  GITHUB_APP_PRIVATE_KEY: z.string().default(''),
+  GITHUB_APP_WEBHOOK_SECRET: z.string().default(''),
+  GITHUB_APP_CLIENT_ID: z.string().default(''),
+  GITHUB_APP_CLIENT_SECRET: z.string().default(''),
 });
 
 export type AppConfig = z.infer<typeof configValidationSchema>;

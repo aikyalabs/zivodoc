@@ -2,7 +2,7 @@ import * as acorn from 'acorn';
 import type { CodeBlock, CodeCheckResult } from '../types.js';
 
 /** Languages that acorn can parse (JavaScript variants). */
-const PARSEABLE_LANGUAGES = new Set(['js', 'javascript', 'jsx', 'mjs', 'cjs']);
+export const PARSEABLE_LANGUAGES = new Set(['js', 'javascript', 'jsx', 'mjs', 'cjs']);
 
 /** Languages we attempt as JS (TypeScript blocks are skipped since acorn doesn't handle TS). */
 const TS_LANGUAGES = new Set(['ts', 'typescript', 'tsx']);

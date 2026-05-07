@@ -1,8 +1,6 @@
 import { createContext } from 'react';
 
-export const SESSION_TOKEN_STORAGE_KEY = 'session-token';
-
-export type SessionSignInFunction = (token: string) => void;
+export type SessionSignInFunction = () => void;
 export type SessionSignOutFunction = (timeout?: boolean) => void;
 
 export interface SessionContextType {

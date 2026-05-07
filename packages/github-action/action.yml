@@ -1,0 +1,116 @@
+name: 'zivodoc Docs QA'
+description: 'Scan documentation for broken links, code errors, and content issues'
+branding:
+  icon: 'search'
+  color: 'gray-dark'
+
+inputs:
+  url:
+    description: 'Docs site URL to scan'
+    required: false
+  repo-path:
+    description: 'Path to docs in the repository (default: docs/)'
+    required: false
+    default: 'docs/'
+  mode:
+    description: 'Scan mode: site, repo, or both'
+    required: false
+    default: 'repo'
+  max-pages:
+    description: 'Max pages to crawl for site mode'
+    required: false
+    default: '500'
+  fail-on-error:
+    description: 'Fail the CI step if error-severity findings exist'
+    required: false
+    default: 'true'
+  comment-on-pr:
+    description: 'Post findings as a PR comment'
+    required: false
+    default: 'true'
+
+outputs:
+  total-findings:
+    description: 'Total number of findings'
+  errors:
+    description: 'Number of error-severity findings'
+  warnings:
+    description: 'Number of warning-severity findings'
+  report:
+    description: 'Path to the scan report markdown file'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Install zivodoc CLI
+      shell: bash
+      run: npm install -g @zivodoc/cli@latest
+
+    - name: Install Playwright browsers
+      shell: bash
+      run: npx playwright install chromium --with-deps
+
+    - name: Run scan
+      id: scan
+      shell: bash
+      run: |
+        ARGS=""
+        if [ -n "${{ inputs.url }}" ]; then
+          ARGS="$ARGS --url ${{ inputs.url }}"
+        fi
+        if [ "${{ inputs.mode }}" = "repo" ] || [ "${{ inputs.mode }}" = "both" ]; then
+          ARGS="$ARGS --repo ${{ github.workspace }} --doc-paths ${{ inputs.repo-path }}"
+        fi
+        ARGS="$ARGS --mode ${{ inputs.mode }} --max-pages ${{ inputs.max-pages }} --json"
+
+        zivodoc scan $ARGS > /tmp/zivodoc-results.json 2>&1 || true
+
+        ERRORS=$(jq '.findings | map(select(.severity == "error")) | length' /tmp/zivodoc-results.json)
+        WARNINGS=$(jq '.findings | map(select(.severity == "warning")) | length' /tmp/zivodoc-results.json)
+        TOTAL=$(jq '.findings | length' /tmp/zivodoc-results.json)
+
+        echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+        echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+        echo "total-findings=$TOTAL" >> $GITHUB_OUTPUT
+
+        # Generate markdown report
+        jq -r '
+          "## zivodoc Scan Results\n\n" +
+          "| Metric | Value |\n|--------|-------|\n" +
+          "| Pages scanned | \(.pagesScanned) |\n" +
+          "| Links checked | \(.linksChecked) |\n" +
+          "| Duration | \(.duration / 1000 | floor)s |\n" +
+          "| **Findings** | **\(.findings | length)** |\n\n" +
+          if (.findings | length) > 0 then
+            "### Findings\n\n" +
+            "| Severity | Title | Source |\n|----------|-------|--------|\n" +
+            (.findings | map("| \(.severity) | \(.title) | \(.source) |") | join("\n")) +
+            "\n"
+          else
+            "✅ No issues found!\n"
+          end
+        ' /tmp/zivodoc-results.json > /tmp/zivodoc-report.md
+
+        echo "report=/tmp/zivodoc-report.md" >> $GITHUB_OUTPUT
+
+    - name: Comment on PR
+      if: inputs.comment-on-pr == 'true' && github.event_name == 'pull_request'
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        path: /tmp/zivodoc-report.md
+        header: zivodoc-scan
+
+    - name: Fail on errors
+      if: inputs.fail-on-error == 'true'
+      shell: bash
+      run: |
+        ERRORS=${{ steps.scan.outputs.errors }}
+        if [ "$ERRORS" -gt 0 ]; then
+          echo "::error::zivodoc found $ERRORS error(s) in your documentation"
+          exit 1
+        fi

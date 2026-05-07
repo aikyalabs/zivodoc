@@ -165,6 +165,30 @@ export function syntaxErrorFinding(
   });
 }
 
+export function runtimeErrorFinding(
+  source: string,
+  line: number,
+  language: string | null,
+  errorType: string,
+  errorMessage: string,
+  codeSnippet: string,
+): Finding {
+  return createFinding({
+    category: 'runtime_error',
+    severity: 'warning',
+    confidence: 'medium',
+    source,
+    line,
+    title: `${errorType} in ${language ?? 'code'} block`,
+    description: errorMessage,
+    suggestion: 'Fix the runtime error or add // @zivodoc-skip if this is an intentional snippet.',
+    evidence: {
+      snippet: codeSnippet.slice(0, 200),
+      actual: `${errorType}: ${errorMessage}`,
+    },
+  });
+}
+
 export function emptyCodeBlockFinding(source: string, line: number): Finding {
   return createFinding({
     category: 'empty_code_block',
@@ -343,6 +367,66 @@ export function placeholderFinding(
     evidence: {
       snippet: matchedText,
       context: context.slice(0, 200),
+    },
+  });
+}
+
+export function missingEndpointFinding(source: string, method: string, path: string): Finding {
+  return createFinding({
+    category: 'missing_endpoint',
+    severity: 'warning',
+    confidence: 'high',
+    source,
+    line: 0,
+    title: `Endpoint not documented: ${method} ${path}`,
+    description: `The OpenAPI spec defines ${method} ${path} but it is not referenced anywhere in the documentation.`,
+    suggestion: 'Add documentation for this endpoint or mark it as internal in the spec.',
+    evidence: { snippet: `${method} ${path}` },
+  });
+}
+
+export function undocumentedEndpointFinding(
+  source: string,
+  line: number,
+  method: string,
+  path: string,
+  context: string,
+): Finding {
+  return createFinding({
+    category: 'undocumented_endpoint',
+    severity: 'warning',
+    confidence: 'medium',
+    source,
+    line,
+    title: `Endpoint not in spec: ${method} ${path}`,
+    description: `Documentation references ${method} ${path}, but this endpoint does not exist in the OpenAPI spec. It may be stale or removed.`,
+    suggestion: 'Update the docs to remove the reference, or add the endpoint to the spec.',
+    evidence: { snippet: `${method} ${path}`, context: context.slice(0, 200) },
+  });
+}
+
+export function wrongHttpMethodFinding(
+  source: string,
+  line: number,
+  path: string,
+  docMethod: string,
+  specMethods: string[],
+  context: string,
+): Finding {
+  return createFinding({
+    category: 'wrong_http_method',
+    severity: 'error',
+    confidence: 'high',
+    source,
+    line,
+    title: `Wrong HTTP method for ${path}`,
+    description: `Docs use ${docMethod} ${path}, but the spec defines ${specMethods.join('/')} for this path.`,
+    suggestion: `Change to ${specMethods[0]} or update the spec.`,
+    evidence: {
+      snippet: `${docMethod} ${path}`,
+      context: context.slice(0, 200),
+      expected: specMethods.join('/'),
+      actual: docMethod,
     },
   });
 }

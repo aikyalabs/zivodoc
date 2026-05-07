@@ -39,6 +39,9 @@ export class ProjectEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 10, nullable: false, default: 'manual' })
   scanSchedule!: 'manual' | 'daily' | 'weekly';
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  openapiSpecUrl!: string | null;
+
   @Column({ type: 'varchar', length: 50, nullable: false })
   organizationId!: string;
 

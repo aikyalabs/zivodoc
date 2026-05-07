@@ -9,3 +9,5 @@ export * from './role';
 export * from './project';
 export * from './scan';
 export * from './finding';
+export * from './github';
+export * from './ai-provider';

@@ -41,7 +41,7 @@ function SettingsPage() {
   const handleSave = () => {
     if (!profile) return;
 
-    const data: Record<string, string> = {};
+    const data: { firstName?: string; lastName?: string; email?: string } = {};
     if (currentFirstName !== profile.firstName) data.firstName = currentFirstName;
     if (currentLastName !== profile.lastName) data.lastName = currentLastName;
     if (currentEmail !== profile.email) data.email = currentEmail;

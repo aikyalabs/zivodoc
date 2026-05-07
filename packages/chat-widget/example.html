@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>zivodoc chat widget — local demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+        max-width: 720px;
+        margin: 64px auto;
+        padding: 0 24px;
+        color: #0a0a0a;
+        line-height: 1.6;
+      }
+      code {
+        background: #f5f5f5;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Demo: zivodoc chat widget</h1>
+    <p>Bottom-right floating bubble → click to open.</p>
+    <p>
+      To embed in any docs site, drop one tag:
+    </p>
+    <pre><code>&lt;script
+  src="https://cdn.zivodoc.com/chat.js"
+  data-project="proj_xxx"
+  data-title="Ask the docs"
+  data-greeting="Hi! I can answer questions about our API."
+  data-theme="auto"
+  defer&gt;&lt;/script&gt;</code></pre>
+
+    <h3>Configuration</h3>
+    <ul>
+      <li><code>data-project</code> — required, the project ULID</li>
+      <li><code>data-api</code> — override API URL (defaults to api.zivodoc.com)</li>
+      <li><code>data-title</code> — header text</li>
+      <li><code>data-greeting</code> — first-load message</li>
+      <li><code>data-theme</code> — <code>auto</code>, <code>light</code>, or <code>dark</code></li>
+      <li><code>data-accent</code> — CSS color for primary button (e.g. <code>#7c3aed</code>)</li>
+      <li><code>data-position</code> — <code>bottom-right</code> (default) or <code>bottom-left</code></li>
+    </ul>
+
+    <script
+      src="./dist/chat.global.js"
+      data-project="proj_demo"
+      data-api="http://localhost:3000"
+      data-title="Ask the docs"
+      data-greeting="Hi! Ask anything about these docs."
+      data-theme="auto"
+      defer
+    ></script>
+  </body>
+</html>

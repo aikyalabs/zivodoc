@@ -23,6 +23,8 @@ import { Skeleton } from '@src/components/atoms/skeleton';
 import { EmptyState } from '@src/components/molecules/EmptyState';
 import { StatCard } from '@src/components/molecules/StatCard';
 import { StatusBadge } from '@src/components/molecules/StatusBadge';
+import { CATEGORY_LABELS } from '@src/lib/category-labels';
+import { formatRelativeTime } from '@src/lib/formatters';
 import { useProfile } from '@src/hooks/useProfile';
 import { useProjects } from '@src/hooks/queries/useProjects';
 import { useDashboardStats } from '@src/hooks/queries/useDashboardStats';
@@ -30,28 +32,6 @@ import { useDashboardStats } from '@src/hooks/queries/useDashboardStats';
 export const Route = createFileRoute('/_authentication/dashboard')({
   component: DashboardPage,
 });
-
-const CATEGORY_LABELS: Record<string, string> = {
-  broken_link: 'Broken Link',
-  broken_anchor: 'Broken Anchor',
-  redirect_chain: 'Redirect',
-  slow_link: 'Slow Link',
-  syntax_error: 'Syntax Error',
-  leaked_secret: 'Leaked Secret',
-  insecure_link: 'Insecure Link',
-  internal_url: 'Internal URL',
-  todo_left: 'TODO Left',
-  placeholder_text: 'Placeholder',
-};
-
-function formatRelativeTime(date: string): string {
-  const diff = Date.now() - new Date(date).getTime();
-  if (diff < 60_000) return 'Just now';
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
-  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
-  if (diff < 604_800_000) return `${Math.floor(diff / 86_400_000)}d ago`;
-  return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
 
 function DashboardPage() {
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
@@ -128,8 +108,8 @@ function DashboardPage() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between h-8">
                 <h2 className="text-sm font-medium">Recent Scans</h2>
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/projects" className="text-muted-foreground">
@@ -139,13 +119,13 @@ function DashboardPage() {
                 </Button>
               </div>
               {(stats?.recentScans?.length ?? 0) === 0 ? (
-                <div className="rounded-lg border border-dashed p-8 text-center">
+                <div className="rounded-xl border border-dashed p-8 text-center">
                   <p className="text-sm text-muted-foreground">
                     No scans yet. Run your first scan from a project.
                   </p>
                 </div>
               ) : (
-                <div className="rounded-lg border bg-card divide-y">
+                <div className="rounded-xl border bg-card shadow-sm divide-y flex-1">
                   {stats?.recentScans.slice(0, 6).map((scan) => {
                     const project = projects.find((p) => p.id === scan.projectId);
                     return (
@@ -178,10 +158,12 @@ function DashboardPage() {
               )}
             </div>
 
-            <div className="space-y-4">
-              <h2 className="text-sm font-medium">Critical Issues</h2>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between h-8">
+                <h2 className="text-sm font-medium">Critical Issues</h2>
+              </div>
               {(stats?.topFindings?.length ?? 0) === 0 ? (
-                <div className="rounded-lg border border-dashed p-8 text-center">
+                <div className="rounded-xl border border-dashed p-8 text-center">
                   <CheckCircle2 className="size-8 text-emerald-500 mx-auto mb-2" />
                   <p className="text-sm font-medium">No critical issues</p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -189,7 +171,7 @@ function DashboardPage() {
                   </p>
                 </div>
               ) : (
-                <div className="rounded-lg border bg-card divide-y">
+                <div className="rounded-xl border bg-card shadow-sm divide-y flex-1">
                   {stats?.topFindings.slice(0, 6).map((finding) => {
                     const project = projects.find((p) => p.id === finding.projectId);
                     return (
@@ -243,7 +225,7 @@ function DashboardPage() {
                     key={project.id}
                     to="/projects/$projectId"
                     params={{ projectId: project.id }}
-                    className="group flex items-center gap-3 rounded-lg border bg-card p-4 hover:border-foreground/20 transition-colors"
+                    className="group flex items-center gap-3 rounded-xl border bg-card shadow-sm p-4 hover:border-foreground/20 transition-colors"
                   >
                     <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
                       <ModeIcon className="size-4 text-muted-foreground" />

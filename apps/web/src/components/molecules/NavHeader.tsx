@@ -1,33 +1,26 @@
-import {
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@src/components/atoms/sidebar';
+import { ChevronDown } from 'lucide-react';
+import { useSidebar } from '@src/components/atoms/sidebar';
 
 export function NavHeader() {
+  const { state } = useSidebar();
+  const isCollapsed = state === 'collapsed';
+
   return (
-    <SidebarHeader>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton size="lg" asChild>
-            <a href="/dashboard">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <svg width="16" height="11" viewBox="0 0 480 320" fillRule="evenodd">
-                  <path
-                    d="M160,160 m-140,0 a140,140 0 1,0 280,0 a140,140 0 1,0 -280,0 M320,160 m-140,0 a140,140 0 1,0 280,0 a140,140 0 1,0 -280,0"
-                    fill="currentColor"
-                  />
-                </svg>
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">zivodoc</span>
-                <span className="truncate text-xs text-muted-foreground">Docs QA</span>
-              </div>
-            </a>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarHeader>
+    <div className="border-b border-sidebar-border flex items-center gap-2 cursor-pointer px-3 py-3">
+      <div className="w-[26px] h-[26px] rounded-md bg-sidebar-primary text-sidebar-primary-foreground flex items-center justify-center font-bold text-[13px] tracking-tight shrink-0">
+        Z
+      </div>
+      {!isCollapsed && (
+        <>
+          <div className="flex-1 min-w-0">
+            <div className="text-[12.5px] font-semibold text-sidebar-primary leading-tight truncate">
+              zivodoc
+            </div>
+            <div className="text-[10.5px] text-sidebar-foreground font-mono">Docs QA</div>
+          </div>
+          <ChevronDown size={13} className="text-sidebar-foreground" />
+        </>
+      )}
+    </div>
   );
 }

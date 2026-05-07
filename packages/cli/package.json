@@ -1,0 +1,25 @@
+{
+  "name": "@zivodoc/cli",
+  "version": "0.1.0",
+  "description": "CLI for zivodoc — automated docs QA",
+  "type": "module",
+  "bin": {
+    "zivodoc": "./dist/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "chalk": "^5.4.1",
+    "ora": "^8.2.0",
+    "@zivodoc/scanner": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

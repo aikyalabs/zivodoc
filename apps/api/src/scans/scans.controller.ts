@@ -52,6 +52,34 @@ export class ScansController {
     return apiCreatedResponse(scan.id);
   }
 
+  @Post('projects/:projectId/scans/upload')
+  async uploadScanResults(
+    @RequestUser() user: AuthUser,
+    @Param('projectId') projectId: string,
+    @Body()
+    body: {
+      pagesScanned: number;
+      codeBlocksFound: number;
+      linksChecked: number;
+      duration: number;
+      triggerSource?: string;
+      findings: Array<{
+        category: string;
+        severity: string;
+        confidence: string;
+        source: string;
+        line: number;
+        title: string;
+        description: string;
+        suggestion?: string;
+        evidence?: Record<string, unknown>;
+      }>;
+    },
+  ) {
+    const scan = await this.scansService.uploadResults(projectId, body, user);
+    return apiOkResponse({ id: scan.id });
+  }
+
   @ZodResponse({ type: ScansResponse })
   @Get('projects/:projectId/scans')
   async listByProject(

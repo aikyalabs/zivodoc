@@ -4,6 +4,17 @@ import { ScanMode } from '../../enums/ScanMode';
 import { ScanStatus } from '../../enums/ScanStatus';
 import { timestamp } from '../timestamp';
 
+export const scanStepSchema = z.object({
+  name: z.string(),
+  label: z.string(),
+  status: z.enum(['pending', 'running', 'completed', 'skipped']),
+  startedAt: z.number().optional(),
+  completedAt: z.number().optional(),
+  durationMs: z.number().optional(),
+  itemsProcessed: z.number().optional(),
+  findingsCount: z.number().optional(),
+});
+
 export const scanModelSchema = z.strictObject({
   id: z.string(),
   projectId: z.string(),
@@ -17,7 +28,9 @@ export const scanModelSchema = z.strictObject({
   linksChecked: z.number(),
   findingsCount: z.number(),
   duration: z.number().nullable(),
+  triggerSource: z.string(),
   errorMessage: z.string().nullable(),
+  steps: z.array(scanStepSchema).nullable(),
   startedAt: timestamp.nullable(),
   completedAt: timestamp.nullable(),
   createdAt: timestamp,

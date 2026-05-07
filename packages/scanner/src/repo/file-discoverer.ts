@@ -23,8 +23,12 @@ export async function discoverMarkdownFiles(
     });
     allFiles.push(...files);
   } else {
+    const realRoot = path.resolve(repoRoot);
     for (const docPath of docPaths) {
       const resolved = path.resolve(repoRoot, docPath);
+      if (!resolved.startsWith(realRoot)) {
+        throw new Error(`Path traversal attempt: ${docPath}`);
+      }
 
       // Check if it's a file
       try {

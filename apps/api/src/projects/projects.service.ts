@@ -29,6 +29,7 @@ export class ProjectsService {
       docPaths?: string[];
       scanMode?: ScanMode;
       maxPages?: number;
+      openapiSpecUrl?: string | null;
     },
     caller: Caller,
   ) {
@@ -60,6 +61,7 @@ export class ProjectsService {
       docPaths: data.docPaths ?? ['docs/', 'README.md'],
       scanMode: data.scanMode ?? 'site',
       maxPages: data.maxPages ?? 500,
+      openapiSpecUrl: data.openapiSpecUrl ?? null,
       organizationId,
     });
 
@@ -99,6 +101,7 @@ export class ProjectsService {
         | 'scanMode'
         | 'maxPages'
         | 'scanSchedule'
+        | 'openapiSpecUrl'
       >
     >,
     caller: Caller,

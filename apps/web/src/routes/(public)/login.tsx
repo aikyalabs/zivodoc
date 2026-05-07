@@ -45,8 +45,8 @@ function LoginPage() {
       );
       return response.data.payload.token;
     },
-    onSuccess: (token) => {
-      signIn(token);
+    onSuccess: () => {
+      signIn();
       navigate({ to: '/dashboard' });
     },
     onError: () => {

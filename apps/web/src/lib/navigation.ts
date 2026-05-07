@@ -6,6 +6,9 @@ import {
   Settings,
   FolderSearch,
   Building,
+  KeyRound,
+  Github,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -86,6 +89,21 @@ export const navigation: NavGroup[] = [
         title: 'Organization',
         url: '/settings/organization',
         icon: Building,
+      },
+      {
+        title: 'API Keys',
+        url: '/settings/api-keys',
+        icon: KeyRound,
+      },
+      {
+        title: 'GitHub',
+        url: '/settings/github',
+        icon: Github,
+      },
+      {
+        title: 'AI Keys',
+        url: '/settings/ai-keys',
+        icon: Sparkles,
       },
     ],
   },

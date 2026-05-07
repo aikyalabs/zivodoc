@@ -1,0 +1,16 @@
+{
+  "name": "@zivodoc/chat-widget",
+  "version": "0.1.0",
+  "description": "Embeddable docs chatbot widget for zivodoc",
+  "type": "module",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

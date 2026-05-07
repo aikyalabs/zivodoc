@@ -7,6 +7,7 @@ import { AuthGuard } from '@src/auth/auth.guard';
 import { AuthService } from '@src/auth/auth.service';
 import { OtpService } from '@src/auth/otp.service';
 import { GoogleStrategy } from '@src/auth/google.strategy';
+import { ApiKeysModule } from '@src/api-keys/api-keys.module';
 import { OrganizationsModule } from '@src/organizations/organizations.module';
 import { UsersModule } from '@src/users/users.module';
 
@@ -21,7 +22,7 @@ import { UsersModule } from '@src/users/users.module';
       useClass: AuthGuard,
     },
   ],
-  imports: [PassportModule, OrganizationsModule, UsersModule],
+  imports: [PassportModule, ApiKeysModule, OrganizationsModule, UsersModule],
   exports: [AuthService],
 })
 export class AuthModule {}

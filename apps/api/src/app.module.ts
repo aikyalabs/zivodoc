@@ -17,7 +17,11 @@ import { RolesModule } from '@src/roles/roles.module';
 import { ProjectsModule } from '@src/projects/projects.module';
 import { ScansModule } from '@src/scans/scans.module';
 import { QueueModule } from '@src/queue/queue.module';
+import { ApiKeysModule } from '@src/api-keys/api-keys.module';
 import { HealthModule } from '@src/health/health.module';
+import { GitHubModule } from '@src/github/github.module';
+import { AiKeysModule } from '@src/ai-keys/ai-keys.module';
+import { ChatModule } from '@src/chat/chat.module';
 
 @Module({
   imports: [
@@ -36,7 +40,11 @@ import { HealthModule } from '@src/health/health.module';
     ProjectsModule,
     ScansModule,
     QueueModule,
+    ApiKeysModule,
     HealthModule,
+    GitHubModule,
+    AiKeysModule,
+    ChatModule,
   ],
   providers: [
     {

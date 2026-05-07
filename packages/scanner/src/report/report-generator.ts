@@ -53,6 +53,8 @@ function buildSections(findings: Finding[], steps: ScanStep[]): ScanReportSectio
     syntax_error: 'check_code',
     empty_code_block: 'check_code',
     missing_code_lang: 'check_code',
+    runtime_error: 'check_code',
+    type_error: 'check_code',
     leaked_secret: 'check_security',
     insecure_link: 'check_security',
     internal_url: 'check_security',
@@ -67,6 +69,9 @@ function buildSections(findings: Finding[], steps: ScanStep[]): ScanReportSectio
     outdated_date: 'check_content',
     duplicate_content: 'check_content',
     stale_ref: 'check_content',
+    missing_endpoint: 'check_openapi',
+    undocumented_endpoint: 'check_openapi',
+    wrong_http_method: 'check_openapi',
   };
 
   const stepLabels: Record<string, string> = {
@@ -76,6 +81,7 @@ function buildSections(findings: Finding[], steps: ScanStep[]): ScanReportSectio
     check_security: 'Security Scan',
     check_structure: 'Structure Analysis',
     check_content: 'Content Quality',
+    check_openapi: 'OpenAPI Spec Validation',
     report: 'Report Generation',
   };
 

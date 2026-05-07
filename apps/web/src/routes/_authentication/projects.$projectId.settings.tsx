@@ -40,6 +40,7 @@ function ProjectSettingsPage() {
   const [maxPages, setMaxPages] = useState<number | null>(null);
   const [defaultBranch, setDefaultBranch] = useState<string | null>(null);
   const [scanSchedule, setScanSchedule] = useState<ScanSchedule | null>(null);
+  const [openapiSpecUrl, setOpenapiSpecUrl] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -52,6 +53,7 @@ function ProjectSettingsPage() {
   const currentMaxPages = maxPages ?? project?.maxPages ?? 500;
   const currentDefaultBranch = defaultBranch ?? project?.defaultBranch ?? 'main';
   const currentScanSchedule = scanSchedule ?? project?.scanSchedule ?? 'manual';
+  const currentOpenapiSpecUrl = openapiSpecUrl ?? project?.openapiSpecUrl ?? '';
 
   const hasChanges =
     project != null &&
@@ -61,7 +63,8 @@ function ProjectSettingsPage() {
       currentScanMode !== project.scanMode ||
       currentMaxPages !== project.maxPages ||
       currentDefaultBranch !== project.defaultBranch ||
-      currentScanSchedule !== project.scanSchedule);
+      currentScanSchedule !== project.scanSchedule ||
+      currentOpenapiSpecUrl !== (project.openapiSpecUrl ?? ''));
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +78,8 @@ function ProjectSettingsPage() {
     if (currentMaxPages !== project.maxPages) data.maxPages = currentMaxPages;
     if (currentDefaultBranch !== project.defaultBranch) data.defaultBranch = currentDefaultBranch;
     if (currentScanSchedule !== project.scanSchedule) data.scanSchedule = currentScanSchedule;
+    if (currentOpenapiSpecUrl !== (project.openapiSpecUrl ?? ''))
+      data.openapiSpecUrl = currentOpenapiSpecUrl || null;
 
     setSaving(true);
     try {
@@ -89,6 +94,7 @@ function ProjectSettingsPage() {
       setMaxPages(null);
       setDefaultBranch(null);
       setScanSchedule(null);
+      setOpenapiSpecUrl(null);
     } catch {
       toast.error('Failed to update project.');
     } finally {
@@ -222,6 +228,24 @@ function ProjectSettingsPage() {
                 <SelectItem value="weekly">Weekly</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <Label htmlFor="openapiSpecUrl">OpenAPI / Swagger Spec URL</Label>
+            <Input
+              id="openapiSpecUrl"
+              type="url"
+              placeholder="https://api.example.com/openapi.json"
+              value={currentOpenapiSpecUrl}
+              onChange={(e) => setOpenapiSpecUrl(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Paste a Swagger UI / Redoc page URL or a direct spec file — we'll auto-discover the
+              spec from common paths (<code>/openapi.json</code>, <code>/swagger.json</code>,
+              <code>/v3/api-docs</code>, etc.). Scans then cross-reference your docs against the
+              spec to detect missing, undocumented, or wrong-method endpoints. Supports JSON or
+              YAML, OpenAPI 2.0/3.x.
+            </p>
           </div>
         </div>
 

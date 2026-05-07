@@ -228,7 +228,7 @@ function OnboardingPage() {
 
         {step === 2 && (
           <div className="space-y-6 text-center">
-            <div className="flex flex-col items-center gap-4 rounded-lg border bg-card p-8">
+            <div className="flex flex-col items-center gap-4 rounded-xl border bg-card shadow-sm p-8">
               {scanMode === 'site' ? (
                 <Globe className="size-8 text-muted-foreground" />
               ) : (

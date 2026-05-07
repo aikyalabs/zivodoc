@@ -13,6 +13,7 @@ export const projectModelSchema = z.strictObject({
   scanMode: z.enum(ScanMode),
   maxPages: z.number(),
   scanSchedule: z.enum(['manual', 'daily', 'weekly']),
+  openapiSpecUrl: z.string().nullable(),
   organizationId: z.string(),
   createdAt: timestamp,
   updatedAt: timestamp,

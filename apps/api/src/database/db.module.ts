@@ -12,6 +12,13 @@ import {
   ProjectEntity,
   ScanEntity,
   FindingEntity,
+  ApiKeyEntity,
+  GitHubInstallationEntity,
+  GitHubRepoLinkEntity,
+  AiProviderKeyEntity,
+  ChatChunkEntity,
+  ChatSessionEntity,
+  ChatMessageEntity,
 } from './entities';
 import {
   OrganizationRepository,
@@ -22,6 +29,13 @@ import {
   ProjectRepository,
   ScanRepository,
   FindingRepository,
+  ApiKeyRepository,
+  GitHubInstallationRepository,
+  GitHubRepoLinkRepository,
+  AiProviderKeyRepository,
+  ChatChunkRepository,
+  ChatSessionRepository,
+  ChatMessageRepository,
 } from './repositories';
 import { AppConfig } from '@src/config.module';
 
@@ -34,6 +48,13 @@ const entities = [
   ProjectEntity,
   ScanEntity,
   FindingEntity,
+  ApiKeyEntity,
+  GitHubInstallationEntity,
+  GitHubRepoLinkEntity,
+  AiProviderKeyEntity,
+  ChatChunkEntity,
+  ChatSessionEntity,
+  ChatMessageEntity,
 ];
 
 const repositories = [
@@ -45,6 +66,13 @@ const repositories = [
   ProjectRepository,
   ScanRepository,
   FindingRepository,
+  ApiKeyRepository,
+  GitHubInstallationRepository,
+  GitHubRepoLinkRepository,
+  AiProviderKeyRepository,
+  ChatChunkRepository,
+  ChatSessionRepository,
+  ChatMessageRepository,
 ];
 
 @Global()
@@ -58,7 +86,8 @@ const repositories = [
         autoLoadEntities: true,
         entities,
         migrations: [join(__dirname, 'migrations/*{.ts,.js}')],
-        synchronize: true,
+        synchronize: false,
+        migrationsRun: false,
         extra: {
           max: 20,
           min: 5,

@@ -38,6 +38,7 @@ import {
 } from '@src/components/atoms/select';
 import { EmptyState } from '@src/components/molecules/EmptyState';
 import { PageHeader } from '@src/components/molecules/PageHeader';
+import { formatRelativeTime } from '@src/lib/formatters';
 import { useProjects } from '@src/hooks/queries/useProjects';
 import { useCreateProject } from '@src/hooks/mutations/useCreateProject';
 
@@ -46,19 +47,6 @@ import type { ScanMode } from '@zivodoc/shared';
 export const Route = createFileRoute('/_authentication/projects/')({
   component: ProjectsPage,
 });
-
-function formatRelativeTime(date: string | null | undefined): string {
-  if (!date) return 'Never';
-  const now = Date.now();
-  const then = new Date(date).getTime();
-  const diff = now - then;
-
-  if (diff < 60_000) return 'Just now';
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
-  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
-  if (diff < 604_800_000) return `${Math.floor(diff / 86_400_000)}d ago`;
-  return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
 
 function ProjectsPage() {
   const { data, isLoading } = useProjects();
@@ -102,7 +90,7 @@ function ProjectsPage() {
                 key={project.id}
                 to="/projects/$projectId"
                 params={{ projectId: project.id }}
-                className="group flex flex-col rounded-lg border bg-card hover:border-foreground/20 transition-all overflow-hidden"
+                className="group flex flex-col rounded-xl border bg-card shadow-sm hover:border-foreground/20 transition-all overflow-hidden"
               >
                 <div className="p-4 pb-3 flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">

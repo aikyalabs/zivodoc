@@ -1,18 +1,11 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 
 import { ErrorBoundary } from '@src/components/atoms/ErrorBoundary';
 import { Button } from '@src/components/atoms/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@src/components/atoms/card';
 import { DashboardLayout } from '@src/components/templates/DashboardLayout';
-import { SESSION_TOKEN_STORAGE_KEY } from '@src/lib/contexts/SessionContext';
 
 export const Route = createFileRoute('/_authentication')({
-  beforeLoad: () => {
-    const token = localStorage.getItem(SESSION_TOKEN_STORAGE_KEY);
-    if (!token) {
-      throw redirect({ to: '/login' });
-    }
-  },
   component: AuthenticatedLayout,
   errorComponent: () => (
     <div className="flex min-h-screen items-center justify-center bg-background">

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CATEGORY_LABELS } from '@src/lib/category-labels';
 import {
   ChevronDown,
   ChevronRight,
@@ -38,30 +39,6 @@ const severityStyles = {
   info: { border: 'border-l-blue-500', bg: 'bg-blue-500', label: 'Info', variant: 'info' as const },
 };
 
-const categoryLabels: Record<string, string> = {
-  broken_link: 'Broken Link',
-  broken_anchor: 'Broken Anchor',
-  redirect_chain: 'Redirect Chain',
-  syntax_error: 'Syntax Error',
-  missing_page: 'Missing Page',
-  slow_link: 'Slow Link',
-  stale_ref: 'Stale Ref',
-  insecure_link: 'Insecure Link',
-  leaked_secret: 'Leaked Secret',
-  internal_url: 'Internal URL',
-  placeholder_text: 'Placeholder',
-  empty_section: 'Empty Section',
-  empty_code_block: 'Empty Code',
-  missing_code_lang: 'No Language',
-  heading_skip: 'Heading Skip',
-  multiple_h1: 'Multiple H1',
-  broken_image: 'Broken Image',
-  todo_left: 'TODO Left',
-  outdated_date: 'Outdated Date',
-  duplicate_content: 'Duplicate',
-  missing_alt_text: 'No Alt Text',
-};
-
 function formatSource(source: string, line: number): { display: string; full: string } {
   let display: string;
   try {
@@ -91,7 +68,7 @@ export function FindingRow({ finding, onUpdateStatus }: FindingRowProps) {
   return (
     <div
       className={cn(
-        'border-l-[3px] rounded-md border bg-card transition-colors',
+        'border-l-[3px] rounded-xl border bg-card shadow-sm transition-colors',
         sev.border,
         isResolved && 'opacity-50',
       )}
@@ -119,7 +96,7 @@ export function FindingRow({ finding, onUpdateStatus }: FindingRowProps) {
               </Badge>
             )}
             <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-              {categoryLabels[finding.category] ?? finding.category}
+              {CATEGORY_LABELS[finding.category] ?? finding.category}
             </Badge>
             {isNew && (
               <Badge variant="info" className="text-[10px] px-1.5 py-0">

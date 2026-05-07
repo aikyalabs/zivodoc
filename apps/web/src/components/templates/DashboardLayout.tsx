@@ -1,17 +1,9 @@
 import { Outlet, useMatches, useNavigate, useLocation } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import { Search, ChevronRight } from 'lucide-react';
 
 import { useProfile } from '@src/hooks/useProfile';
-
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@src/components/atoms/breadcrumb';
-import { Separator } from '@src/components/atoms/separator';
+import { Kbd } from '@src/components/atoms/kbd';
 import {
   Sidebar,
   SidebarContent,
@@ -27,7 +19,6 @@ import { ThemeToggle } from '@src/components/molecules/ThemeToggle';
 import { UserNav } from '@src/components/molecules/UserNav';
 import { navigation } from '@src/lib/navigation';
 
-// ID prefixes used by entities — skip these in breadcrumbs
 const ID_PREFIXES = ['proj_', 'scan_', 'fnd_', 'user_', 'org_', 'role_'];
 
 function buildBreadcrumbs(matches: { pathname: string }[]) {
@@ -41,7 +32,6 @@ function buildBreadcrumbs(matches: { pathname: string }[]) {
     const last = segments[segments.length - 1];
     if (!last) continue;
 
-    // Skip segments that are entity IDs — the page itself handles showing the name
     if (ID_PREFIXES.some((prefix) => last.toLowerCase().startsWith(prefix))) continue;
 
     const label = last.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -84,34 +74,53 @@ export function DashboardLayout() {
         <SidebarRail />
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                {breadcrumbs.map((crumb, index) => {
-                  const isLast = index === breadcrumbs.length - 1;
-                  return (
-                    <BreadcrumbItem key={crumb.href}>
-                      {index > 0 && <BreadcrumbSeparator />}
-                      {isLast ? (
-                        <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                      ) : (
-                        <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-                      )}
-                    </BreadcrumbItem>
-                  );
-                })}
-              </BreadcrumbList>
-            </Breadcrumb>
+        <header className="h-14 shrink-0 border-b bg-card flex items-center px-3 gap-2.5 sticky top-0 z-20 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0 shrink">
+            <SidebarTrigger className="size-7" />
+            <div className="flex items-center gap-1 text-[12.5px] min-w-0">
+              {breadcrumbs.map((crumb, index) => {
+                const isLast = index === breadcrumbs.length - 1;
+                return (
+                  <span key={crumb.href} className="flex items-center gap-1 min-w-0">
+                    {index > 0 && (
+                      <ChevronRight size={11} className="text-muted-foreground/50 shrink-0" />
+                    )}
+                    <span
+                      className={`whitespace-nowrap overflow-hidden text-ellipsis min-w-0 ${
+                        isLast ? 'text-foreground font-semibold' : 'text-muted-foreground'
+                      }`}
+                    >
+                      {crumb.label}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
           </div>
-          <div className="ml-auto flex items-center gap-2">
+
+          <div className="flex-1 flex justify-center min-w-0">
+            <button
+              type="button"
+              className="w-full max-w-[480px] min-w-0 flex items-center gap-2 px-2.5 py-1.5 bg-secondary border border-border rounded-lg text-muted-foreground text-[12.5px] whitespace-nowrap transition-colors hover:border-input cursor-pointer"
+            >
+              <Search size={13} />
+              <span className="flex-1 text-left overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+                Search projects, findings…
+              </span>
+              <span className="inline-flex gap-0.5 shrink-0">
+                <Kbd>⌘</Kbd>
+                <Kbd>K</Kbd>
+              </span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0">
             <ThemeToggle />
+            <div className="w-px h-5 bg-border mx-1" />
             <UserNav />
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-6 pb-16">
+        <main className="flex-1 overflow-auto p-5 pb-16">
           <Outlet />
         </main>
       </SidebarInset>

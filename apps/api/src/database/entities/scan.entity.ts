@@ -57,8 +57,14 @@ export class ScanEntity extends BaseEntity {
   @Column({ type: 'int', nullable: true })
   duration!: number | null;
 
+  @Column({ type: 'varchar', length: 20, nullable: false, default: 'manual' })
+  triggerSource!: string;
+
   @Column({ type: 'text', nullable: true })
   errorMessage!: string | null;
+
+  @Column({ type: 'jsonb', nullable: true, default: null })
+  steps!: unknown;
 
   @Column({ type: 'timestamp', nullable: true })
   startedAt!: Date | null;

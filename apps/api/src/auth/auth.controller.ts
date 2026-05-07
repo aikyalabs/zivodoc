@@ -90,6 +90,7 @@ export class AuthController {
     };
 
     const session = await this.authService.handleGoogleAuth(profile);
+    this.setSessionCookie(res, session.token);
     const frontendUrl = this.config.get('FRONTEND_URL');
     res.redirect(`${frontendUrl}/auth/callback?token=${session.token}`);
   }
@@ -105,8 +106,9 @@ export class AuthController {
   @ZodResponse({ type: AuthSessionResponse })
   @Public()
   @Post('otp/verify')
-  async verifyOtp(@Body() body: OtpVerifyRequest) {
+  async verifyOtp(@Body() body: OtpVerifyRequest, @Res({ passthrough: true }) res: Response) {
     const session = await this.authService.verifyOtp(body.email, body.code);
+    this.setSessionCookie(res, session.token);
     return apiOkResponse({ token: session.token });
   }
 
@@ -118,8 +120,26 @@ export class AuthController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
-  async logout(@Req() req: Request): Promise<void> {
-    const token = this.authService.extractTokenFromHeader(req.headers.authorization);
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<void> {
+    const token = this.extractToken(req);
     if (token) await this.authService.logout(token);
+    res.clearCookie('session', { httpOnly: true, sameSite: 'lax', path: '/' });
+  }
+
+  private extractToken(req: Request): string | undefined {
+    return (
+      this.authService.extractTokenFromHeader(req.headers.authorization) ??
+      (req.cookies?.session as string | undefined)
+    );
+  }
+
+  private setSessionCookie(res: Response, token: string): void {
+    res.cookie('session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: this.config.get('SESSION_EXPIRATION_MINUTES') * 60 * 1000,
+    });
   }
 }
