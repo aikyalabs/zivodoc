@@ -7,7 +7,7 @@ import {
   OrganizationRepository,
 } from '@db/repositories';
 import { GitHubInstallationEntity, GitHubRepoLinkEntity } from '@db/entities';
-import { Caller, isAdmin } from '@src/auth/request-user.decorator';
+import { Caller } from '@src/auth/request-user.decorator';
 import { GitHubAppService, type GitHubRepo } from './github-app.service';
 
 interface LinkRepoParams {
@@ -63,8 +63,8 @@ export class GitHubInstallationService {
   }
 
   async listInstallations(caller: Caller): Promise<GitHubInstallationEntity[]> {
-    if (isAdmin(caller)) return this.installationRepo.find({ order: { createdAt: 'DESC' } });
-    return this.installationRepo.findByOrganizationId(caller.organizationId!);
+    if (!caller.organizationId) return [];
+    return this.installationRepo.findByOrganizationId(caller.organizationId);
   }
 
   async listRepos(
@@ -73,7 +73,7 @@ export class GitHubInstallationService {
   ): Promise<(GitHubRepo & { isLinked: boolean })[]> {
     const installation = await this.installationRepo.findByInstallationId(installationId);
     if (!installation) throw new NotFoundException('Installation not found.');
-    if (!isAdmin(caller) && installation.organizationId !== caller.organizationId) {
+    if (installation.organizationId !== caller.organizationId) {
       throw new NotFoundException('Installation not found.');
     }
 
@@ -87,7 +87,7 @@ export class GitHubInstallationService {
   async linkRepoToProject(data: LinkRepoParams, caller: Caller): Promise<GitHubRepoLinkEntity> {
     const installation = await this.installationRepo.findByInstallationId(data.installationId);
     if (!installation) throw new NotFoundException('Installation not found.');
-    if (!isAdmin(caller) && installation.organizationId !== caller.organizationId) {
+    if (installation.organizationId !== caller.organizationId) {
       throw new NotFoundException('Installation not found.');
     }
 
@@ -127,7 +127,7 @@ export class GitHubInstallationService {
   async unlinkRepo(projectId: string, caller: Caller): Promise<void> {
     const link = await this.repoLinkRepo.findByProjectId(projectId);
     if (!link) throw new NotFoundException('Repo link not found.');
-    if (!isAdmin(caller) && link.organizationId !== caller.organizationId) {
+    if (link.organizationId !== caller.organizationId) {
       throw new NotFoundException('Repo link not found.');
     }
     await this.repoLinkRepo.remove(link);

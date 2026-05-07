@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { AiProviderKeyRepository } from '@db/repositories';
 import { AiProviderKeyEntity, type AiProvider } from '@db/entities';
 import type { AppConfig } from '@src/config.module';
-import { isAdmin, type Caller } from '@src/auth/request-user.decorator';
+import type { Caller } from '@src/auth/request-user.decorator';
 
 import { decrypt, encrypt, previewKey } from './encryption.util';
 
@@ -33,11 +33,8 @@ export class AiKeysService {
   }
 
   private requireOrg(caller: Caller): string {
-    if (!caller.organizationId && !isAdmin(caller)) {
-      throw new ForbiddenException('No organization context.');
-    }
     if (!caller.organizationId) {
-      throw new BadRequestException('Organization context required.');
+      throw new ForbiddenException('No organization context.');
     }
     return caller.organizationId;
   }

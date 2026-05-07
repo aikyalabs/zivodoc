@@ -2,13 +2,13 @@ import {
   LayoutDashboard,
   Users,
   Building2,
-  Shield,
   Settings,
   FolderSearch,
   Building,
   KeyRound,
   Github,
   Sparkles,
+  ScrollText,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -33,6 +33,8 @@ export interface NavGroup {
   items: NavItem[];
 }
 
+const ORG_ROLES: UserRole[] = ['owner', 'member'];
+
 export const navigation: NavGroup[] = [
   {
     label: 'Overview',
@@ -41,6 +43,7 @@ export const navigation: NavGroup[] = [
         title: 'Dashboard',
         url: '/dashboard',
         icon: LayoutDashboard,
+        roles: ORG_ROLES,
       },
     ],
   },
@@ -51,6 +54,7 @@ export const navigation: NavGroup[] = [
         title: 'Projects',
         url: '/projects',
         icon: FolderSearch,
+        roles: ORG_ROLES,
       },
     ],
   },
@@ -59,20 +63,20 @@ export const navigation: NavGroup[] = [
     items: [
       {
         title: 'Users',
-        url: '/users',
+        url: '/admin/users',
         icon: Users,
         roles: ['admin'],
       },
       {
         title: 'Organizations',
-        url: '/organizations',
+        url: '/admin/organizations',
         icon: Building2,
         roles: ['admin'],
       },
       {
-        title: 'Roles & Permissions',
-        url: '/roles',
-        icon: Shield,
+        title: 'Audit Logs',
+        url: '/admin/audit-logs',
+        icon: ScrollText,
         roles: ['admin'],
       },
     ],
@@ -89,6 +93,7 @@ export const navigation: NavGroup[] = [
         title: 'Organization',
         url: '/settings/organization',
         icon: Building,
+        roles: ORG_ROLES,
       },
       {
         title: 'API Keys',
@@ -99,11 +104,13 @@ export const navigation: NavGroup[] = [
         title: 'GitHub',
         url: '/settings/github',
         icon: Github,
+        roles: ORG_ROLES,
       },
       {
         title: 'AI Keys',
         url: '/settings/ai-keys',
         icon: Sparkles,
+        roles: ORG_ROLES,
       },
     ],
   },

@@ -22,6 +22,7 @@ import { HealthModule } from '@src/health/health.module';
 import { GitHubModule } from '@src/github/github.module';
 import { AiKeysModule } from '@src/ai-keys/ai-keys.module';
 import { ChatModule } from '@src/chat/chat.module';
+import { AdminModule } from '@src/admin/admin.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { ChatModule } from '@src/chat/chat.module';
     GitHubModule,
     AiKeysModule,
     ChatModule,
+    AdminModule,
   ],
   providers: [
     {

@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { ApiKeyRepository } from '@db/repositories';
 import { ApiKeyEntity } from '@db/entities';
-import { Caller, isAdmin } from '@src/auth/request-user.decorator';
+import { Caller } from '@src/auth/request-user.decorator';
 
 const API_KEY_PREFIX = 'zv_';
 const KEY_LENGTH = 40;
@@ -36,7 +36,7 @@ export class ApiKeysService {
   async revoke(id: string, caller: Caller): Promise<void> {
     const apiKey = await this.apiKeyRepository.findOne({ where: { id } });
     if (!apiKey) throw new NotFoundException('API key not found.');
-    if (!isAdmin(caller) && apiKey.userId !== caller.id) {
+    if (apiKey.userId !== caller.id) {
       throw new NotFoundException('API key not found.');
     }
 

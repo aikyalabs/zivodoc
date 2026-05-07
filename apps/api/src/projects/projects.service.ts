@@ -10,7 +10,7 @@ import { ScanMode, FindingCategory, FindingSeverity, FindingStatus } from '@zivo
 import { ProjectEntity } from '@db/entities';
 import { ProjectRepository, type ProjectWithStats } from '@db/repositories';
 import { OrganizationRepository, FindingRepository } from '@db/repositories';
-import { Caller, isAdmin } from '@src/auth/request-user.decorator';
+import { Caller } from '@src/auth/request-user.decorator';
 
 @Injectable()
 export class ProjectsService {
@@ -33,11 +33,11 @@ export class ProjectsService {
     },
     caller: Caller,
   ) {
-    if (!isAdmin(caller) && !caller.organizationId) {
+    if (!caller.organizationId) {
       throw new ForbiddenException('No organization context.');
     }
 
-    const organizationId = caller.organizationId!;
+    const organizationId = caller.organizationId;
 
     const org = await this.organizationRepository.findOne({ where: { id: organizationId } });
     if (!org) throw new NotFoundException('Organization not found.');
@@ -71,7 +71,7 @@ export class ProjectsService {
   public async findById(id: string, caller: Caller) {
     const project = await this.projectRepository.findOne({ where: { id } });
     if (!project) throw new NotFoundException('Project not found.');
-    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+    if (project.organizationId !== caller.organizationId) {
       throw new NotFoundException('Project not found.');
     }
     return project;
@@ -81,10 +81,10 @@ export class ProjectsService {
     caller: Caller,
     options?: { limit?: number; offset?: number },
   ): Promise<[ProjectWithStats[], number]> {
-    if (!isAdmin(caller) && !caller.organizationId) {
+    if (!caller.organizationId) {
       throw new ForbiddenException('No organization context.');
     }
-    const where = isAdmin(caller) ? {} : { organizationId: caller.organizationId! };
+    const where = { organizationId: caller.organizationId };
     return this.projectRepository.findWithStats(where, options);
   }
 
@@ -108,7 +108,7 @@ export class ProjectsService {
   ) {
     const project = await this.projectRepository.findOne({ where: { id } });
     if (!project) throw new NotFoundException('Project not found.');
-    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+    if (project.organizationId !== caller.organizationId) {
       throw new NotFoundException('Project not found.');
     }
 
@@ -118,7 +118,7 @@ export class ProjectsService {
   public async remove(id: string, caller: Caller) {
     const project = await this.projectRepository.findOne({ where: { id } });
     if (!project) throw new NotFoundException('Project not found.');
-    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+    if (project.organizationId !== caller.organizationId) {
       throw new NotFoundException('Project not found.');
     }
 
@@ -138,7 +138,7 @@ export class ProjectsService {
   ) {
     const project = await this.projectRepository.findOne({ where: { id: projectId } });
     if (!project) throw new NotFoundException('Project not found.');
-    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+    if (project.organizationId !== caller.organizationId) {
       throw new NotFoundException('Project not found.');
     }
 
@@ -153,7 +153,7 @@ export class ProjectsService {
   public async exportFindingsCsv(projectId: string, caller: Caller): Promise<string> {
     const project = await this.projectRepository.findOne({ where: { id: projectId } });
     if (!project) throw new NotFoundException('Project not found.');
-    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+    if (project.organizationId !== caller.organizationId) {
       throw new NotFoundException('Project not found.');
     }
 

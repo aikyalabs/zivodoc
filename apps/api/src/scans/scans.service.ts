@@ -16,7 +16,7 @@ import {
   OrganizationRepository,
   GitHubRepoLinkRepository,
 } from '@db/repositories';
-import { Caller, isAdmin } from '@src/auth/request-user.decorator';
+import { Caller } from '@src/auth/request-user.decorator';
 import { FindingCategory, FindingSeverity, FindingStatus, ScanMode } from '@zivodoc/shared';
 
 @Injectable()
@@ -37,7 +37,7 @@ export class ScansService {
   ): Promise<ScanEntity> {
     const project = await this.projectRepository.findOne({ where: { id: projectId } });
     if (!project) throw new NotFoundException('Project not found.');
-    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+    if (project.organizationId !== caller.organizationId) {
       throw new NotFoundException('Project not found.');
     }
 
@@ -132,7 +132,7 @@ export class ScansService {
   ): Promise<ScanEntity> {
     const project = await this.projectRepository.findOne({ where: { id: projectId } });
     if (!project) throw new NotFoundException('Project not found.');
-    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+    if (project.organizationId !== caller.organizationId) {
       throw new NotFoundException('Project not found.');
     }
 
@@ -187,7 +187,7 @@ export class ScansService {
   public async findById(id: string, caller: Caller): Promise<ScanEntity> {
     const scan = await this.scanRepository.findOne({ where: { id } });
     if (!scan) throw new NotFoundException('Scan not found.');
-    if (!isAdmin(caller) && scan.organizationId !== caller.organizationId) {
+    if (scan.organizationId !== caller.organizationId) {
       throw new NotFoundException('Scan not found.');
     }
     return scan;
@@ -200,7 +200,7 @@ export class ScansService {
   ): Promise<[ScanEntity[], number]> {
     const project = await this.projectRepository.findOne({ where: { id: projectId } });
     if (!project) throw new NotFoundException('Project not found.');
-    if (!isAdmin(caller) && project.organizationId !== caller.organizationId) {
+    if (project.organizationId !== caller.organizationId) {
       throw new NotFoundException('Project not found.');
     }
 
@@ -225,7 +225,7 @@ export class ScansService {
   ) {
     const scan = await this.scanRepository.findOne({ where: { id: scanId } });
     if (!scan) throw new NotFoundException('Scan not found.');
-    if (!isAdmin(caller) && scan.organizationId !== caller.organizationId) {
+    if (scan.organizationId !== caller.organizationId) {
       throw new NotFoundException('Scan not found.');
     }
 
@@ -244,7 +244,7 @@ export class ScansService {
   ): Promise<void> {
     const finding = await this.findingRepository.findOne({ where: { id: findingId } });
     if (!finding) throw new NotFoundException('Finding not found.');
-    if (!isAdmin(caller) && finding.organizationId !== caller.organizationId) {
+    if (finding.organizationId !== caller.organizationId) {
       throw new NotFoundException('Finding not found.');
     }
 
@@ -259,7 +259,10 @@ export class ScansService {
     resolvedFindings: number;
     recentScans: ScanEntity[];
   }> {
-    const orgFilter = isAdmin(caller) ? {} : { organizationId: caller.organizationId! };
+    if (!caller.organizationId) {
+      throw new NotFoundException('No organization context.');
+    }
+    const orgFilter = { organizationId: caller.organizationId };
 
     const [totalProjects, totalScans, openFindings, resolvedFindings, recentScans] =
       await Promise.all([
@@ -280,7 +283,10 @@ export class ScansService {
   }
 
   public async getTopFindings(caller: Caller, limit = 5) {
-    const orgFilter = isAdmin(caller) ? {} : { organizationId: caller.organizationId! };
+    if (!caller.organizationId) {
+      throw new NotFoundException('No organization context.');
+    }
+    const orgFilter = { organizationId: caller.organizationId };
 
     return this.findingRepository.find({
       where: {
