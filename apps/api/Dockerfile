@@ -15,10 +15,21 @@ RUN pnpm --filter @zivodoc/scanner build
 RUN pnpm --filter @zivodoc/api build
 
 FROM base AS runner
+
+# procps gives us /bin/ps that crawlee/playwright spawn for process checks.
+# git is required because the scanner clones repos via simple-git.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends procps git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN groupadd --system --gid 1001 nodejs && useradd --system --uid 1001 --gid nodejs nestjs
 
 # Copy the entire workspace tree — preserves pnpm's content-addressed store and symlinks
 COPY --from=builder --chown=nestjs:nodejs /app /app
+
+# Install Playwright Chromium + its system deps (libnss3 et al) for site-mode scans.
+# pnpm runs the playwright binary that lives inside the workspace.
+RUN cd /app/apps/api && pnpm exec playwright install --with-deps chromium
 
 USER nestjs
 WORKDIR /app/apps/api
