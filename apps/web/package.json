@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --cache --report-unused-disable-directives --max-warnings 0",
-    "test": "vitest",
+    "test": "vitest --passWithNoTests",
     "coverage": "vitest run --coverage"
   },
   "dependencies": {

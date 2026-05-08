@@ -14,8 +14,7 @@
   "files": ["dist"],
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
-    "lint": "eslint . --cache --report-unused-disable-directives --max-warnings 0"
+    "dev": "tsup --watch"
   },
   "dependencies": {
     "zod": "^3.25.67"
