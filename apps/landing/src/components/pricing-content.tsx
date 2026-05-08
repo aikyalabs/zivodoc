@@ -1,24 +1,24 @@
 import { FadeIn, FadeInStagger, FadeInStaggerItem } from './fade-in';
 import { CTA } from './cta';
 
-const WAITLIST_URL = '/waitlist';
+const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
 
 const faqs = [
   {
-    q: 'Will there be a free tier?',
-    a: "Yes — we're planning a generous free tier so you can try zivodoc on your docs before committing. Details coming soon.",
+    q: 'Is there a free tier?',
+    a: 'Yes — sign up free and start scanning your docs immediately. No credit card required.',
   },
   {
-    q: 'How will pricing work?',
-    a: 'Simple, transparent pricing with no per-seat fees. Pay based on the number of docs sites you monitor and the scan frequency you need.',
+    q: 'How does pricing work?',
+    a: 'Simple, transparent pricing with no per-seat fees. Pay based on the number of docs sites you monitor and the scan frequency you need. Paid plans are coming soon — early users get the best pricing.',
   },
   {
-    q: 'Can I start using zivodoc now?',
-    a: "Yes! Sign up for early access and you'll get free unlimited scanning while we're in beta. Early users will be grandfathered into the best pricing when we launch.",
+    q: 'What does the free tier include?',
+    a: "You'll get scans on a single project with our core checks (broken links, code validation, structure, content, OpenAPI). Connect your GitHub repo and run scans on demand.",
   },
   {
-    q: 'What happens after the beta?',
-    a: "Early access users will be grandfathered into the best pricing when we launch. You'll always have time to evaluate before committing to a paid plan.",
+    q: 'When will paid plans launch?',
+    a: "We're rolling them out as the platform stabilizes. Free tier users will be grandfathered into the best pricing when we launch — and you'll always have time to evaluate before committing.",
   },
 ];
 
@@ -40,8 +40,8 @@ export default function PricingContent() {
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="mt-8 text-[17px] sm:text-[19px] leading-[1.55] text-ink-secondary max-w-[520px]">
-              We're finalizing our pricing plans. Sign up for early access now and get free
-              unlimited scanning while we're in beta.
+              Sign up free today and start scanning your docs in minutes. Paid plans are coming —
+              early users will be grandfathered into the best pricing when they launch.
             </p>
           </FadeIn>
         </div>
@@ -56,21 +56,21 @@ export default function PricingContent() {
                 <div className="inline-flex items-center gap-2 bg-surface-elevated border border-line-hover px-3 py-1.5 mb-8">
                   <span className="size-1.5 bg-green" />
                   <span className="font-label text-[11px] uppercase tracking-[-0.02em] text-ink-secondary">
-                    BETA
+                    FREE TIER LIVE
                   </span>
                 </div>
                 <h2 className="text-[28px] sm:text-[36px] font-semibold leading-[1.1] tracking-[-0.03em] mb-6">
-                  Free during early access
+                  Start free. No credit card.
                 </h2>
                 <p className="text-[15px] leading-[1.7] text-ink-secondary mb-10 max-w-[420px] mx-auto">
-                  Get unlimited scans, full API validation, and AI-powered analysis while we're in
-                  beta. Early users get the best pricing when we launch.
+                  Scan your docs, validate code examples, catch broken links and stale API
+                  references. Sign up free and run your first scan in under 5 minutes.
                 </p>
                 <a
-                  href={WAITLIST_URL}
+                  href={`${APP_URL}/login`}
                   className="font-label inline-flex items-center gap-2.5 h-[52px] px-8 bg-surface-button text-surface text-[14px] tracking-[-0.02em] hover:bg-white transition-colors"
                 >
-                  GET EARLY ACCESS
+                  GET STARTED FREE
                   <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                     <path
                       d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9"

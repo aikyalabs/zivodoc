@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 
-const WAITLIST_URL = '/waitlist';
+const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
 
 const navLinks = [
   { href: '/features', label: 'FEATURES' },
@@ -54,16 +54,16 @@ export function Header() {
         {/* Right side */}
         <div className="hidden md:flex items-center h-full shrink-0">
           <a
-            href={WAITLIST_URL}
+            href={`${APP_URL}/login`}
             className="font-label flex items-center h-full px-6 text-[14px] tracking-[-0.04em] text-ink-secondary hover:text-ink transition-colors"
           >
             LOG IN
           </a>
           <a
-            href={WAITLIST_URL}
+            href={`${APP_URL}/login`}
             className="font-label flex items-center h-full px-6 min-w-[132px] justify-center gap-2.5 bg-surface-button text-surface text-[14px] tracking-[-0.04em] hover:bg-white transition-colors"
           >
-            JOIN WAITLIST
+            SIGN UP FREE
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path
                 d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9"
@@ -100,14 +100,14 @@ export function Header() {
             </a>
           ))}
           <div className="flex flex-col gap-3 pt-5 border-t border-line">
-            <a href={WAITLIST_URL} className="font-label text-[14px] text-ink-secondary">
+            <a href={`${APP_URL}/login`} className="font-label text-[14px] text-ink-secondary">
               LOG IN
             </a>
             <a
-              href={WAITLIST_URL}
+              href={`${APP_URL}/login`}
               className="font-label flex items-center justify-center h-[54px] bg-surface-button text-surface text-[14px]"
             >
-              GET EARLY ACCESS
+              SIGN UP FREE
             </a>
           </div>
         </div>

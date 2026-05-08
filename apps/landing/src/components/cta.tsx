@@ -1,6 +1,6 @@
 import { FadeIn } from './fade-in';
 
-const WAITLIST_URL = '/waitlist';
+const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
 
 export function CTA() {
   return (
@@ -23,18 +23,18 @@ export function CTA() {
 
         <FadeIn delay={0.1}>
           <p className="mt-8 text-[17px] text-ink-secondary max-w-[480px] leading-[1.6]">
-            Connect your repo, run the first scan in under 5 minutes. Start free during early
-            access.
+            Connect your repo, run the first scan in under 5 minutes. Free tier — no credit card
+            required.
           </p>
         </FadeIn>
 
         <FadeIn delay={0.2}>
           <div className="mt-10 flex flex-wrap items-center gap-3">
             <a
-              href={WAITLIST_URL}
+              href={`${APP_URL}/login`}
               className="font-label inline-flex items-center gap-2.5 h-[52px] px-6 bg-surface-button text-surface text-[14px] hover:bg-white transition-colors"
             >
-              GET EARLY ACCESS
+              GET STARTED FREE
               <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                 <path
                   d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9"

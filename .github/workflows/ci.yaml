@@ -107,6 +107,8 @@ jobs:
 
       - name: Build landing
         run: pnpm --filter @zivodoc/landing build
+        env:
+          PUBLIC_APP_URL: https://app.zivodoc.com
 
       - name: Deploy to Cloudflare Pages
         run: npx wrangler pages deploy apps/landing/dist --project-name=zivodoc --commit-dirty=true

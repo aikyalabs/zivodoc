@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-const WAITLIST_URL = '/waitlist';
+const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
 
 type TabKey = 'scan' | 'validate' | 'detect' | 'fix';
 
@@ -118,7 +118,7 @@ export function HeroSplit() {
               <span className="inline-flex items-center gap-2 border border-line-hover px-3 py-1.5">
                 <span className="size-1.5 rounded-full bg-green" />
                 <span className="font-label text-[10px] tracking-[-0.02em] text-ink-secondary">
-                  Now in early access
+                  Free tier live
                 </span>
               </span>
             </motion.div>
@@ -165,10 +165,10 @@ export function HeroSplit() {
               variants={fadeUp}
             >
               <a
-                href={WAITLIST_URL}
+                href={`${APP_URL}/login`}
                 className="font-label inline-flex items-center gap-2.5 h-[46px] px-5 bg-surface-button text-surface text-[13px] tracking-[-0.02em] hover:bg-white transition-colors"
               >
-                Get early access
+                Get started free
                 <svg width="13" height="13" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                   <path
                     d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9"
