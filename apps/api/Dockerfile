@@ -24,12 +24,17 @@ RUN apt-get update \
 
 RUN groupadd --system --gid 1001 nodejs && useradd --system --uid 1001 --gid nodejs nestjs
 
+# Shared Playwright cache path — readable by the nestjs runtime user.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
 # Copy the entire workspace tree — preserves pnpm's content-addressed store and symlinks
 COPY --from=builder --chown=nestjs:nodejs /app /app
 
 # Install Playwright Chromium + its system deps (libnss3 et al) for site-mode scans.
-# pnpm runs the playwright binary that lives inside the workspace.
-RUN cd /app/apps/api && pnpm exec playwright install --with-deps chromium
+# Browsers go to /ms-playwright (system path), then we hand the cache + workspace to nestjs.
+RUN cd /app/apps/api \
+    && pnpm exec playwright install --with-deps chromium \
+    && chown -R nestjs:nodejs /ms-playwright
 
 USER nestjs
 WORKDIR /app/apps/api
