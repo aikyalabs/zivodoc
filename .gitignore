@@ -38,4 +38,5 @@ docker-compose.override.yaml
 
 # Generated
 apps/web/src/routeTree.gen.ts
+apps/landing/.astro/
 inspo/*
