@@ -51,7 +51,7 @@ async function bootstrap() {
 
   if (process.env.NODE_ENV !== 'production') {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('SaaS Template API')
+      .setTitle('zivodoc API')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
