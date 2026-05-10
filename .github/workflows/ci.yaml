@@ -175,7 +175,7 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm --filter @zivodoc/web test -- --run
 
-  ci-pass:
+  ci_pass:
     name: CI pass
     runs-on: ubuntu-latest
     if: always()
@@ -209,12 +209,12 @@ jobs:
   deploy-landing:
     name: Deploy landing
     runs-on: ubuntu-latest
-    needs: [changes, ci-pass]
+    needs: [changes, ci_pass]
     if: |
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
       needs.changes.outputs.landing == 'true' &&
-      needs.ci-pass.result == 'success'
+      needs.ci_pass.result == 'success'
     environment: prod
     permissions:
       contents: read
@@ -233,12 +233,12 @@ jobs:
   deploy-web:
     name: Deploy web
     runs-on: ubuntu-latest
-    needs: [changes, ci-pass]
+    needs: [changes, ci_pass]
     if: |
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
       needs.changes.outputs.web == 'true' &&
-      needs.ci-pass.result == 'success'
+      needs.ci_pass.result == 'success'
     environment: prod
     permissions:
       contents: read
@@ -258,12 +258,12 @@ jobs:
   deploy-widget:
     name: Deploy widget
     runs-on: ubuntu-latest
-    needs: [changes, ci-pass]
+    needs: [changes, ci_pass]
     if: |
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
       needs.changes.outputs.widget == 'true' &&
-      needs.ci-pass.result == 'success'
+      needs.ci_pass.result == 'success'
     environment: prod
     permissions:
       contents: read
@@ -285,12 +285,12 @@ jobs:
   deploy-api:
     name: Deploy API
     runs-on: ubuntu-latest
-    needs: [changes, ci-pass]
+    needs: [changes, ci_pass]
     if: |
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
       needs.changes.outputs.api == 'true' &&
-      needs.ci-pass.result == 'success'
+      needs.ci_pass.result == 'success'
     environment: prod
     permissions:
       contents: read
