@@ -10,7 +10,6 @@ import { Stats } from '../components/stats';
 import { Features } from '../components/features';
 import { ScanVisual } from '../components/scan-visual';
 import { TechMarquee } from '../components/tech-marquee';
-import { Testimonials } from '../components/testimonials';
 import { CTA } from '../components/cta';
 import { Footer } from '../components/footer';
 
@@ -20,7 +19,7 @@ const jsonLd = {
   name: 'zivodoc',
   applicationCategory: 'DeveloperApplication',
   operatingSystem: 'Web',
-  description: 'Automated QA for developer documentation. Scans for broken code examples, stale API references, and dead links — then opens PRs to fix them.',
+  description: 'Automated QA for developer documentation. Scans for broken code examples, stale API references, and dead links — surfaces them in CI and your dashboard.',
   url: 'https://zivodoc.com',
   offers: {
     '@type': 'Offer',
@@ -29,12 +28,14 @@ const jsonLd = {
     description: 'Free tier — no credit card required',
   },
   featureList: [
-    'Code block execution in sandboxes',
-    'API reference validation against OpenAPI specs',
-    'Dead link detection',
-    'AI-powered contradiction detection',
-    'Automatic fix PR generation',
-    'CI pipeline integration',
+    'JavaScript runtime execution in WASM sandbox',
+    'JS / TS / JSON / YAML syntax validation',
+    'API reference validation against OpenAPI 3.0, 3.1, and Swagger 2.0',
+    'Dead link, redirect, and anchor checking',
+    'Secret leak detection',
+    'GitHub App: PR checks and inline comments',
+    'GitHub Action and CLI for CI integration',
+    'Scheduled scans (daily / weekly / on-push)',
   ],
 };
 ---
@@ -50,7 +51,6 @@ const jsonLd = {
     <Features client:visible />
     <ScanVisual client:visible />
     <TechMarquee client:visible />
-    <Testimonials client:visible />
     <CTA client:visible />
   </main>
   <Footer />

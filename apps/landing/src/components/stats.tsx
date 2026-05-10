@@ -1,10 +1,10 @@
 import { FadeIn, FadeInStagger, FadeInStaggerItem } from './fade-in';
 
 const stats = [
-  { value: '80%', label: 'of docs sites have broken code examples' },
-  { value: '47%', label: 'of API refs go stale within 6 months' },
-  { value: '3x', label: 'more support tickets from bad docs' },
-  { value: '5 min', label: 'to run your first scan' },
+  { value: '21', label: 'finding categories the scanner ships with' },
+  { value: 'JS', label: 'examples executed in a WASM sandbox' },
+  { value: 'CI', label: 'GitHub Action and CLI for any provider' },
+  { value: '5 min', label: 'to run your first scan, free' },
 ];
 
 export function Stats() {
@@ -19,7 +19,7 @@ export function Stats() {
           </FadeIn>
           <FadeIn delay={0.1}>
             <h2 className="text-[32px] sm:text-[44px] lg:text-[52px] font-semibold leading-[1.08] tracking-[-0.03em] text-ink">
-              The docs quality crisis, quantified.
+              What the scanner actually does.
             </h2>
           </FadeIn>
         </div>

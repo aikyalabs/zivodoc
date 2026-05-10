@@ -86,15 +86,15 @@ export default function PricingContent() {
               <div className="mt-12 grid grid-cols-3 gap-4 sm:gap-8">
                 <div>
                   <p className="text-[32px] font-bold tracking-[-0.03em] mb-2">$0</p>
-                  <p className="text-[13px] text-ink-secondary">Free tier, always</p>
+                  <p className="text-[13px] text-ink-secondary">Free tier, today</p>
                 </div>
                 <div>
-                  <p className="text-[32px] font-bold tracking-[-0.03em] mb-2">$29</p>
-                  <p className="text-[13px] text-ink-secondary">Pro, starting at</p>
+                  <p className="text-[32px] font-bold tracking-[-0.03em] mb-2">Pro</p>
+                  <p className="text-[13px] text-ink-secondary">Coming soon</p>
                 </div>
                 <div>
-                  <p className="text-[32px] font-bold tracking-[-0.03em] mb-2">$79</p>
-                  <p className="text-[13px] text-ink-secondary">Team, starting at</p>
+                  <p className="text-[32px] font-bold tracking-[-0.03em] mb-2">Team</p>
+                  <p className="text-[13px] text-ink-secondary">Coming soon</p>
                 </div>
               </div>
             </div>

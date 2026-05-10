@@ -4,15 +4,15 @@ import { FadeIn, FadeInStagger, FadeInStaggerItem } from './fade-in';
 const features = [
   {
     icon: Terminal,
-    title: 'Code Block Scanner',
+    title: 'Code Block Validation',
     medium: 'Execution',
     description:
-      'Every code example in your docs is extracted and executed in isolated sandboxes. Node.js, Python, Go, cURL — zivodoc spins up the right environment, runs the code, and reports exactly what broke and why.',
+      'Every JavaScript example in your docs runs in an isolated WASM sandbox to catch ReferenceError, TypeError, and runtime crashes. JS, TypeScript, JSON, and YAML blocks are also syntax-checked, so broken examples get flagged before they hit your users.',
     bullets: [
-      'Multi-language sandboxes',
-      'Import validation',
-      'Output verification',
-      'Version pinning',
+      'JavaScript runtime in WASM',
+      'JS / TS syntax checking',
+      'JSON / YAML validation',
+      'Per-block error context',
     ],
     span: 'md:col-span-2 md:row-span-2',
     size: 'large' as const,
@@ -22,7 +22,7 @@ const features = [
     title: 'API Validation',
     medium: 'Accuracy',
     description:
-      'Compares every API reference in your docs against your OpenAPI spec. Catches wrong params, missing fields, and outdated schemas.',
+      'Compares every API reference in your docs against your OpenAPI spec. Catches wrong params, missing fields, and outdated schemas. Supports OpenAPI 3.0, 3.1, and Swagger 2.0.',
     span: 'md:col-span-1 md:row-span-1',
     size: 'small' as const,
   },
@@ -31,25 +31,25 @@ const features = [
     title: 'Dead Link Detection',
     medium: 'Reliability',
     description:
-      'Scans every internal and external link. Finds 404s, redirects, and anchors that no longer exist.',
+      'Scans every internal and external link. Finds 404s, redirect chains, and anchors that no longer exist.',
     span: 'md:col-span-1 md:row-span-1',
     size: 'small' as const,
   },
   {
     icon: Brain,
-    title: 'AI Content Analysis',
-    medium: 'Intelligence',
+    title: 'Secret & Quality Scan',
+    medium: 'Hygiene',
     description:
-      'Uses AI to detect contradictions between pages, outdated version references, confusing explanations, and content that drifted from the actual codebase.',
+      'Detects leaked API keys, internal-only URLs, missing alt text, broken images, heading skips, TODO markers, and placeholder text — the small stuff that erodes trust over time.',
     span: 'md:col-span-2 md:row-span-1',
     size: 'medium' as const,
   },
   {
     icon: GitPullRequest,
-    title: 'Auto-Fix PRs',
-    medium: 'Automation',
+    title: 'PR Checks & Comments',
+    medium: 'GitHub',
     description:
-      "Doesn't just report problems — generates fix PRs automatically. Ready for your team to review and merge.",
+      'GitHub App posts a check status and a sticky PR comment listing every finding, so docs reviews happen in the same place as code reviews.',
     span: 'md:col-span-1 md:row-span-1',
     size: 'small' as const,
   },
@@ -58,7 +58,7 @@ const features = [
     title: 'CI Integration',
     medium: 'Integration',
     description:
-      'Runs in your CI pipeline on every push. One line to set up. Results in your PR checks.',
+      'GitHub Action and CLI for any CI provider. One line to set up. Fails the build on error-severity findings.',
     span: 'md:col-span-1 md:row-span-1',
     size: 'small' as const,
   },

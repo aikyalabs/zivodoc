@@ -5,27 +5,27 @@ import { CTA } from './cta';
 const features = [
   {
     icon: Terminal,
-    label: '01 / Code Execution',
-    title: 'Every code example, actually tested',
+    label: '01 / Code Validation',
+    title: 'Every JS example, actually executed',
     description:
-      'zivodoc extracts every code block from your docs and executes them in isolated sandboxes. Node.js, Python, Go, Ruby, cURL — each example runs in the right environment with the right dependencies. Broken imports, deprecated APIs, and wrong output are caught before your users hit them.',
+      'zivodoc extracts every code block from your docs and runs JavaScript examples in an isolated WASM sandbox to catch ReferenceError, TypeError, and runtime crashes. JS, TypeScript, JSON, and YAML blocks are also syntax-checked. Broken imports and undefined references are flagged before your users hit them.',
     bullets: [
-      'Multi-language sandbox execution (Node.js, Python, Go, Ruby, shell)',
-      'Automatic dependency detection and installation',
-      'Output verification against documented expectations',
-      'Version pinning to match your documented SDK versions',
-      'Parallel execution for fast scan times',
-      'Detailed failure reports with line-level context',
+      'JavaScript runtime execution via QuickJS WASM',
+      'Smart skip heuristics so snippet blocks don’t false-positive',
+      'JS and TypeScript syntax checking',
+      'JSON and YAML structural validation',
+      'Per-block error context with file path and line number',
+      '@zivodoc-skip annotation to opt a block out',
     ],
-    code: `$ zivodoc validate --execute
+    code: `$ zivodoc validate
 
-Spinning up sandboxes...
-  [Node.js 20]  Running 287 JavaScript examples
-  [Python 3.12] Running 98 Python examples
-  [cURL]        Running 38 shell examples
+Validating 423 code blocks...
+  JavaScript runtime  267 ran, 12 runtime errors
+  JS/TS syntax        389 parsed, 4 syntax errors
+  JSON                36 parsed, 2 invalid
+  YAML                18 parsed, 1 invalid
 
-Results: 391/423 passed, 32 failed
-  12 import errors, 8 deprecated APIs, 12 wrong output`,
+Results: 19 broken examples across 8 pages.`,
   },
   {
     icon: Search,
@@ -78,51 +78,54 @@ Found 23 broken links, 8 redirect chains, 4 missing anchors.`,
   },
   {
     icon: Brain,
-    label: '04 / AI Analysis',
-    title: 'Contradictions and confusion, detected',
+    label: '04 / Secrets & Quality',
+    title: 'The small stuff, caught before users see it',
     description:
-      "AI reads your docs the way a developer would — and flags what doesn't make sense. Pages that contradict each other, outdated version references, confusing explanations, and content that drifted from your actual codebase. Not just syntax checking — semantic understanding.",
+      'zivodoc scans every page for leaked credentials, internal-only URLs, missing alt text, broken images, heading-level skips, multiple H1s, empty sections, TODO markers, and placeholder text. The kind of issues that quietly erode docs trust over time.',
     bullets: [
-      'Cross-page contradiction detection',
-      'Outdated version and SDK reference flagging',
-      'Confusing or ambiguous content identification',
-      'Content drift detection against source code',
-      'Tone and consistency analysis',
-      'Suggested rewrites for flagged content',
+      'Pattern-based secret detection (API keys, JWTs, AWS, Stripe)',
+      'Internal-only URLs slipped into public docs',
+      'Missing alt text and broken image references',
+      'Heading hierarchy issues (skips, multiple H1s, empty sections)',
+      'TODO and placeholder text left behind',
+      'Stale dates and outdated copy markers',
     ],
-    code: `$ zivodoc detect --ai
+    code: `$ zivodoc scan
 
-Analyzing content for contradictions...
+Scanning content quality...
 
-  [CONTRADICTION] /guides/auth.md says "tokens expire in 1h"
-                  /api/tokens.md says "tokens expire in 24h"
-  [STALE]         /guides/quickstart.md references SDK v2
-                  Latest SDK version is v4.2.1
-  [CONFUSING]     /api/errors.md — 3 different error formats shown`,
+  [SECRET]    /guides/setup.md:42  → AWS access key pattern
+  [HEADING]   /api/auth.md:18      → H2 → H4 (skipped H3)
+  [ALT]       /guides/quickstart   → 3 images missing alt text
+  [TODO]      /api/errors.md:91    → "TODO: document error codes"
+  [INTERNAL]  /guides/deploy.md    → links to staging.internal
+
+12 hygiene issues across 7 pages.`,
   },
   {
     icon: GitPullRequest,
-    label: '05 / Auto-Fix PRs',
-    title: 'Fixes generated, PRs opened',
+    label: '05 / PR Checks & Comments',
+    title: 'Docs reviews, where code reviews happen',
     description:
-      "zivodoc doesn't just report problems — it fixes them. Broken imports get corrected, stale references get updated, dead links get replaced. Each fix is a clean PR with context explaining what broke and why, ready for your team to review and merge.",
+      'Install the zivodoc GitHub App on your repo. Every push to a PR runs a scan and posts a check status — broken docs block the merge, just like failing tests. A sticky comment on the PR lists every finding with file path, line number, and severity, so your team reviews docs the same way they review code.',
     bullets: [
-      'Automatic PR generation for each category of fix',
-      'Clean diffs with context explaining the change',
-      'Grouped by severity (critical, warning, info)',
-      'Respects your branch naming conventions',
-      'Links back to the scan report for full context',
-      'Configurable auto-merge for low-risk fixes',
+      'GitHub App with check status (pass / fail) on every PR',
+      'Sticky PR comment listing all findings with file:line context',
+      'Configurable severity threshold for blocking merges',
+      'Updates in place on subsequent pushes — no comment spam',
+      'Works for public and private repos',
+      'Deep link from each finding back to the scan report',
     ],
-    code: `$ zivodoc fix --auto-pr
+    code: `# zivodoc on PR #284
+✓  No errors blocking merge.
 
-Generating fixes...
-  PR #142: Fix 12 broken import statements in /guides/
-  PR #143: Update API response schemas to match OpenAPI spec
-  PR #144: Fix dead links in /api/ (7 links)
-  PR #145: Update SDK version references v2 → v4.2.1
+Check: zivodoc/scan       Status: success (warnings only)
 
-Opened 4 PRs on your-org/your-docs. Review in your dashboard.`,
+  [warn]  /guides/auth.md:42       broken anchor → #retry-logic
+  [warn]  /api/tokens.md:18        stale SDK version reference
+  [warn]  /guides/setup.md:91      broken external link
+
+3 warnings · 0 errors · view full report → app.zivodoc.com`,
   },
   {
     icon: Plug,
@@ -131,12 +134,12 @@ Opened 4 PRs on your-org/your-docs. Review in your dashboard.`,
     description:
       'Add zivodoc to your CI pipeline with a single step. Runs on every push, every PR, or on a schedule. Results appear in your PR checks — broken docs block the merge, just like failing tests. Continuous monitoring means docs never drift again.',
     bullets: [
-      'One-line CI setup (any provider)',
-      'PR check integration (pass/fail)',
-      'Scheduled scans (daily, weekly, on-push)',
-      'Results as PR comments with inline annotations',
+      'GitHub Action and CLI for any CI provider',
+      'PR check integration (pass / fail on error severity)',
+      'Scheduled scans (daily / weekly / manual)',
+      'Sticky PR comment with inline finding context',
       'Dashboard for historical scan trends',
-      'Slack/Discord notifications for new issues',
+      'CSV export of findings for downstream tooling',
     ],
     code: `# .ci/docs-qa.yml
 name: Docs QA
@@ -169,8 +172,8 @@ export default function FeaturesContent() {
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="mt-8 text-[17px] sm:text-[19px] leading-[1.55] text-ink-secondary max-w-[560px]">
-              Six layers of automated docs QA — from code execution to AI analysis. Continuous
-              monitoring with automatic fixes.
+              Six layers of automated docs QA — code execution, API validation, link checking,
+              hygiene scans, GitHub PR integration, and CI gating.
             </p>
           </FadeIn>
         </div>

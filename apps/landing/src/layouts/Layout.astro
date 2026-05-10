@@ -6,14 +6,16 @@ import { CustomCursor } from '../components/custom-cursor';
 interface Props {
   title: string;
   description?: string;
-  jsonLd?: Record<string, unknown>;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const {
   title,
-  description = 'Automated QA for developer documentation. Finds broken code examples, stale API references, and dead links — then opens PRs to fix them.',
+  description = 'Automated QA for developer documentation. Finds broken code examples, stale API references, and dead links — surfaced in CI and your dashboard.',
   jsonLd,
 } = Astro.props;
+
+const jsonLdList = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 
 const canonicalURL = new URL(Astro.url.pathname, 'https://zivodoc.com');
 
@@ -64,17 +66,22 @@ const websiteSchema = {
     <meta property="og:image" content="https://zivodoc.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="zivodoc — automated QA for developer documentation" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="https://zivodoc.com/og-image.png" />
+    <meta name="twitter:image:alt" content="zivodoc — automated QA for developer documentation" />
 
     <!-- Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
     <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
-    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    {jsonLdList.map((schema) => (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))}
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

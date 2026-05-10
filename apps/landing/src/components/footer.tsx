@@ -4,11 +4,11 @@ const columns = [
   {
     title: 'Product',
     links: [
-      { label: 'Code Scanner', href: '/features' },
+      { label: 'Code Validation', href: '/features' },
       { label: 'API Validator', href: '/features' },
       { label: 'Link Checker', href: '/features' },
-      { label: 'AI Analysis', href: '/features' },
-      { label: 'Auto-Fix PRs', href: '/features' },
+      { label: 'Secret & Quality Scan', href: '/features' },
+      { label: 'PR Checks', href: '/features' },
     ],
   },
   {
@@ -51,7 +51,7 @@ export function Footer() {
             <div className="mt-6 space-y-6 max-w-[310px]">
               <p className="text-[15px] leading-[1.3] text-ink-secondary">
                 Automated QA for developer documentation. Finds broken code examples, stale API
-                references, and dead links — then opens PRs to fix them.
+                references, and dead links — surfaced in CI and your dashboard.
               </p>
               <p className="text-[15px] leading-[1.3] text-ink-secondary">
                 Connect your repo and docs site. zivodoc continuously monitors for docs drift so

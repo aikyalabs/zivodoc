@@ -3,20 +3,20 @@ import { motion } from 'framer-motion';
 
 const APP_URL = import.meta.env.PUBLIC_APP_URL ?? 'http://localhost:5173';
 
-type TabKey = 'scan' | 'validate' | 'detect' | 'fix';
+type TabKey = 'scan' | 'validate' | 'detect' | 'report';
 
 const tabs: { key: TabKey; label: string }[] = [
   { key: 'scan', label: 'Scan' },
   { key: 'validate', label: 'Validate' },
   { key: 'detect', label: 'Detect' },
-  { key: 'fix', label: 'Fix' },
+  { key: 'report', label: 'Report' },
 ];
 
 const tabPreviews: Record<TabKey, string[]> = {
   scan: [
     '$ zivodoc scan --repo your-org/docs',
     '',
-    'Connecting to repository...',
+    'Cloning repository...',
     'Crawling docs site... found 1,847 pages',
     '',
     'Extracting checkable items...',
@@ -24,58 +24,63 @@ const tabPreviews: Record<TabKey, string[]> = {
     '    API refs... 189 endpoints',
     '    Links... 2,341 total',
     '',
-    'Detected stack:',
-    '    Languages:  JavaScript, Python, cURL',
+    'Detected:',
     '    Spec:       openapi.yaml (OpenAPI 3.1)',
-    '    Framework:  Docusaurus v3.2',
+    '    Languages:  js, ts, json, yaml, bash',
     '',
     '✓ 4,800 items across 1,847 pages. Ready to validate.',
   ],
   validate: [
-    '$ zivodoc validate --all',
+    '$ zivodoc validate',
     '',
-    'Running code examples in sandboxes...',
-    '  [Node.js 20]  247/267 passed',
-    '  [Python 3.12] 88/102 passed',
-    '  [cURL]        36/54 passed',
+    'JavaScript runtime (QuickJS WASM)...',
+    '  267 blocks executed, 12 runtime errors',
+    '',
+    'Syntax checks...',
+    '  JS / TS    ✗ 4 syntax errors',
+    '  JSON       ✗ 2 invalid blocks',
+    '  YAML       ✗ 1 invalid block',
     '',
     'Comparing API refs against OpenAPI spec...',
     '  ✗ 14 parameter mismatches',
     '  ✗ 8 outdated response schemas',
     '',
     'Checking 2,341 links...',
-    '  ✗ 23 dead links found',
+    '  ✗ 23 dead links, 8 redirect chains',
     '',
-    '76 issues across 1,847 pages.',
+    '72 findings across 1,847 pages.',
   ],
   detect: [
-    '$ zivodoc detect --ai',
+    '$ zivodoc detect',
     '',
-    'Analyzing content with AI...',
+    'Scanning content quality...',
     '',
-    '  ! /guides/auth.md says "tokens expire in 1h"',
-    '    /api/tokens.md says "tokens expire in 24h"',
-    '  ! /guides/quickstart.md references SDK v2',
-    '    Latest released version is v4.2.1',
-    '  ! /api/errors.md shows 3 conflicting formats',
-    '  ! /guides/rate-limits.md contradicts /api/limits.md',
+    '  ! /guides/setup.md:42      AWS access key pattern',
+    '  ! /api/auth.md:18          heading skip (H2 → H4)',
+    '  ! /guides/quickstart.md    3 images missing alt text',
+    '  ! /api/errors.md:91        TODO marker left behind',
+    '  ! /guides/deploy.md        links to staging.internal',
     '',
-    '7 contradictions, 4 stale refs, 2 confusing sections.',
+    '12 hygiene issues across 7 pages.',
   ],
-  fix: [
-    '$ zivodoc fix --auto-pr',
+  report: [
+    '$ zivodoc report',
     '',
-    'Generating fixes...',
-    '  PR #142: Fix 12 broken import statements',
-    '  PR #143: Update 8 API response schemas',
-    '  PR #144: Fix 23 dead links across /api/',
-    '  PR #145: Update SDK version refs v2 → v4.2.1',
-    '  PR #146: Resolve 7 content contradictions',
+    'Scan zsc_01HGV4… · main · 4m 18s',
     '',
-    '5 PRs opened with 64 file changes.',
-    'Review at your-org/docs/pulls',
+    'By severity',
+    '  error    ████████░░  32',
+    '  warning  ██████████  41',
+    '  info     ████░░░░░░  15',
     '',
-    '✓ All fixes ready for review.',
+    'By category',
+    '  broken_link        23',
+    '  runtime_error      12',
+    '  syntax_error        7',
+    '  api_mismatch       14',
+    '  leaked_secret       1',
+    '',
+    '✓ Posted PR check + sticky comment to PR #284.',
   ],
 };
 
@@ -138,9 +143,9 @@ export function HeroSplit() {
                 className="bg-clip-text text-transparent"
                 style={{ backgroundImage: 'linear-gradient(135deg, #999 0%, #444 100%)' }}
               >
-                We fix
+                We find
                 <br />
-                them.
+                what.
               </span>
             </motion.h1>
 
@@ -152,8 +157,8 @@ export function HeroSplit() {
               custom={2}
               variants={fadeUp}
             >
-              Scans your docs for broken code examples, stale API references, and dead links — then
-              opens PRs to fix them.
+              Scans your docs for broken code examples, stale API references, and dead links —
+              surfaced as PR checks and a live dashboard.
             </motion.p>
 
             {/* CTAs */}

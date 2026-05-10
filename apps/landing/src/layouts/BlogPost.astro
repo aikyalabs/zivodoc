@@ -22,7 +22,7 @@ const canonicalURL = new URL(Astro.url.pathname, 'https://zivodoc.com');
 
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'Article',
+  '@type': 'BlogPosting',
   headline: title,
   description,
   url: canonicalURL.href,
