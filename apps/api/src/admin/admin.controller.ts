@@ -14,8 +14,12 @@ import { z } from 'zod';
 
 import { apiOkResponse, apiPaginatedResponse } from '@src/api-response.helper';
 import { Roles } from '@src/auth/roles.decorator';
-import { PlanType as PlanTypeEnum, UserRole as UserRoleEnum } from '@zivodoc/shared';
-import { AdminService, type AuditLogFilters } from './admin.service';
+import {
+  PlanType as PlanTypeEnum,
+  ScanStatus as ScanStatusEnum,
+  UserRole as UserRoleEnum,
+} from '@zivodoc/shared';
+import { AdminService, type AuditLogFilters, type ScanListFilters } from './admin.service';
 
 const updateUserSchema = z.object({
   role: z.enum(UserRoleEnum).optional(),
@@ -28,6 +32,14 @@ const updateOrgSchema = z.object({
   scanQuota: z.number().int().min(0).optional(),
   maxProjects: z.number().int().min(0).optional(),
   maxPages: z.number().int().min(0).optional(),
+});
+
+const scanQuerySchema = z.object({
+  limit: z.coerce.number().int().positive().optional(),
+  offset: z.coerce.number().int().min(0).optional(),
+  status: z.enum(ScanStatusEnum).optional(),
+  organizationId: z.string().optional(),
+  startDate: z.coerce.date().optional(),
 });
 
 const auditQuerySchema = z.object({
@@ -54,6 +66,86 @@ export class AdminController {
   @Get('scans/summary')
   async scanSummary() {
     return apiOkResponse(await this.admin.getScanSummary());
+  }
+
+  @Get('queue/summary')
+  async queueSummary() {
+    return apiOkResponse(await this.admin.getQueueSummary());
+  }
+
+  @Get('sessions')
+  async listSessions(@Query('limit') limit?: string, @Query('offset') offset?: string) {
+    const [sessions, total] = await this.admin.listActiveSessions({
+      limit: limit ? Number(limit) : undefined,
+      offset: offset ? Number(offset) : undefined,
+    });
+    return apiPaginatedResponse(
+      sessions.map((s) => ({
+        token: s.token,
+        userId: s.userId,
+        userEmail: s.user.email,
+        expiresAt: s.expiresAt,
+        lastActivity: s.updatedAt,
+      })),
+      total,
+    );
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('sessions/:token')
+  async revokeSession(@Param('token') token: string): Promise<void> {
+    await this.admin.revokeSession(token);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Delete('users/:id/sessions')
+  async revokeAllSessions(@Param('id') id: string) {
+    return apiOkResponse(await this.admin.revokeAllSessionsForUser(id));
+  }
+
+  @Get('github-installations')
+  async listGitHubInstallations() {
+    const rows = await this.admin.listGitHubInstallations();
+    return apiPaginatedResponse(
+      rows.map((r) => ({
+        id: r.id,
+        installationId: r.installationId,
+        accountLogin: r.accountLogin,
+        accountType: r.accountType,
+        accountAvatarUrl: r.accountAvatarUrl,
+        organizationId: r.organizationId,
+        organizationName: r.organization?.name ?? null,
+        repositorySelection: r.repositorySelection,
+        suspendedAt: r.suspendedAt,
+        createdAt: r.createdAt,
+      })),
+      rows.length,
+    );
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('github-installations/:id')
+  async revokeGitHubInstallation(@Param('id') id: string): Promise<void> {
+    await this.admin.revokeGitHubInstallation(id);
+  }
+
+  @Get('ai-keys')
+  async listAiKeys() {
+    const rows = await this.admin.listAiKeys();
+    return apiPaginatedResponse(
+      rows.map((r) => ({
+        id: r.id,
+        organizationId: r.organizationId,
+        organizationName: r.organization?.name ?? null,
+        provider: r.provider,
+        model: r.model,
+        keyPreview: r.keyPreview,
+        lastUsedAt: r.lastUsedAt,
+        lastVerifiedAt: r.lastVerifiedAt,
+        createdAt: r.createdAt,
+      })),
+      rows.length,
+    );
   }
 
   @Get('users')
@@ -186,6 +278,35 @@ export class AdminController {
   @HttpCode(HttpStatus.OK)
   async suspendOrganization(@Param('id') id: string) {
     return apiOkResponse(await this.admin.suspendOrganization(id));
+  }
+
+  @Get('scans')
+  async listScans(@Query() query: unknown) {
+    const filters = scanQuerySchema.parse(query) as ScanListFilters;
+    const [scans, total] = await this.admin.listScans(filters);
+    return apiPaginatedResponse(
+      scans.map((s) => ({
+        id: s.id,
+        projectId: s.projectId,
+        organizationId: s.organizationId,
+        status: s.status,
+        mode: s.mode,
+        branch: s.branch,
+        pagesScanned: s.pagesScanned,
+        findingsCount: s.findingsCount,
+        duration: s.duration,
+        errorMessage: s.errorMessage,
+        createdAt: s.createdAt,
+      })),
+      total,
+    );
+  }
+
+  @Post('scans/:id/cancel')
+  @HttpCode(HttpStatus.OK)
+  async cancelScan(@Param('id') id: string) {
+    const scan = await this.admin.cancelScan(id);
+    return apiOkResponse({ id: scan.id, status: scan.status });
   }
 
   @Get('audit-logs')

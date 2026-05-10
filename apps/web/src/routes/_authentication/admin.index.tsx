@@ -1,6 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Activity, Users, Building2, ScrollText, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import {
+  Activity,
+  Users,
+  Building2,
+  ScrollText,
+  AlertTriangle,
+  CheckCircle2,
+  Layers,
+} from 'lucide-react';
 
 import { Skeleton } from '@src/components/atoms/skeleton';
 import { StatCard } from '@src/components/molecules/StatCard';
@@ -26,6 +34,14 @@ interface ScanSummary {
   topOrgs: { orgId: string; name: string; count: number }[];
 }
 
+interface QueueSummary {
+  waiting: number;
+  active: number;
+  completed: number;
+  failed: number;
+  delayed: number;
+}
+
 function AdminOverviewPage() {
   const { data: statsResp, isLoading: statsLoading } = useQuery({
     queryKey: ['admin', 'stats'],
@@ -41,6 +57,15 @@ function AdminOverviewPage() {
       const r = await apiClient.get<ApiOkResponse<ScanSummary>>('/admin/scans/summary');
       return r.data.payload;
     },
+  });
+
+  const { data: queue } = useQuery({
+    queryKey: ['admin', 'queue', 'summary'],
+    queryFn: async () => {
+      const r = await apiClient.get<ApiOkResponse<QueueSummary>>('/admin/queue/summary');
+      return r.data.payload;
+    },
+    refetchInterval: 5_000,
   });
 
   return (
@@ -95,6 +120,32 @@ function AdminOverviewPage() {
               value={scans?.today.failed ?? 0}
               variant={scans && scans.today.failed > 0 ? 'error' : 'default'}
             />
+          </div>
+        )}
+      </Section>
+
+      <Section title="Scan queue (live)">
+        {!queue ? (
+          <SkeletonGrid count={4} />
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              label="Waiting"
+              value={queue.waiting}
+              icon={Layers}
+              variant={queue.waiting > 0 ? 'info' : 'default'}
+            />
+            <StatCard
+              label="Active"
+              value={queue.active}
+              variant={queue.active > 0 ? 'success' : 'default'}
+            />
+            <StatCard
+              label="Failed"
+              value={queue.failed}
+              variant={queue.failed > 0 ? 'error' : 'default'}
+            />
+            <StatCard label="Delayed" value={queue.delayed} />
           </div>
         )}
       </Section>

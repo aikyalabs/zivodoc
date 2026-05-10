@@ -1,21 +1,37 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Between } from 'typeorm';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { Between, MoreThanOrEqual } from 'typeorm';
 
 import {
+  AiProviderKeyRepository,
   AuditLogRepository,
+  GitHubInstallationRepository,
   OrganizationRepository,
   ProjectRepository,
   ScanRepository,
+  SessionRepository,
   UserRepository,
 } from '@db/repositories';
 import {
+  AiProviderKeyEntity,
   AuditLogEntity,
+  GitHubInstallationEntity,
   OrganizationEntity,
   ProjectEntity,
   ScanEntity,
+  SessionEntity,
   UserEntity,
 } from '@db/entities';
 import type { PlanType, ScanStatus, UserRole } from '@zivodoc/shared';
+
+export interface ScanListFilters {
+  limit?: number;
+  offset?: number;
+  status?: ScanStatus;
+  organizationId?: string;
+  startDate?: Date;
+}
 
 interface ListOptions {
   limit?: number;
@@ -59,7 +75,83 @@ export class AdminService {
     private readonly auditLogs: AuditLogRepository,
     private readonly scans: ScanRepository,
     private readonly projects: ProjectRepository,
+    private readonly sessions: SessionRepository,
+    private readonly githubInstalls: GitHubInstallationRepository,
+    private readonly aiKeys: AiProviderKeyRepository,
+    @InjectQueue('scan') private readonly scanQueue: Queue,
   ) {}
+
+  async listGitHubInstallations(): Promise<
+    (GitHubInstallationEntity & {
+      organization: OrganizationEntity;
+    })[]
+  > {
+    return this.githubInstalls.find({
+      relations: ['organization'],
+      order: { createdAt: 'DESC' },
+    }) as Promise<(GitHubInstallationEntity & { organization: OrganizationEntity })[]>;
+  }
+
+  async revokeGitHubInstallation(id: string): Promise<void> {
+    const result = await this.githubInstalls.delete({ id });
+    if (!result.affected) throw new NotFoundException('Installation not found.');
+  }
+
+  async listAiKeys(): Promise<(AiProviderKeyEntity & { organization: OrganizationEntity })[]> {
+    return this.aiKeys.find({
+      relations: ['organization'],
+      order: { createdAt: 'DESC' },
+    }) as Promise<(AiProviderKeyEntity & { organization: OrganizationEntity })[]>;
+  }
+
+  async listActiveSessions(options: {
+    limit?: number;
+    offset?: number;
+  }): Promise<[(SessionEntity & { user: UserEntity })[], number]> {
+    const limit = options.limit ?? 50;
+    const offset = options.offset ?? 0;
+    const [rows, total] = await this.sessions.findAndCount({
+      where: { expiresAt: MoreThanOrEqual(new Date()) },
+      relations: ['user'],
+      order: { updatedAt: 'DESC' },
+      skip: offset,
+      take: limit,
+    });
+    return [rows as (SessionEntity & { user: UserEntity })[], total];
+  }
+
+  async revokeSession(token: string): Promise<void> {
+    const result = await this.sessions.delete({ token });
+    if (!result.affected) throw new NotFoundException('Session not found.');
+  }
+
+  async revokeAllSessionsForUser(userId: string): Promise<{ revoked: number }> {
+    const result = await this.sessions.delete({ userId });
+    return { revoked: result.affected ?? 0 };
+  }
+
+  async getQueueSummary(): Promise<{
+    waiting: number;
+    active: number;
+    completed: number;
+    failed: number;
+    delayed: number;
+  }> {
+    const counts = await this.scanQueue.getJobCounts(
+      'waiting',
+      'active',
+      'completed',
+      'failed',
+      'delayed',
+    );
+    return {
+      waiting: counts.waiting ?? 0,
+      active: counts.active ?? 0,
+      completed: counts.completed ?? 0,
+      failed: counts.failed ?? 0,
+      delayed: counts.delayed ?? 0,
+    };
+  }
 
   async listUsers(options: ListOptions): Promise<[UserEntity[], number]> {
     const limit = options.limit ?? 25;
@@ -228,6 +320,32 @@ export class AdminService {
       month: { total: monthTotal },
       topOrgs,
     };
+  }
+
+  async listScans(filters: ScanListFilters): Promise<[ScanEntity[], number]> {
+    const limit = filters.limit ?? 50;
+    const offset = filters.offset ?? 0;
+    const where: Record<string, unknown> = {};
+    if (filters.status) where.status = filters.status;
+    if (filters.organizationId) where.organizationId = filters.organizationId;
+    if (filters.startDate) where.createdAt = Between(filters.startDate, new Date());
+    return this.scans.findAndCount({
+      where,
+      order: { createdAt: 'DESC' },
+      skip: offset,
+      take: limit,
+    });
+  }
+
+  async cancelScan(id: string): Promise<ScanEntity> {
+    const scan = await this.scans.findOne({ where: { id } });
+    if (!scan) throw new NotFoundException('Scan not found.');
+    if (!['pending', 'running'].includes(scan.status)) {
+      throw new BadRequestException('Scan is already finished.');
+    }
+    scan.status = 'failed';
+    scan.errorMessage = 'Cancelled by admin.';
+    return this.scans.save(scan);
   }
 
   // Top-5 orgs by scan count needs SQL aggregation — Repository.find/count can't GROUP BY.

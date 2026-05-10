@@ -10,6 +10,8 @@ import {
   Sparkles,
   ScrollText,
   Activity,
+  Radar,
+  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -78,6 +80,30 @@ export const navigation: NavGroup[] = [
         title: 'Organizations',
         url: '/admin/organizations',
         icon: Building2,
+        roles: ['admin'],
+      },
+      {
+        title: 'Scans',
+        url: '/admin/scans',
+        icon: Radar,
+        roles: ['admin'],
+      },
+      {
+        title: 'Sessions',
+        url: '/admin/sessions',
+        icon: ShieldCheck,
+        roles: ['admin'],
+      },
+      {
+        title: 'GitHub Apps',
+        url: '/admin/github',
+        icon: Github,
+        roles: ['admin'],
+      },
+      {
+        title: 'AI Keys',
+        url: '/admin/ai-keys',
+        icon: Sparkles,
         roles: ['admin'],
       },
       {
