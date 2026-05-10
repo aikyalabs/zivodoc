@@ -1,8 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Between } from 'typeorm';
 
-import { AuditLogRepository, OrganizationRepository, UserRepository } from '@db/repositories';
-import { OrganizationEntity, UserEntity, AuditLogEntity } from '@db/entities';
-import type { PlanType, UserRole } from '@zivodoc/shared';
+import {
+  AuditLogRepository,
+  OrganizationRepository,
+  ProjectRepository,
+  ScanRepository,
+  UserRepository,
+} from '@db/repositories';
+import {
+  AuditLogEntity,
+  OrganizationEntity,
+  ProjectEntity,
+  ScanEntity,
+  UserEntity,
+} from '@db/entities';
+import type { PlanType, ScanStatus, UserRole } from '@zivodoc/shared';
 
 interface ListOptions {
   limit?: number;
@@ -10,12 +23,42 @@ interface ListOptions {
   search?: string;
 }
 
+export interface AuditLogFilters extends ListOptions {
+  actorId?: string;
+  method?: string;
+  statusBucket?: '2xx' | '4xx' | '5xx';
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export interface ScanSummary {
+  today: { total: number; completed: number; failed: number; running: number };
+  week: { total: number; completed: number; failed: number };
+  month: { total: number };
+  topOrgs: { orgId: string; name: string; count: number }[];
+}
+
+export interface OrganizationDetail {
+  organization: OrganizationEntity;
+  users: UserEntity[];
+  projects: ProjectEntity[];
+  recentScans: ScanEntity[];
+}
+
+const STATUS_BUCKETS: Record<'2xx' | '4xx' | '5xx', [number, number]> = {
+  '2xx': [200, 299],
+  '4xx': [400, 499],
+  '5xx': [500, 599],
+};
+
 @Injectable()
 export class AdminService {
   constructor(
     private readonly users: UserRepository,
     private readonly orgs: OrganizationRepository,
     private readonly auditLogs: AuditLogRepository,
+    private readonly scans: ScanRepository,
+    private readonly projects: ProjectRepository,
   ) {}
 
   async listUsers(options: ListOptions): Promise<[UserEntity[], number]> {
@@ -80,16 +123,46 @@ export class AdminService {
     await this.orgs.remove(org);
   }
 
-  async listAuditLogs(options: ListOptions): Promise<[AuditLogEntity[], number]> {
-    const limit = options.limit ?? 50;
-    const offset = options.offset ?? 0;
+  async getOrganizationDetail(id: string): Promise<OrganizationDetail> {
+    const organization = await this.getOrganization(id);
+    const [users, projects, recentScans] = await Promise.all([
+      this.users.find({ where: { organizationId: id }, order: { createdAt: 'DESC' } }),
+      this.projects.find({ where: { organizationId: id }, order: { createdAt: 'DESC' } }),
+      this.scans.find({
+        where: { organizationId: id },
+        order: { createdAt: 'DESC' },
+        take: 10,
+      }),
+    ]);
+    return { organization, users, projects, recentScans };
+  }
+
+  async suspendOrganization(id: string): Promise<{ disabledCount: number }> {
+    await this.getOrganization(id);
+    const result = await this.users.update({ organizationId: id }, { isDisabled: true });
+    return { disabledCount: result.affected ?? 0 };
+  }
+
+  async listAuditLogs(filters: AuditLogFilters): Promise<[AuditLogEntity[], number]> {
+    const limit = filters.limit ?? 50;
+    const offset = filters.offset ?? 0;
     const qb = this.auditLogs.createQueryBuilder('log').orderBy('log.createdAt', 'DESC');
-    if (options.search) {
+
+    if (filters.search) {
       qb.andWhere('(log.action ILIKE :s OR log.path ILIKE :s OR log.actorId = :exact)', {
-        s: `%${options.search}%`,
-        exact: options.search,
+        s: `%${filters.search}%`,
+        exact: filters.search,
       });
     }
+    if (filters.actorId) qb.andWhere('log.actorId = :aid', { aid: filters.actorId });
+    if (filters.method) qb.andWhere('log.method = :m', { m: filters.method });
+    if (filters.statusBucket) {
+      const [lo, hi] = STATUS_BUCKETS[filters.statusBucket];
+      qb.andWhere('log.statusCode BETWEEN :lo AND :hi', { lo, hi });
+    }
+    if (filters.startDate) qb.andWhere('log.createdAt >= :sd', { sd: filters.startDate });
+    if (filters.endDate) qb.andWhere('log.createdAt <= :ed', { ed: filters.endDate });
+
     return qb.skip(offset).take(limit).getManyAndCount();
   }
 
@@ -110,5 +183,69 @@ export class AdminService {
       activeUsers: totalUsers - disabledUsers,
       disabledUsers,
     };
+  }
+
+  async getScanSummary(): Promise<ScanSummary> {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - 7);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const countByStatus = (since: Date, status: ScanStatus) =>
+      this.scans.count({ where: { createdAt: Between(since, now), status } });
+
+    const [
+      todayTotal,
+      todayCompleted,
+      todayFailed,
+      todayRunning,
+      weekTotal,
+      weekCompleted,
+      weekFailed,
+      monthTotal,
+      topOrgs,
+    ] = await Promise.all([
+      this.scans.count({ where: { createdAt: Between(startOfDay, now) } }),
+      countByStatus(startOfDay, 'completed'),
+      countByStatus(startOfDay, 'failed'),
+      countByStatus(startOfDay, 'running'),
+      this.scans.count({ where: { createdAt: Between(startOfWeek, now) } }),
+      countByStatus(startOfWeek, 'completed'),
+      countByStatus(startOfWeek, 'failed'),
+      this.scans.count({ where: { createdAt: Between(startOfMonth, now) } }),
+      this.topOrgsByScansSince(startOfMonth),
+    ]);
+
+    return {
+      today: {
+        total: todayTotal,
+        completed: todayCompleted,
+        failed: todayFailed,
+        running: todayRunning,
+      },
+      week: { total: weekTotal, completed: weekCompleted, failed: weekFailed },
+      month: { total: monthTotal },
+      topOrgs,
+    };
+  }
+
+  // Top-5 orgs by scan count needs SQL aggregation — Repository.find/count can't GROUP BY.
+  private async topOrgsByScansSince(
+    since: Date,
+  ): Promise<{ orgId: string; name: string; count: number }[]> {
+    const rows = await this.scans
+      .createQueryBuilder('scan')
+      .leftJoin('scan.organization', 'org')
+      .select('scan.organizationId', 'orgId')
+      .addSelect('org.name', 'name')
+      .addSelect('COUNT(scan.id)', 'count')
+      .where('scan.createdAt >= :since', { since })
+      .groupBy('scan.organizationId')
+      .addGroupBy('org.name')
+      .orderBy('count', 'DESC')
+      .limit(5)
+      .getRawMany<{ orgId: string; name: string; count: string }>();
+    return rows.map((r) => ({ orgId: r.orgId, name: r.name, count: Number(r.count) }));
   }
 }

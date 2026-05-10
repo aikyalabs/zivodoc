@@ -9,6 +9,7 @@ import {
   Github,
   Sparkles,
   ScrollText,
+  Activity,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -61,6 +62,12 @@ export const navigation: NavGroup[] = [
   {
     label: 'Platform',
     items: [
+      {
+        title: 'Overview',
+        url: '/admin',
+        icon: Activity,
+        roles: ['admin'],
+      },
       {
         title: 'Users',
         url: '/admin/users',

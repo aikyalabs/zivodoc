@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Post,
   Query,
 } from '@nestjs/common';
 import { z } from 'zod';
@@ -14,7 +15,7 @@ import { z } from 'zod';
 import { apiOkResponse, apiPaginatedResponse } from '@src/api-response.helper';
 import { Roles } from '@src/auth/roles.decorator';
 import { PlanType as PlanTypeEnum, UserRole as UserRoleEnum } from '@zivodoc/shared';
-import { AdminService } from './admin.service';
+import { AdminService, type AuditLogFilters } from './admin.service';
 
 const updateUserSchema = z.object({
   role: z.enum(UserRoleEnum).optional(),
@@ -29,6 +30,17 @@ const updateOrgSchema = z.object({
   maxPages: z.number().int().min(0).optional(),
 });
 
+const auditQuerySchema = z.object({
+  limit: z.coerce.number().int().positive().optional(),
+  offset: z.coerce.number().int().min(0).optional(),
+  search: z.string().optional(),
+  actorId: z.string().optional(),
+  method: z.string().optional(),
+  statusBucket: z.enum(['2xx', '4xx', '5xx']).optional(),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+});
+
 @Roles('admin')
 @Controller('admin')
 export class AdminController {
@@ -37,6 +49,11 @@ export class AdminController {
   @Get('stats')
   async stats() {
     return apiOkResponse(await this.admin.getStats());
+  }
+
+  @Get('scans/summary')
+  async scanSummary() {
+    return apiOkResponse(await this.admin.getScanSummary());
   }
 
   @Get('users')
@@ -124,17 +141,57 @@ export class AdminController {
     await this.admin.deleteOrganization(id);
   }
 
-  @Get('audit-logs')
-  async listAuditLogs(
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
-    @Query('search') search?: string,
-  ) {
-    const [logs, total] = await this.admin.listAuditLogs({
-      limit: limit ? Number(limit) : undefined,
-      offset: offset ? Number(offset) : undefined,
-      search,
+  @Get('organizations/:id/detail')
+  async organizationDetail(@Param('id') id: string) {
+    const detail = await this.admin.getOrganizationDetail(id);
+    return apiOkResponse({
+      organization: {
+        id: detail.organization.id,
+        name: detail.organization.name,
+        slug: detail.organization.slug,
+        plan: detail.organization.plan,
+        scanQuota: detail.organization.scanQuota,
+        scansUsedThisMonth: detail.organization.scansUsedThisMonth,
+        maxPages: detail.organization.maxPages,
+        maxProjects: detail.organization.maxProjects,
+        createdAt: detail.organization.createdAt,
+      },
+      users: detail.users.map((u) => ({
+        id: u.id,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        role: u.role,
+        isDisabled: u.isDisabled,
+      })),
+      projects: detail.projects.map((p) => ({
+        id: p.id,
+        name: p.name,
+        siteUrl: p.siteUrl,
+        repoUrl: p.repoUrl,
+        scanMode: p.scanMode,
+      })),
+      recentScans: detail.recentScans.map((s) => ({
+        id: s.id,
+        projectId: s.projectId,
+        status: s.status,
+        findingsCount: s.findingsCount,
+        duration: s.duration,
+        createdAt: s.createdAt,
+      })),
     });
+  }
+
+  @Post('organizations/:id/suspend')
+  @HttpCode(HttpStatus.OK)
+  async suspendOrganization(@Param('id') id: string) {
+    return apiOkResponse(await this.admin.suspendOrganization(id));
+  }
+
+  @Get('audit-logs')
+  async listAuditLogs(@Query() query: unknown) {
+    const filters = auditQuerySchema.parse(query) as AuditLogFilters;
+    const [logs, total] = await this.admin.listAuditLogs(filters);
     return apiPaginatedResponse(logs, total);
   }
 }

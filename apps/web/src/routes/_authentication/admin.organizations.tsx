@@ -33,6 +33,7 @@ import {
   TableRow,
 } from '@src/components/atoms/table';
 import { ConfirmDialog } from '@src/components/molecules/ConfirmDialog';
+import { OrgDetailSheet } from '@src/components/molecules/OrgDetailSheet';
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
 import { formatRelativeTime } from '@src/lib/formatters';
 
@@ -66,6 +67,7 @@ function AdminOrgsPage() {
   const [search, setSearch] = useState('');
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminOrg | null>(null);
+  const [viewingId, setViewingId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'organizations', search],
@@ -136,7 +138,7 @@ function AdminOrgsPage() {
           </TableHeader>
           <TableBody>
             {orgs.map((o) => (
-              <TableRow key={o.id}>
+              <TableRow key={o.id} className="cursor-pointer" onClick={() => setViewingId(o.id)}>
                 <TableCell className="font-medium">{o.name}</TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   <code>{o.slug}</code>
@@ -152,7 +154,7 @@ function AdminOrgsPage() {
                 <TableCell className="text-xs text-muted-foreground">
                   {formatRelativeTime(o.createdAt)}
                 </TableCell>
-                <TableCell className="flex gap-1">
+                <TableCell className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -190,6 +192,8 @@ function AdminOrgsPage() {
           }
         }}
       />
+
+      <OrgDetailSheet orgId={viewingId} onClose={() => setViewingId(null)} />
 
       {editing && (
         <EditOrgDialog
