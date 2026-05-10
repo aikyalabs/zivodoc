@@ -27,7 +27,7 @@ export function Problem() {
             {
               title: 'Broken code examples',
               description:
-                '80% of docs sites have code examples that no longer work. Imports change, APIs deprecate, output formats shift. Your getting-started guide silently becomes a getting-stuck guide.',
+                'Code examples drift the moment your code does. Imports change, APIs deprecate, output formats shift. Your getting-started guide silently becomes a getting-stuck guide.',
             },
             {
               title: 'Stale API references',

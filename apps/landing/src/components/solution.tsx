@@ -13,14 +13,14 @@ export function Solution() {
       num: '02',
       title: 'Scan & Validate',
       description:
-        'zivodoc crawls every page, extracts code blocks, API references, and links. Code examples are executed in isolated sandboxes. API endpoints are validated against your OpenAPI spec.',
+        'zivodoc crawls every page, extracts code blocks, API references, and links. JS examples run in a WASM sandbox; JS / TS / JSON / YAML are syntax-checked; API references are validated against your OpenAPI spec.',
       highlight: false,
     },
     {
       num: '03',
-      title: 'Detect & Fix',
+      title: 'Review & Resolve',
       description:
-        'AI analyzes content for contradictions, outdated references, and confusing explanations. Then zivodoc opens PRs with the fixes — ready for your team to review and merge.',
+        'Findings appear in your dashboard with file, line, and severity. The GitHub App posts a check + sticky comment on every PR so reviewers see broken docs alongside the diff — no separate workflow.',
       highlight: false,
     },
   ];

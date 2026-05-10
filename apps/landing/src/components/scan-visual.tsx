@@ -2,18 +2,18 @@ import { motion } from 'framer-motion';
 import { FadeIn } from './fade-in';
 
 const issueCards = [
-  { label: '/guides/quickstart.md', type: 'Broken code', severity: 'critical' },
-  { label: '/api/authentication.md', type: 'Stale API ref', severity: 'critical' },
-  { label: '/api/errors.md', type: 'Contradiction', severity: 'warning' },
+  { label: '/guides/quickstart.md', type: 'Runtime error', severity: 'critical' },
+  { label: '/api/authentication.md', type: 'API mismatch', severity: 'critical' },
+  { label: '/api/errors.md', type: 'Heading skip', severity: 'warning' },
   { label: '/guides/webhooks.md', type: 'Dead link', severity: 'warning' },
-  { label: '/api/tokens.md', type: 'Stale API ref', severity: 'info' },
-  { label: '/guides/pagination.md', type: 'Broken code', severity: 'critical' },
+  { label: '/api/tokens.md', type: 'Leaked secret', severity: 'critical' },
+  { label: '/guides/pagination.md', type: 'Syntax error', severity: 'warning' },
 ];
 
 const fixCards = [
-  { title: 'PR #142', desc: 'Fix 12 broken imports' },
-  { title: 'PR #143', desc: 'Update API schemas' },
-  { title: 'PR #144', desc: 'Fix 7 dead links' },
+  { title: 'Check: zivodoc/scan', desc: 'failure · 4 errors · PR #284' },
+  { title: 'Sticky PR comment', desc: 'inline file:line context for 23 findings' },
+  { title: 'Live dashboard', desc: 'history, filters, resolve / ignore' },
 ];
 
 function IssueCard({ card, index }: { card: (typeof issueCards)[number]; index: number }) {
@@ -50,7 +50,7 @@ function FixCard({ card, index }: { card: (typeof fixCards)[number]; index: numb
       <div className="flex items-center gap-2 mb-1">
         <span className="size-1.5 rounded-full bg-green" />
         <span className="font-label text-[10px] text-green uppercase tracking-[0.03em]">
-          Fix ready
+          Surfaced
         </span>
       </div>
       <p className="text-[12px] font-semibold text-ink">{card.title}</p>
@@ -66,18 +66,18 @@ export function ScanVisual() {
         <div className="text-center mb-10 sm:mb-20">
           <FadeIn>
             <p className="font-label text-[12px] font-bold uppercase tracking-[0.08em] text-ink-muted mb-5">
-              03 / Scan &amp; Fix
+              03 / Scan &amp; Surface
             </p>
           </FadeIn>
           <FadeIn delay={0.1}>
             <h2 className="text-[36px] sm:text-[48px] lg:text-[58px] font-semibold leading-[1.04] tracking-[-0.04em] text-ink max-w-[700px] mx-auto">
-              Issues found. <span className="text-ink-secondary">Fixes generated.</span>
+              Issues found. <span className="text-ink-secondary">Surfaced where you work.</span>
             </h2>
           </FadeIn>
           <FadeIn delay={0.15}>
             <p className="mt-6 text-[17px] text-ink-secondary max-w-[480px] mx-auto leading-[1.6]">
-              zivodoc maps every issue in your docs, then generates PRs to fix them — all in a
-              single scan.
+              zivodoc maps every issue in your docs and surfaces them as PR checks, sticky comments,
+              and a live dashboard — your team reviews docs the way they review code.
             </p>
           </FadeIn>
         </div>
@@ -123,7 +123,7 @@ export function ScanVisual() {
               transition={{ duration: 0.4, delay: 0.8 }}
             >
               <span className="font-label text-[11px] text-ink-secondary tracking-[-0.02em]">
-                zivodoc auto-fix →
+                zivodoc → GitHub
               </span>
             </motion.div>
           </div>

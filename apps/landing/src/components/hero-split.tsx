@@ -271,7 +271,7 @@ export function HeroSplit() {
               {[
                 { value: '32', label: 'Broken examples' },
                 { value: '14', label: 'API mismatches' },
-                { value: '5', label: 'PRs opened' },
+                { value: '23', label: 'Dead links' },
               ].map((stat) => (
                 <div key={stat.label} className="bg-surface-card border border-line px-4 py-3.5">
                   <p className="text-[20px] font-semibold tracking-[-0.02em] text-ink leading-none">

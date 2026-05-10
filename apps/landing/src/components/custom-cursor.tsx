@@ -50,27 +50,31 @@ export function CustomCursor() {
 
   if (isTouchDevice) return null;
 
+  if (!isVisible) return null;
+
   return (
     <>
       {/* Dot */}
       <motion.div
         className="fixed top-0 left-0 size-1.5 rounded-full pointer-events-none z-[10000] mix-blend-difference bg-white hidden lg:block"
+        initial={false}
         animate={{
           x: position.x - 3,
           y: position.y - 3,
           scale: isHovering ? 0 : 1,
-          opacity: isVisible ? 1 : 0,
+          opacity: 1,
         }}
         transition={{ type: 'spring', stiffness: 500, damping: 28, mass: 0.5 }}
       />
       {/* Ring */}
       <motion.div
         className="fixed top-0 left-0 size-10 border border-white rounded-full pointer-events-none z-[10000] mix-blend-difference hidden lg:block"
+        initial={false}
         animate={{
           x: position.x - 20,
           y: position.y - 20,
           scale: isHovering ? 1.3 : 0.8,
-          opacity: isVisible ? (isHovering ? 1 : 0.4) : 0,
+          opacity: isHovering ? 1 : 0.4,
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20, mass: 0.8 }}
       />

@@ -5,7 +5,7 @@ const issues = [
   { file: '/guides/quickstart.md', type: 'Broken code', severity: 'critical', line: 42 },
   { file: '/api/authentication.md', type: 'Stale API ref', severity: 'critical', line: 18 },
   { file: '/guides/webhooks.md', type: 'Dead link', severity: 'warning', line: 67 },
-  { file: '/api/errors.md', type: 'Contradiction', severity: 'warning', line: 23 },
+  { file: '/api/errors.md', type: 'Heading skip', severity: 'warning', line: 23 },
   { file: '/guides/pagination.md', type: 'Broken code', severity: 'critical', line: 91 },
   { file: '/api/tokens.md', type: 'Stale API ref', severity: 'info', line: 55 },
 ];
@@ -32,7 +32,7 @@ export function DashboardSection() {
           </div>
           <FadeIn delay={0.2} className="hidden md:block">
             <p className="font-label text-[11px] text-ink-muted max-w-[240px] text-right leading-[1.6]">
-              Every issue tracked. Every fix one click away.
+              Every issue tracked. Filter, resolve, re-scan.
             </p>
           </FadeIn>
         </div>
@@ -149,9 +149,9 @@ export function DashboardSection() {
 
             {/* Bottom bar */}
             <div className="px-4 sm:px-6 py-3 border-t border-line bg-surface-elevated flex items-center justify-between">
-              <span className="font-label text-[10px] text-ink-muted">4 PRs ready to open</span>
+              <span className="font-label text-[10px] text-ink-muted">23 findings · 1m 42s</span>
               <span className="font-label text-[10px] text-ink-secondary px-3 py-1 bg-surface-button text-surface cursor-pointer hover:bg-white transition-colors">
-                Auto-fix all →
+                Open in dashboard →
               </span>
             </div>
           </div>
