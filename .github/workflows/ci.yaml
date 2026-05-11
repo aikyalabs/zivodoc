@@ -213,8 +213,8 @@ jobs:
     if: |
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
-      needs.changes.outputs.landing == 'true' &&
-      success()
+      needs.ci_pass.result == 'success' &&
+      needs.changes.outputs.landing == 'true'
     environment: prod
     permissions:
       contents: read
@@ -237,8 +237,8 @@ jobs:
     if: |
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
-      needs.changes.outputs.web == 'true' &&
-      success()
+      needs.ci_pass.result == 'success' &&
+      needs.changes.outputs.web == 'true'
     environment: prod
     permissions:
       contents: read
@@ -262,8 +262,8 @@ jobs:
     if: |
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
-      needs.changes.outputs.widget == 'true' &&
-      success()
+      needs.ci_pass.result == 'success' &&
+      needs.changes.outputs.widget == 'true'
     environment: prod
     permissions:
       contents: read
@@ -289,8 +289,8 @@ jobs:
     if: |
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
-      needs.changes.outputs.api == 'true' &&
-      success()
+      needs.ci_pass.result == 'success' &&
+      needs.changes.outputs.api == 'true'
     environment: prod
     permissions:
       contents: read
