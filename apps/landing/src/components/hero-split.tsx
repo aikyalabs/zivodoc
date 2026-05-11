@@ -111,7 +111,7 @@ export function HeroSplit() {
       <div className="relative max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 pt-16 sm:pt-24 lg:pt-32 pb-20 sm:pb-32 lg:pb-40">
         <div className="grid lg:grid-cols-[1fr_1.3fr] gap-10 lg:gap-16 items-center">
           {/* ── Left column — text ── */}
-          <div>
+          <div className="min-w-0">
             {/* Badge */}
             <motion.div
               className="mb-6"
@@ -198,7 +198,7 @@ export function HeroSplit() {
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col gap-3"
+            className="flex flex-col gap-3 min-w-0"
           >
             {/* Terminal */}
             <div className="bg-surface-card border border-line overflow-hidden shadow-2xl shadow-black/50">
