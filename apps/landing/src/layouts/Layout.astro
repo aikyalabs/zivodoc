@@ -90,6 +90,15 @@ const websiteSchema = {
       href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Fragment+Mono&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-97ML2HZFRW"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-97ML2HZFRW');
+    </script>
   </head>
   <body>
     <SmoothScroll client:load />
