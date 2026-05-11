@@ -10,6 +10,7 @@ import { useProfile } from '@src/hooks/useProfile';
 import { useCreateProject } from '@src/hooks/mutations/useCreateProject';
 import { useTriggerScan } from '@src/hooks/mutations/useTriggerScan';
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
+import { trackEvent } from '@src/lib/analytics';
 import { useQueryClient } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/_authentication/onboarding')({
@@ -60,6 +61,24 @@ function OnboardingPage() {
         if (latestScan) {
           setScanStatus(latestScan.status);
           if (latestScan.status === 'completed' || latestScan.status === 'failed') {
+            if (latestScan.status === 'completed') {
+              const errorCount = latestScan.errorCount ?? 0;
+              const warningCount = latestScan.warningCount ?? 0;
+              const infoCount = latestScan.infoCount ?? 0;
+              const severityMax =
+                errorCount > 0
+                  ? 'error'
+                  : warningCount > 0
+                    ? 'warning'
+                    : infoCount > 0
+                      ? 'info'
+                      : 'none';
+              trackEvent('scan_completed', {
+                findings_count: latestScan.findingsCount ?? 0,
+                severity_max: severityMax,
+                onboarding: true,
+              });
+            }
             clearInterval(interval);
           }
         }

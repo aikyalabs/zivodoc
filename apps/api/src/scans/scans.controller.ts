@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -18,6 +19,7 @@ import {
   CreatedResponse,
 } from '@src/api-response.helper';
 import { AuthUser, RequestUser } from '@src/auth/request-user.decorator';
+import { Public } from '@src/auth/public.decorator';
 import { clampPagination } from '@src/pagination.helper';
 import {
   TriggerScanRequest,
@@ -25,6 +27,8 @@ import {
   ScansResponse,
   FindingsResponse,
   UpdateFindingRequest,
+  ScanShareTokenResponse,
+  SharedScanResponse,
 } from '@src/scans/scans.dto';
 import { ScansService } from '@src/scans/scans.service';
 
@@ -119,6 +123,27 @@ export class ScansController {
       ...pagination,
     });
     return apiPaginatedResponse(items, Number(total));
+  }
+
+  @ZodResponse({ type: ScanShareTokenResponse })
+  @Post('scans/:id/share')
+  async enableShare(@RequestUser() user: AuthUser, @Param('id') id: string) {
+    const result = await this.scansService.enableShare(id, user);
+    return apiOkResponse(result);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('scans/:id/share')
+  async disableShare(@RequestUser() user: AuthUser, @Param('id') id: string): Promise<void> {
+    await this.scansService.disableShare(id, user);
+  }
+
+  @ZodResponse({ type: SharedScanResponse })
+  @Public()
+  @Get('public/shared-scans/:token')
+  async getSharedScan(@Param('token') token: string) {
+    const data = await this.scansService.findByShareToken(token);
+    return apiOkResponse(data);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

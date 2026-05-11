@@ -4,9 +4,11 @@ import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
 
 import { useSession } from '@src/hooks/useSession';
+import { trackEvent } from '@src/lib/analytics';
 
 const searchSchema = z.object({
   token: z.string().optional(),
+  new: z.string().optional(),
 });
 
 export const Route = createFileRoute('/(public)/auth/callback')({
@@ -17,16 +19,17 @@ export const Route = createFileRoute('/(public)/auth/callback')({
 function AuthCallback() {
   const navigate = useNavigate();
   const { signIn } = useSession();
-  const { token } = useSearch({ from: '/(public)/auth/callback' });
+  const { token, new: isNew } = useSearch({ from: '/(public)/auth/callback' });
 
   useEffect(() => {
     if (token) {
+      if (isNew === '1') trackEvent('sign_up', { method: 'google' });
       signIn();
       navigate({ to: '/dashboard' });
     } else {
       navigate({ to: '/login' });
     }
-  }, [token, signIn, navigate]);
+  }, [token, isNew, signIn, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">

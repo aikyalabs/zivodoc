@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import {
   BadRequestException,
   ConflictException,
@@ -136,6 +137,10 @@ export class ScansService {
       throw new NotFoundException('Project not found.');
     }
 
+    const errorCount = data.findings.filter((f) => f.severity === 'error').length;
+    const warningCount = data.findings.filter((f) => f.severity === 'warning').length;
+    const infoCount = data.findings.filter((f) => f.severity === 'info').length;
+
     const scan = this.scanRepository.create({
       projectId: project.id,
       organizationId: project.organizationId,
@@ -145,8 +150,10 @@ export class ScansService {
       pagesScanned: data.pagesScanned,
       codeBlocksFound: data.codeBlocksFound,
       linksChecked: data.linksChecked,
-      findingsCount: data.findings.filter((f) => f.severity === 'error' || f.severity === 'warning')
-        .length,
+      findingsCount: errorCount + warningCount,
+      errorCount,
+      warningCount,
+      infoCount,
       duration: data.duration,
       startedAt: new Date(Date.now() - data.duration),
       completedAt: new Date(),
@@ -235,6 +242,72 @@ export class ScansService {
       filters.limit ?? 20,
       filters.offset ?? 0,
     );
+  }
+
+  public async enableShare(scanId: string, caller: Caller): Promise<{ token: string }> {
+    const scan = await this.scanRepository.findOne({ where: { id: scanId } });
+    if (!scan) throw new NotFoundException('Scan not found.');
+    if (scan.organizationId !== caller.organizationId) {
+      throw new NotFoundException('Scan not found.');
+    }
+
+    if (!scan.shareToken) {
+      const token = crypto.randomBytes(24).toString('base64url');
+      await this.scanRepository.update(scanId, { shareToken: token });
+      return { token };
+    }
+    return { token: scan.shareToken };
+  }
+
+  public async disableShare(scanId: string, caller: Caller): Promise<void> {
+    const scan = await this.scanRepository.findOne({ where: { id: scanId } });
+    if (!scan) throw new NotFoundException('Scan not found.');
+    if (scan.organizationId !== caller.organizationId) {
+      throw new NotFoundException('Scan not found.');
+    }
+    await this.scanRepository.update(scanId, { shareToken: null });
+  }
+
+  public async findByShareToken(token: string): Promise<{
+    scan: ScanEntity;
+    projectName: string;
+    findings: Array<{
+      id: string;
+      category: string;
+      severity: string;
+      source: string;
+      line: number;
+      title: string;
+      description: string;
+      status: string;
+    }>;
+  }> {
+    const scan = await this.scanRepository.findOne({ where: { shareToken: token } });
+    if (!scan) throw new NotFoundException('Shared scan not found.');
+
+    const project = await this.projectRepository.findOne({ where: { id: scan.projectId } });
+    if (!project) throw new NotFoundException('Shared scan not found.');
+
+    const findings = await this.findingRepository.find({
+      where: { scanId: scan.id, status: In(['open', 'reopened']) },
+      order: { severity: 'ASC', createdAt: 'DESC' },
+      take: 500,
+    });
+
+    return {
+      scan,
+      projectName: project.name,
+      findings: findings.map((f) => ({
+        id: f.id,
+        category: f.category,
+        severity: f.severity,
+        source: f.source,
+        line: f.line,
+        title: f.title,
+        description: f.description,
+        status: f.status,
+      })),
+    };
   }
 
   public async updateFindingStatus(

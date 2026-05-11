@@ -158,6 +158,8 @@ export class ScanProcessor extends WorkerHost {
         organizationId,
       );
 
+      const severityCounts = await this.countOpenFindingsBySeverity(projectId);
+
       await this.scanRepository.update(scanId, {
         status: 'completed',
         completedAt: new Date(),
@@ -165,6 +167,9 @@ export class ScanProcessor extends WorkerHost {
         codeBlocksFound: scanResult.codeBlocksFound,
         linksChecked: scanResult.linksChecked,
         findingsCount: reconciled.open,
+        errorCount: severityCounts.error,
+        warningCount: severityCounts.warning,
+        infoCount: severityCounts.info,
         duration: Date.now() - startTime,
         steps: scanResult.steps,
       });
@@ -369,5 +374,26 @@ export class ScanProcessor extends WorkerHost {
     });
 
     return { created, carried, autoResolved: autoResolveIds.length, reopened, open };
+  }
+
+  private async countOpenFindingsBySeverity(
+    projectId: string,
+  ): Promise<{ error: number; warning: number; info: number }> {
+    const rows = await this.findingRepository
+      .createQueryBuilder('f')
+      .select('f.severity', 'severity')
+      .addSelect('COUNT(*)', 'count')
+      .where('f.projectId = :projectId', { projectId })
+      .andWhere('f.status IN (:...statuses)', { statuses: ['open', 'reopened'] })
+      .groupBy('f.severity')
+      .getRawMany<{ severity: string; count: string }>();
+
+    const counts = { error: 0, warning: 0, info: 0 };
+    for (const row of rows) {
+      if (row.severity === 'error') counts.error = Number(row.count);
+      else if (row.severity === 'warning') counts.warning = Number(row.count);
+      else if (row.severity === 'info') counts.info = Number(row.count);
+    }
+    return counts;
   }
 }

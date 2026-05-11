@@ -54,6 +54,18 @@ export class ScanEntity extends BaseEntity {
   @Column({ type: 'int', nullable: false, default: 0 })
   findingsCount!: number;
 
+  @Column({ type: 'int', nullable: false, default: 0 })
+  errorCount!: number;
+
+  @Column({ type: 'int', nullable: false, default: 0 })
+  warningCount!: number;
+
+  @Column({ type: 'int', nullable: false, default: 0 })
+  infoCount!: number;
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  shareToken!: string | null;
+
   @Column({ type: 'int', nullable: true })
   duration!: number | null;
 

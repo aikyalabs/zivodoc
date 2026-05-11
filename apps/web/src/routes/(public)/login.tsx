@@ -10,6 +10,7 @@ import { Label } from '@src/components/atoms/label';
 import { Separator } from '@src/components/atoms/separator';
 import { useSession } from '@src/hooks/useSession';
 import { API_URL, apiClient } from '@src/lib/queries/defaultQueryFn';
+import { trackEvent } from '@src/lib/analytics';
 
 import type { ApiOkResponse } from '@zivodoc/shared';
 
@@ -39,13 +40,14 @@ function LoginPage() {
 
   const verifyOtpMutation = useMutation({
     mutationFn: async (data: { email: string; code: string }) => {
-      const response = await apiClient.post<ApiOkResponse<{ token: string }>>(
+      const response = await apiClient.post<ApiOkResponse<{ token: string; isNew: boolean }>>(
         '/auth/otp/verify',
         data,
       );
-      return response.data.payload.token;
+      return response.data.payload;
     },
-    onSuccess: () => {
+    onSuccess: ({ isNew }) => {
+      if (isNew) trackEvent('sign_up', { method: 'email_otp' });
       signIn();
       navigate({ to: '/dashboard' });
     },

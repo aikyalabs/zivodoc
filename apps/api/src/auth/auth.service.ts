@@ -35,8 +35,8 @@ export class AuthService {
     firstName: string;
     lastName: string;
     avatar?: string;
-  }): Promise<SessionEntity> {
-    const { user } = await this.findOrCreateUser({
+  }): Promise<{ session: SessionEntity; isNew: boolean }> {
+    const { user, isNew } = await this.findOrCreateUser({
       email: profile.email,
       firstName: profile.firstName,
       lastName: profile.lastName,
@@ -48,17 +48,21 @@ export class AuthService {
       throw new UnauthorizedException('Your account has been disabled.');
     }
 
-    return this.createSession(user.id);
+    const session = await this.createSession(user.id);
+    return { session, isNew };
   }
 
   public async sendOtp(email: string): Promise<void> {
     await this.otpService.sendOtp(email);
   }
 
-  public async verifyOtp(email: string, code: string): Promise<SessionEntity> {
+  public async verifyOtp(
+    email: string,
+    code: string,
+  ): Promise<{ session: SessionEntity; isNew: boolean }> {
     await this.otpService.verifyOtp(email, code);
 
-    const { user } = await this.findOrCreateUser({
+    const { user, isNew } = await this.findOrCreateUser({
       email,
       firstName: email.split('@')[0],
       lastName: '',
@@ -68,7 +72,8 @@ export class AuthService {
       throw new UnauthorizedException('Your account has been disabled.');
     }
 
-    return this.createSession(user.id);
+    const session = await this.createSession(user.id);
+    return { session, isNew };
   }
 
   public async completeOnboarding(

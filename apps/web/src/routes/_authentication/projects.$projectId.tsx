@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createFileRoute, Link, Outlet, useMatchRoute } from '@tanstack/react-router';
 import {
   ArrowLeft,
@@ -15,7 +15,9 @@ import {
   ChevronRight,
   Settings,
   Download,
+  Share2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Badge } from '@src/components/atoms/badge';
 import { Button } from '@src/components/atoms/button';
@@ -41,6 +43,7 @@ import { useProjectFindings } from '@src/hooks/queries/useProjectFindings';
 import { useTriggerScan } from '@src/hooks/mutations/useTriggerScan';
 import { useUpdateFinding } from '@src/hooks/mutations/useUpdateFinding';
 import { apiClient } from '@src/lib/queries/defaultQueryFn';
+import { trackEvent } from '@src/lib/analytics';
 import { formatDuration, formatDateTime } from '@src/lib/formatters';
 
 import type { FindingCategory, FindingSeverity, FindingStatus } from '@zivodoc/shared';
@@ -98,6 +101,17 @@ const scanColumns: DataTableColumn<Scan>[] = [
 
 const PAGE_SIZE = { scans: 10, findings: 25 } as const;
 
+function maxSeverity(scan: {
+  errorCount: number;
+  warningCount: number;
+  infoCount: number;
+}): string {
+  if (scan.errorCount > 0) return 'error';
+  if (scan.warningCount > 0) return 'warning';
+  if (scan.infoCount > 0) return 'info';
+  return 'none';
+}
+
 function ProjectDetailPage() {
   const { projectId } = Route.useParams();
   const matchRoute = useMatchRoute();
@@ -129,6 +143,19 @@ function ProjectDetailContent({ projectId }: { projectId: string }) {
 
   const { data: pollingScan } = useScan(latestScan?.id ?? '', isScanRunning);
 
+  const trackedScanIds = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!latestScan || latestScan.status !== 'completed') return;
+    if (trackedScanIds.current.has(latestScan.id)) return;
+    trackedScanIds.current.add(latestScan.id);
+    trackEvent('scan_completed', {
+      findings_count: latestScan.findingsCount,
+      severity_max: maxSeverity(latestScan),
+      mode: latestScan.mode,
+      trigger_source: latestScan.triggerSource,
+    });
+  }, [latestScan]);
+
   const [severity, setSeverity] = useState<FindingSeverity | 'all'>('all');
   const [category, setCategory] = useState<FindingCategory | 'all'>('all');
   const [status, setStatus] = useState<FindingStatus | 'all'>('all');
@@ -151,6 +178,21 @@ function ProjectDetailContent({ projectId }: { projectId: string }) {
 
   const handleUpdateFinding = (findingId: string, newStatus: 'resolved' | 'ignored') => {
     updateFinding.mutate({ findingId, status: newStatus });
+  };
+
+  const handleShareScan = async () => {
+    if (!latestScan) return;
+    try {
+      const response = await apiClient.post<{ payload: { token: string } }>(
+        `/scans/${latestScan.id}/share`,
+      );
+      const token = response.data.payload.token;
+      const url = `${window.location.origin}/shared/${token}`;
+      await navigator.clipboard.writeText(url);
+      toast.success('Share link copied to clipboard');
+    } catch {
+      toast.error('Failed to create share link');
+    }
   };
 
   const handleExportCsv = async () => {
@@ -212,6 +254,12 @@ function ProjectDetailContent({ projectId }: { projectId: string }) {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {latestScan && latestScan.status === 'completed' && (
+              <Button variant="outline" size="sm" onClick={handleShareScan}>
+                <Share2 className="mr-2 size-3.5" />
+                Share
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/projects/$projectId/settings" params={{ projectId }}>
                 <Settings className="mr-2 size-3.5" />

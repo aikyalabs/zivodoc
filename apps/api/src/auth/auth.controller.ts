@@ -67,9 +67,9 @@ export class AuthController {
   @Patch()
   async refreshSession(@Req() req: Request) {
     const token = this.authService.extractTokenFromHeader(req.headers.authorization);
-    if (!token) return apiOkResponse({ token: '' });
+    if (!token) return apiOkResponse({ token: '', isNew: false });
     const session = await this.authService.refresh(token);
-    return apiOkResponse({ token: session.token });
+    return apiOkResponse({ token: session.token, isNew: false });
   }
 
   @Public()
@@ -89,10 +89,11 @@ export class AuthController {
       avatar?: string;
     };
 
-    const session = await this.authService.handleGoogleAuth(profile);
+    const { session, isNew } = await this.authService.handleGoogleAuth(profile);
     this.setSessionCookie(res, session.token);
     const frontendUrl = this.config.get('FRONTEND_URL');
-    res.redirect(`${frontendUrl}/auth/callback?token=${session.token}`);
+    const newParam = isNew ? '&new=1' : '';
+    res.redirect(`${frontendUrl}/auth/callback?token=${session.token}${newParam}`);
   }
 
   @ZodResponse({ type: OtpSendResponse })
@@ -107,9 +108,9 @@ export class AuthController {
   @Public()
   @Post('otp/verify')
   async verifyOtp(@Body() body: OtpVerifyRequest, @Res({ passthrough: true }) res: Response) {
-    const session = await this.authService.verifyOtp(body.email, body.code);
+    const { session, isNew } = await this.authService.verifyOtp(body.email, body.code);
     this.setSessionCookie(res, session.token);
-    return apiOkResponse({ token: session.token });
+    return apiOkResponse({ token: session.token, isNew });
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
