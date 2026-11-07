@@ -256,6 +256,7 @@ export class ScanProcessor extends WorkerHost {
       concurrency: 5,
       authToken,
       openapiSpecUrl: params.openapiSpecUrl ?? undefined,
+      blockPrivateNetworks: true,
     });
     return result as ScannerResult;
   }

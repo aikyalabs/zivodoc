@@ -10,6 +10,8 @@ export interface ScanOptions {
   concurrency?: number;
   authToken?: string;
   openapiSpecUrl?: string;
+  /** Hosted scans set this so user-supplied URLs can't reach internal networks */
+  blockPrivateNetworks?: boolean;
 }
 
 export type FindingSeverity = 'error' | 'warning' | 'info';

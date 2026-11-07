@@ -59,6 +59,7 @@ import {
 import { analyzeContent } from './analyze/content-analyzer.js';
 import { fetchAndParseSpec, validateOpenApi } from './analyze/openapi-validator.js';
 import { generateReport } from './report/report-generator.js';
+import { assertPublicUrl } from './shared/url-guard.js';
 
 function createStep(name: ScanStepName, label: string): ScanStep {
   return { name, label, status: 'pending' };
@@ -80,10 +81,19 @@ function completeStep(step: ScanStep, itemsProcessed: number, findingsCount: num
   };
 }
 
+async function assertScanTargetsPublic(options: ScanOptions): Promise<void> {
+  const targets = [options.siteUrl, options.repoUrl, options.openapiSpecUrl];
+  for (const target of targets) {
+    if (target) await assertPublicUrl(target);
+  }
+}
+
 export async function scan(options: ScanOptions): Promise<ScanResult> {
   const startTime = Date.now();
   const maxPages = options.maxPages ?? 100;
   const concurrency = options.concurrency ?? 5;
+
+  if (options.blockPrivateNetworks) await assertScanTargetsPublic(options);
 
   const steps: ScanStep[] = [
     createStep('crawl', 'Crawl & Extract'),
@@ -175,7 +185,9 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
   totalLinksChecked += externalLinks.length;
 
   if (externalLinks.length > 0) {
-    const { findings } = await checkLinks(allLinks);
+    const { findings } = await checkLinks(allLinks, {
+      blockPrivateNetworks: options.blockPrivateNetworks,
+    });
     linkFindings.push(...findings);
   }
 

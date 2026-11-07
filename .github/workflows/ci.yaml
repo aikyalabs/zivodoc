@@ -124,6 +124,7 @@ jobs:
       - run: pnpm turbo build --filter=@zivodoc/landing
         env:
           PUBLIC_APP_URL: https://app.zivodoc.com
+          PUBLIC_GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
 
   build-widget:
     name: Build widget
@@ -225,6 +226,7 @@ jobs:
       - run: pnpm --filter @zivodoc/landing build
         env:
           PUBLIC_APP_URL: https://app.zivodoc.com
+          PUBLIC_GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
       - run: npx wrangler pages deploy apps/landing/dist --project-name=zivodoc --commit-dirty=true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -250,6 +252,7 @@ jobs:
       - run: pnpm --filter @zivodoc/web build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
       - run: npx wrangler pages deploy apps/web/dist --project-name=zivodoc-app --commit-dirty=true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

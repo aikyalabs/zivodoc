@@ -166,7 +166,10 @@ export class GitHubAppService {
       .createHmac('sha256', this.webhookSecret)
       .update(payload)
       .digest('hex')}`;
-    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+    const signatureBuffer = Buffer.from(signature);
+    const expectedBuffer = Buffer.from(expected);
+    if (signatureBuffer.length !== expectedBuffer.length) return false;
+    return crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
   }
 
   getInstallUrl(state: string): string {

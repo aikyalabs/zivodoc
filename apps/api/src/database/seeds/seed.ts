@@ -6,7 +6,10 @@ import { OrganizationEntity } from '../entities/organization.entity';
 import { UserEntity } from '../entities/user.entity';
 import { RoleEntity } from '../entities/role.entity';
 
-async function seed() {
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || 'admin@example.com';
+const OWNER_EMAIL = process.env.SEED_OWNER_EMAIL || 'owner@example.com';
+
+async function seed(): Promise<void> {
   const dataSource = new DataSource({
     type: 'postgres',
     url: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/saas_template',
@@ -21,15 +24,13 @@ async function seed() {
   const userRepo = dataSource.getRepository(UserEntity);
   const roleRepo = dataSource.getRepository(RoleEntity);
 
-  // Check if admin already exists
-  const existingAdmin = await userRepo.findOne({ where: { email: 'hello@aikyalabs.app' } });
+  const existingAdmin = await userRepo.findOne({ where: { email: ADMIN_EMAIL } });
   if (existingAdmin) {
     console.log('Admin user already exists. Skipping seed.');
     await dataSource.destroy();
     return;
   }
 
-  // Create default organization
   const org = orgRepo.create({
     name: 'zivodoc',
     slug: 'zivodoc',
@@ -37,7 +38,6 @@ async function seed() {
   const savedOrg = await orgRepo.save(org);
   console.log(`Created organization: ${savedOrg.name} (${savedOrg.id})`);
 
-  // Create admin role with full permissions
   const adminRole = roleRepo.create({
     name: 'admin',
     description: 'Full access to all resources',
@@ -49,9 +49,9 @@ async function seed() {
 
   // Create platform admin (no organization — admins are platform-wide)
   const admin = userRepo.create({
-    firstName: 'Ritesh',
-    lastName: 'Kumar',
-    email: 'hello@aikyalabs.app',
+    firstName: 'Platform',
+    lastName: 'Admin',
+    email: ADMIN_EMAIL,
     role: 'admin',
     organizationId: null,
     onboardingCompleted: true,
@@ -59,11 +59,10 @@ async function seed() {
   const savedUser = await userRepo.save(admin);
   console.log(`Created admin: ${savedUser.email} (${savedUser.id})`);
 
-  // Create an org owner for the default org
   const owner = userRepo.create({
     firstName: 'Org',
     lastName: 'Owner',
-    email: 'owner@zivodoc.com',
+    email: OWNER_EMAIL,
     role: 'owner',
     organizationId: savedOrg.id,
     roleId: savedRole.id,
@@ -73,8 +72,8 @@ async function seed() {
   console.log(`Created org owner: ${savedOwner.email} (${savedOwner.id})`);
 
   console.log('\n--- Seed Complete ---');
-  console.log(`Admin:        hello@aikyalabs.app (use Google OAuth or Email OTP to sign in)`);
-  console.log(`Org Owner:    owner@zivodoc.com (use Google OAuth or Email OTP to sign in)`);
+  console.log(`Admin:        ${ADMIN_EMAIL} (use Google OAuth or Email OTP to sign in)`);
+  console.log(`Org Owner:    ${OWNER_EMAIL} (use Google OAuth or Email OTP to sign in)`);
   console.log(`Organization: ${savedOrg.name}`);
 
   await dataSource.destroy();

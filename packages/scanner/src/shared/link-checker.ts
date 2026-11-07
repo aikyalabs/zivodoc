@@ -1,4 +1,5 @@
 import type { PageLink, LinkCheckResult, Finding } from '../types.js';
+import { isPublicUrl } from './url-guard.js';
 import {
   brokenLinkFinding,
   redirectChainFinding,
@@ -273,8 +274,14 @@ async function processBatch<T, R>(
   return results;
 }
 
+async function filterPublicLinks(links: PageLink[]): Promise<PageLink[]> {
+  const isPublicList = await Promise.all(links.map((link) => isPublicUrl(link.href)));
+  return links.filter((_, index) => isPublicList[index]);
+}
+
 export async function checkLinks(
   links: PageLink[],
+  options: { blockPrivateNetworks?: boolean } = {},
 ): Promise<{ results: LinkCheckResult[]; findings: Finding[] }> {
   const findings: Finding[] = [];
   const checkable: PageLink[] = [];
@@ -292,7 +299,9 @@ export async function checkLinks(
   for (const link of checkable) {
     if (!seen.has(link.href)) seen.set(link.href, link);
   }
-  const uniqueLinks = Array.from(seen.values());
+  const uniqueLinks = options.blockPrivateNetworks
+    ? await filterPublicLinks(Array.from(seen.values()))
+    : Array.from(seen.values());
 
   const httpResults = await processBatch(
     uniqueLinks,

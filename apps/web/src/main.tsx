@@ -6,9 +6,12 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from 'sonner';
 
+import { initAnalytics } from '@src/lib/analytics';
 import { SessionProvider } from '@src/providers/SessionProvider';
 import { ThemeProvider } from '@src/providers/ThemeProvider';
 import { routeTree } from '@src/routeTree.gen';
+
+initAnalytics();
 
 const ReactQueryDevtools = import.meta.env.DEV
   ? lazy(() =>

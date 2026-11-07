@@ -40,3 +40,6 @@ docker-compose.override.yaml
 apps/web/src/routeTree.gen.ts
 apps/landing/.astro/
 inspo/*
+
+# Private notes
+MARKETING.md
