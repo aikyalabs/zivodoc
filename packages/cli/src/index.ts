@@ -1,9 +1,17 @@
-import { Command } from 'commander';
+import { Command, InvalidArgumentError, Option } from 'commander';
 import { loginCommand } from './commands/login.js';
 import { scanCommand } from './commands/scan.js';
 import { findingsCommand } from './commands/findings.js';
 
 const program = new Command();
+
+function parsePositiveInteger(value: string): number {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new InvalidArgumentError('Must be a positive integer.');
+  }
+  return parsed;
+}
 
 program.name('zivodoc').description('Automated QA for developer documentation').version('0.1.0');
 
@@ -20,8 +28,13 @@ program
   .option('--repo <url>', 'Git repository URL to scan')
   .option('--branch <branch>', 'Branch to scan (default: main)')
   .option('--doc-paths <paths...>', 'Paths to scan within the repo')
-  .option('--max-pages <n>', 'Max pages to crawl', '500')
-  .option('--mode <mode>', 'Scan mode: site, repo, or both')
+  .option('--max-pages <n>', 'Max pages to crawl', parsePositiveInteger, 500)
+  .addOption(
+    new Option(
+      '--mode <mode>',
+      'Scan mode (default: site when --url is given, otherwise repo)',
+    ).choices(['site', 'repo', 'both']),
+  )
   .option('--json', 'Output results as JSON')
   .option('--project <id>', 'Upload results to a zivodoc project')
   .action((opts) =>
@@ -30,7 +43,7 @@ program
       repo: opts.repo,
       branch: opts.branch,
       docPaths: opts.docPaths,
-      maxPages: opts.maxPages ? parseInt(opts.maxPages) : undefined,
+      maxPages: opts.maxPages,
       mode: opts.mode,
       json: opts.json,
       project: opts.project,
@@ -42,7 +55,7 @@ program
   .description('List findings for a project from the API')
   .option('--status <status>', 'Filter by status (open, resolved, ignored)')
   .option('--severity <severity>', 'Filter by severity (error, warning, info)')
-  .option('--limit <n>', 'Max results', '25')
+  .option('--limit <n>', 'Max results', parsePositiveInteger, 25)
   .action(findingsCommand);
 
 program.parse();

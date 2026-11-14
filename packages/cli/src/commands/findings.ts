@@ -13,7 +13,7 @@ interface FindingResponse {
 
 export async function findingsCommand(
   projectId: string,
-  options: { status?: string; severity?: string; limit?: string },
+  options: { status?: string; severity?: string; limit?: number },
 ): Promise<void> {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -25,7 +25,7 @@ export async function findingsCommand(
   const params = new URLSearchParams();
   if (options.status) params.set('status', options.status);
   if (options.severity) params.set('severity', options.severity);
-  if (options.limit) params.set('limit', options.limit);
+  if (options.limit) params.set('limit', String(options.limit));
 
   try {
     const response = await fetch(`${apiUrl}/projects/${projectId}/findings?${params}`, {
